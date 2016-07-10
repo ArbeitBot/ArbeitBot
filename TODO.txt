@@ -2,7 +2,6 @@
 
 Главная идея: биржа фриланса наоборот!
 
-
 Техническая часть:
 ============================================================
 ! - Добавить методы в dbmanager.js для работы с другими моделями
@@ -61,16 +60,18 @@
 
 
 
-Логика работы:
+Logic:
+============================================================
+[] – button
+[[]] – button collection
 ============================================================
 
-Старт:
+/start
 ===========================
-(где не указано - обычные кнопки юзаются)
-/start - сообщение типа "Привет, что ищем?"
-кнопки [["Freelancers"], ["Work"]]
+	> What are you looking for?
+	< [Freelancers][Work]
 
-["Freelancers"]
+[Freelancers]
 ===========================
 ! - добавить заказ
 	!- введите название проекта
@@ -93,14 +94,67 @@
 - ["Завершить поиск"] - фрилансерам, кому отправил инвайт заказчик, отправляется отмена, в базу /job сохраняется заказ, конец 
 
 
-["Work"]
+[Work]
 ===========================
-- новый фрилансер оставляет свои данные: категории, часовой рейт
-- писать что bot_username изменить нельзя!! - что бы нельзя было ерундой заниматься - один телеграм акк - один бот акк - Западный Свердловск!
-	- значек "Это реальный telegram username" - проверять при выдаче списка с этим фрилансером - через тг-кли?
-    - возможность добавлять категории - модерировать
-- при создании нового профиля он подписывается на все выбранные категории
-- существующий может изменять данные совего профиля
-- существующий может получать инвайты от заказчиков - 
-    т.е. он в одно время или фрилансер или заказчик и переключаться должен по кнопкам - так норм?
+if freelancer didn't fill below data yet
+	> Please select a category that fits you the best
+	< [html5][javascript][nodejs]...
+	===
+	> Please write a small (250 characters) description about yourself (will be visible to clients)
+	< (small description within 250 chars)
+	===
+	> Please give us your average hourly rate in USD so that we can give you better offers
+	< [$5...$10][$10...$20]...
+	===
+	> You rock! Now just wait for us to send you matching job offers or browse through the menu
+	< [[Freelancer main menu]]
+else
+	> You rock! Now just wait for us to send you matching job offers or browse through the menu
+	< [[Freelancer main menu]]
 
+[[Freelancer main menu]]
+===========================
+[Ready to work]\[Busy] (depends on 'busy' flag of freelancer)
+[Change categories]
+[Change bio]
+[Change hourly rate]
+[Help]
+===========================
+
+[Ready to work]
+===========================
+	> You are now busy. You will not receive any job offers untill you switch back to "Ready to work"
+	< [[Freelancer main menu]]
+
+[Busy]
+===========================
+	> You are now ready to work. You will  receive job offers untill you switch back to "Busy"
+	< [[Freelancer main menu]]
+
+[Change categories]
+===========================
+	> Please select categories that match your skillset:
+	< [html5][javascript][nodejs]... <- inline keyboard where yeach category can be selected\deselected
+	(freelancer main menu is still there)
+
+[Change bio]
+===========================
+	> Here is your existing bio: <description>. What would you like us to change it to?
+	< (small description within 250 chars)
+	===
+	> You rock! Your bio has been updated
+	< [[Freelancer main menu]]
+
+[Change hourly rate]
+===========================
+	> You current hourly rate is: <hourly rate>. What would you like us to change it to?
+	< [$5...$10][$10...$20]...
+	 ===
+	> You rock! Your hourly rate has been updated
+	< [[Freelancer main menu]]
+
+[Help]
+===========================
+	> Please contact us if you have any questions at all
+	< [@borodutch] <- inline keyboard
+	(freelancer main menu is still there)
