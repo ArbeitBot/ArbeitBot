@@ -10,56 +10,56 @@ var Category = mongoose.model('category');
 // Freelancer
 
 function getFreelancer(chatId, callback) {
-  Freelancer.findOne({id: chatId})
-  .populate('categories')
-  .exec(callback);
+	Freelancer.findOne({id: chatId})
+	.populate('categories')
+	.exec(callback);
 };
 
 function addFreelancer(freelancer, callback) {
-  Freelancer.findOne({id: freelancer.id})
-  .populate('categories')
-  .exec((err, dbFreelancerObject) => {
-    if (err) {
-      callback(err);
-    } else if (dbFreelancerObject) {
-      callback(null, dbFreelancerObject);
-    } else {
-      let freelancerObject = new Freelancer(freelancer);
-      freelancerObject.save(callback);
-    }
-  });
+	Freelancer.findOne({id: freelancer.id})
+	.populate('categories')
+	.exec((err, dbFreelancerObject) => {
+		if (err) {
+			callback(err);
+		} else if (dbFreelancerObject) {
+			callback(null, dbFreelancerObject);
+		} else {
+			let freelancerObject = new Freelancer(freelancer);
+			freelancerObject.save(callback);
+		}
+	});
 };
 
 function addCategoryToFreelancer(freelancerId, categoryTitle, callback) {
 
-  function findFreelancerCallback(err, freelancer, category) {
-    if (err) {
-      // todo: handle error
-    } else {
-      if (freelancer.categories.indexOf(category) < 0) {
-        freelancer.categories.push(category);
-      }
-      freelancer.save(callback);
-    }
-  };
+	function findFreelancerCallback(err, freelancer, category) {
+		if (err) {
+	  // todo: handle error
+	} else {
+		if (freelancer.categories.indexOf(category) < 0) {
+			freelancer.categories.push(category);
+		}
+		freelancer.save(callback);
+	}
+};
 
-  function findCategoryCallback(err, category) {
-    if (err) {
-      callback(err);
-    } else {
-      getFreelancer(freelancerId, (err, freelancer) => {
-        findFreelancerCallback(err, freelancer, category);
-      });
-    }
-  }
+function findCategoryCallback(err, category) {
+	if (err) {
+		callback(err);
+	} else {
+		getFreelancer(freelancerId, (err, freelancer) => {
+			findFreelancerCallback(err, freelancer, category);
+		});
+	}
+}
 
-  Category.findOne({title: categoryTitle}, findCategoryCallback);
+Category.findOne({title: categoryTitle}, findCategoryCallback);
 }
 
 // Categories
 
 function getCategories(callback) {
-  Category.find({}, callback);
+	Category.find({}, callback);
 };
 
 // Export

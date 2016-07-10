@@ -62,13 +62,16 @@ function fl_addedCategory(message) {
 		if (err) {
 			// todo: handle error
 		} else {
-			console.log(freelancer);
+			fl_showMainMenu(freelancer);
 		}
 	})
 };
 
 function fl_showMainMenu(freelancer) {
-
+	sendKeyboard(
+		freelancer.id,
+		strings.mainMenuMessage,
+		strings.mainMenuOptions);
 };
 
 // Helpers
