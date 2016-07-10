@@ -110,7 +110,8 @@ function sendKeyboard(chatId, text, buttons) {
 		chat_id: chatId,
 		text: text,
 		reply_markup: {
-			keyboard: []
+			keyboard: [],
+			resize_keyboard: true		// кнопки по размеру текста, а не по стандарту
 		}
 	}
 	for (var button of buttons) {
