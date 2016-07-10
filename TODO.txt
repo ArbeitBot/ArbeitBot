@@ -178,3 +178,6 @@ else
 		(freelancer main menu is still there)
 
 When client selects freelancer in the list of freelancers that was shown to him, freelancer gets a message with job description and inline keyboard [I'm interested][Not interested]. When freelancer selects a button, his button on client side changes to relevant one (interested\not interested). When client removes or finishes job, all job candidates (freelancers who received invite) get the buttons to be inactive.
+
+(categories can be chosen like that: 
+https://www.dropbox.com/s/6l4kpjp58n4qpfa/bandicam%202016-07-11%2000-46-42-127.mp4?dl=0)

@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var freelancerSchema = new Schema({
+var userSchema = new Schema({
   id: Number,
   first_name: String,
   last_name: String,
@@ -11,11 +11,17 @@ var freelancerSchema = new Schema({
     ref: 'category',
     required: true,
     default: []
+  }],
+  jobs: [{
+    type: Schema.ObjectId,
+    ref: 'job',
+    required: true,
+    default: []
   }]
 });
 
-freelancerSchema.methods.name = () => {
+userSchema.methods.name = () => {
   return username || first_name || last_name;
 };
 
-mongoose.model('freelancer', freelancerSchema);
+mongoose.model('user', userSchema);

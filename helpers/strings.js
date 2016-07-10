@@ -1,11 +1,5 @@
 module.exports = {
-	startMessage: 'Well hello there! I am here to assits you at searching for freelancers or work. What are you looking for today?',
-	askForCategoryMessage: 'What skill describes you best? (You will receive automatic updates for this category)',
-	mainMenuMessage: 'You are doing great! What would you like to do today?',
-	replyMarkups: {
-		freelancers: 'Freelancers',
-		work: 'Work'
-	},
+	mainMenuMessage: 'Well hello there! I am here to assits you at searching for contractors or clients. What are you looking for today?',
 	categoryNames: [
 		'html5',
 		'webpages',
@@ -14,9 +8,10 @@ module.exports = {
 		'ios',
 		'android'
 	],
-	mainMenuOptions: [
-		'View 5 most recent jobs',
-		'Options',
-		'Help'
-	]
+	mainMenuOptions: {
+		findJobs: 'Find jobs',
+		findContractors: 'Find contractors',
+		changeLanguage: 'Change language',
+		help: 'Help'
+	}
 };

@@ -20,7 +20,7 @@ fs.readdirSync(path.join(__dirname, '/models')).forEach(function(filename) {
 });
 
 // start bot
-require('./helpers/bot');
+require('./helpers/logic');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

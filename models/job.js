@@ -9,7 +9,7 @@ var jobSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'client',
     required: true
-  }
+  },
   freelancer: {
     type: Schema.ObjectId,
     ref: 'freelancer'
