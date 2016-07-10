@@ -6,6 +6,7 @@ var freelancerSchema = new Schema({
   first_name: String,
   last_name: String,
   username: String,
+  bot_username: String,
   categories: [{
     type: Schema.ObjectId,
     ref: 'category',

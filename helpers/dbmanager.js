@@ -4,8 +4,7 @@ var mongoose = require('mongoose');
 var Freelancer = mongoose.model('freelancer');
 var Employer = mongoose.model('employer');
 var Category = mongoose.model('category');
-// Uncomment when job model is done
-// var Job = mongoose.model('job');
+var Job = mongoose.model('job');
 
 // Freelancer
 

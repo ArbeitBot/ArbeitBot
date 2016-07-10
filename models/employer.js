@@ -5,7 +5,8 @@ var employerSchema = new Schema({
   id: Number,
   first_name: String,
   last_name: String,
-  username: String
+  username: String,
+  bot_username: String
 });
 
 employerSchema.methods.name = () => {
