@@ -73,26 +73,43 @@ Logic:
 
 [Freelancers]
 ===========================
-! - добавить заказ
-	!- введите название проекта
-	!- ввежите описание проекта
-	!- введите категории проекта - из списка, можно добавить свою 
-	    - продумать как модерировать
-	!- введите стоимость ОТ/ДО
-	    - за час, за проекта
-- получить список свободных кандидатов - 
-!    - добавить статус, рейтинг в модель freelancer
-!    - предусмотреть возможность отображать фуллнейм и писать человеку без юзернама - вплоть до подтверждения фрилансером работы, показаны bot_username`s
-    список инлайн кнопок с юзернеймами фрилансеров "@username -" - внизу обычная кнопка - "Отправить всем", "Завершить поиск"
-    - показывать их псевдонимы из биржи!!!
-    - возможность сортировать кандидатов, по: рейтингу, времени в боте, стоимости, еще?
-- при клике на инлайн кнопку фрилансера ему отправляется уведомление, что его выбрали и он должен либо подтвердить, либо отказаться
-- если, фрилансер откликнулась, то кнопка меняется на "@username +" и заказчику присылается уведомление
-    - при ответе фрилансера учитывать действует ли еще заявка - не выбран ли исполнитель
-- ["Отправить всем"] - тоже самое, но всем
-- тех заказчиков, что откликнулись можно выбрать и написать им
-- ["Завершить поиск"] - фрилансерам, кому отправил инвайт заказчик, отправляется отмена, в базу /job сохраняется заказ, конец 
+	> You rock! Please add a new job by touching the relevant button
+	< [[Client main menu]]
 
+	[[Client main menu]]
+	===========================
+	[Post new job]
+	[My jobs]
+	[Help]
+	===========================
+
+	[Post new job]
+	===========================
+		> Which category suits your job the best?
+		< [html5][javascript][nodejs]...
+		===
+		> Please give us a short description of your project (up to 500 characters)
+		< (Job description)
+		===
+		> How much would you like to pay for this job? (this will affect what freelancers are shown to you)
+		< [Negotiable][$5...$10][$10...$20]...
+		===
+		> You rock! Below goes the list of best freelancers that we could find. Please select which ones of them should receive your offer. <list of freelancer's names and their bio>
+		< [All of them][@freelancer1][@freelancer2]... <- inline keyboard (each button should change status to 'pending', 'rejected', 'accepted' when suitable)
+		< [[Client main menu]]
+
+	[My jobs]
+	===========================
+		Multiple messages with inline keyboards and structure:
+		> Job description
+		< [Remove][Post again][Completed][Failed][Available freelancers] <- inline keyboard
+		(client main menu is still there)
+
+	[Help]
+	===========================
+		> Please contact us if you have any questions at all
+		< [@borodutch] <- inline keyboard
+		(client main menu is still there)
 
 [Work]
 ===========================
@@ -111,50 +128,53 @@ if freelancer didn't fill below data yet
 else
 	> You rock! Now just wait for us to send you matching job offers or browse through the menu
 	< [[Freelancer main menu]]
-
-[[Freelancer main menu]]
-===========================
-[Ready to work]\[Busy] (depends on 'busy' flag of freelancer)
-[Change categories]
-[Change bio]
-[Change hourly rate]
-[Help]
 ===========================
 
-[Ready to work]
-===========================
-	> You are now busy. You will not receive any job offers untill you switch back to "Ready to work"
-	< [[Freelancer main menu]]
+	[[Freelancer main menu]]
+	===========================
+	[Ready to work]\[Busy] (depends on 'busy' flag of freelancer)
+	[Change categories]
+	[Change bio]
+	[Change hourly rate]
+	[Help]
+	===========================
 
-[Busy]
-===========================
-	> You are now ready to work. You will  receive job offers untill you switch back to "Busy"
-	< [[Freelancer main menu]]
+	[Ready to work]
+	===========================
+		> You are now busy. You will not receive any job offers untill you switch back to "Ready to work"
+		< [[Freelancer main menu]]
 
-[Change categories]
-===========================
-	> Please select categories that match your skillset:
-	< [html5][javascript][nodejs]... <- inline keyboard where yeach category can be selected\deselected
-	(freelancer main menu is still there)
+	[Busy]
+	===========================
+		> You are now ready to work. You will  receive job offers untill you switch back to "Busy"
+		< [[Freelancer main menu]]
 
-[Change bio]
-===========================
-	> Here is your existing bio: <description>. What would you like us to change it to?
-	< (small description within 250 chars)
-	===
-	> You rock! Your bio has been updated
-	< [[Freelancer main menu]]
+	[Change categories]
+	===========================
+		> Please select categories that match your skillset:
+		< [html5][javascript][nodejs]... <- inline keyboard where yeach category can be selected\deselected
+		(freelancer main menu is still there)
 
-[Change hourly rate]
-===========================
-	> You current hourly rate is: <hourly rate>. What would you like us to change it to?
-	< [$5...$10][$10...$20]...
-	 ===
-	> You rock! Your hourly rate has been updated
-	< [[Freelancer main menu]]
+	[Change bio]
+	===========================
+		> Here is your existing bio: <description>. What would you like us to change it to?
+		< (small description within 250 chars)
+		===
+		> You rock! Your bio has been updated
+		< [[Freelancer main menu]]
 
-[Help]
-===========================
-	> Please contact us if you have any questions at all
-	< [@borodutch] <- inline keyboard
-	(freelancer main menu is still there)
+	[Change hourly rate]
+	===========================
+		> You current hourly rate is: <hourly rate>. What would you like us to change it to?
+		< [$5...$10][$10...$20]...
+		===
+		> You rock! Your hourly rate has been updated
+		< [[Freelancer main menu]]
+
+	[Help]
+	===========================
+		> Please contact us if you have any questions at all
+		< [@borodutch] <- inline keyboard
+		(freelancer main menu is still there)
+
+When client selects freelancer in the list of freelancers that was shown to him, freelancer gets a message with job description and inline keyboard [I'm interested][Not interested]. When freelancer selects a button, his button on client side changes to relevant one (interested\not interested). When client removes or finishes job, all job candidates (freelancers who received invite) get the buttons to be inactive.
