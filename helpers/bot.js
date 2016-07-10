@@ -23,11 +23,6 @@ bot.on('message', message => {
 	}
 });
 
-bot.on('inline.callback.query', function(message)
-{
-    console.log(message);
-});
-
 // Sending messages
 
 function sendStartMessage(chatId) {
@@ -44,12 +39,37 @@ function fl_selectedWork(message) {
 		if (err) {
 			// todo: handle error
 		} else {
+			if (freelancer.categories.length > 0) {
+				fl_showMainMenu(freelancer);
+			} else {
+				fl_askForCategories(freelancer);
+			}
+		}
+	})
+};
+
+function fl_askForCategories(freelancer) {
+	sendKeyboard(
+		freelancer.id,
+		strings.askForCategoryMessage,
+		strings.categoryNames);
+};
+
+function fl_addedCategory(message) {
+	let categoryTitle = message.text;
+
+	dbmanager.addCategoryToFreelancer(message.from.id, categoryTitle, (err, freelancer) => {
+		if (err) {
+			// todo: handle error
+		} else {
 			console.log(freelancer);
 		}
 	})
 };
 
+function fl_showMainMenu(freelancer) {
 
+};
 
 // Helpers
 
@@ -74,11 +94,13 @@ function checkReplyMarkup(message) {
 	if (text == replyMarkups.freelancers) {
 	} else if (text == replyMarkups.work) {
 		fl_selectedWork(message);
+	} else if (strings.categoryNames.indexOf(text) > -1) {
+		fl_addedCategory(message);
 	} else {
 		return false;
 	}
-	return ture;
-}
+	return true;
+};
 
 function sendKeyboard(chatId, text, buttons) {
 	var message = {
@@ -96,7 +118,7 @@ function sendKeyboard(chatId, text, buttons) {
 	message.reply_markup = JSON.stringify(message.reply_markup);
 	bot.sendMessage(message)
 	.catch(err => console.log(err));
-}
+};
 
 function sendInline(chatId, text, inlines, callbacks) {
 	var message = {
@@ -116,4 +138,4 @@ function sendInline(chatId, text, inlines, callbacks) {
 	console.log(message);
 	bot.sendMessage(message)
 	.catch(err => console.log(err));
-}
+};

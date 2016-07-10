@@ -5,7 +5,13 @@ var freelancerSchema = new Schema({
   id: Number,
   first_name: String,
   last_name: String,
-  username: String
+  username: String,
+  categories: [{
+    type: Schema.ObjectId,
+    ref: 'category',
+    required: true,
+    default: []
+  }]
 });
 
 freelancerSchema.methods.name = () => {
