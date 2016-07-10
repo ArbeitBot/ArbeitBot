@@ -3,12 +3,17 @@ var Schema = mongoose.Schema;
 
 // very basic variant
 var jobSchema = new Schema({
-  Title: String,
-  Description: String,
-  Deadline: Date,
-  Price: Number,
-  employer: String, 	// bot_username 
-  freelancer: String,	// bot_username 
+  description: String,
+  priceRange: String,
+  client: {
+    type: Schema.ObjectId,
+    ref: 'client',
+    required: true
+  }
+  freelancer: {
+    type: Schema.ObjectId,
+    ref: 'freelancer'
+  }, 
   candidates: [{
     type: Schema.ObjectId,
     ref: 'freelancer',
@@ -16,9 +21,5 @@ var jobSchema = new Schema({
     default: []
   }]
 });
-
-// employerSchema.methods.name = () => {
-//   return username || first_name || last_name;
-// };
 
 mongoose.model('job', jobSchema);

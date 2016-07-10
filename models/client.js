@@ -1,16 +1,15 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var employerSchema = new Schema({
+var clientSchema = new Schema({
   id: Number,
   first_name: String,
   last_name: String,
-  username: String,
-  bot_username: String
+  username: String
 });
 
-employerSchema.methods.name = () => {
+clientSchema.methods.name = () => {
   return username || first_name || last_name;
 };
 
-mongoose.model('employer', employerSchema);
+mongoose.model('client', clientSchema);
