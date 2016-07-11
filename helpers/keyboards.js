@@ -30,6 +30,19 @@ let helpKeyboard = [
 	]
 ];
 
+let languageKeyboard = [
+	[
+		{ 
+			text: '🇷🇺',
+			callback_data: 'russian' 
+		},
+		{ 
+			text: '🇺🇸',
+			callback_data: 'english' 
+		}
+	]
+];
+
 // functions
 
 function sendKeyboard(bot, chatId, text, keyboard) {
@@ -65,6 +78,7 @@ module.exports = {
 	// keyboards
 	mainMenuKeyboard: mainMenuKeyboard,
 	helpKeyboard: helpKeyboard,
+	languageKeyboard: languageKeyboard,
 	// functions
 	sendKeyboard: sendKeyboard,
 	sendInline: sendInline

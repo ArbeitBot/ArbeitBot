@@ -29,13 +29,21 @@ function handleInline(msg) {
 	} else if (text == mainMenuOptions.findContractors) {
 
 	} else if (text == mainMenuOptions.changeLanguage) {
-
+		sendChangeLanguage(msg.chat.id);
 	} else if (text == mainMenuOptions.help) {
 		sendHelp(msg.chat.id);
 	}
 };
 
 // Sending messages
+
+function sendChangeLanguage(chatId) {
+	keyboards.sendInline(
+		bot,
+		chatId,
+		strings.languageMessage,
+		keyboards.languageKeyboard);
+};
 
 function sendHelp(chatId) {
 	keyboards.sendInline(
