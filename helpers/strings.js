@@ -5,14 +5,7 @@ module.exports = {
 	helpMessage: 'If you have any questions or requests please contact my creator:',
 	becameBusyMessage: 'You just set your status to busy. You will not receive any new job offers until you switch back to available',
 	becameAvailableMessage: 'You just switched to available status. You will now receive relevant job offers until you switch back to busy',
-	categoryNames: [
-		'html5',
-		'webpages',
-		'nodejs',
-		'swift',
-		'ios',
-		'android'
-	],
+	editHourlyRateMessage: 'What is your hourly rate?',
 	mainMenuOptions: {
 		findJobs: 'Find jobs',
 		findContractors: 'Find contractors',
@@ -20,10 +13,17 @@ module.exports = {
 		help: 'Help'
 	},
 	freelanceMenuOptions: {
-		changeCategories: 'Change categories',
-		changeHourlyRate: 'Change hourly rate',
+		editBio: 'Edit bio',
+		editCategories: 'Edit categories',
+		editHourlyRate: 'Edit hourly rate',
 		back: '🔙 Back',
 		busy: '⚒ Busy',
 		available: '✅ Available',
-	}
+	},
+	hourlyRateOptions: [
+		'$0...$5', '$5...$10', '$10...$20',
+		'$20...$30', '$30...$40', '$40...$50',
+		'$50...$75', '$75...$100', '$100...$200',
+		'$200+'
+	]
 };

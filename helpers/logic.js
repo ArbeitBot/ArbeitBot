@@ -36,10 +36,12 @@ function handleInline(msg) {
 		sendHelp(msg.chat.id);
 	}
 	// Check freelance menu
-	else if (text == freelanceMenuOptions.changeCategories) {
+	else if (text == freelanceMenuOptions.editBio) {
 
-	} else if (text == freelanceMenuOptions.changeCategories) {
+	} else if (text == freelanceMenuOptions.editCategories) {
 
+	} else if (text == freelanceMenuOptions.editHourlyRate) {
+		sendEditHourlyRate(msg.chat.id);
 	} else if (text == freelanceMenuOptions.back) {
 		sendMainMenu(msg.chat.id);
 	} else if (text == freelanceMenuOptions.busy || text == freelanceMenuOptions.available) {
@@ -74,6 +76,14 @@ function sendFreelanceMenu(chatId) {
 			// todo: handle case when user doesn't exist – basically impossible one
 		}
 	});
+};
+
+function sendEditHourlyRate(chatId) {
+	keyboards.sendInline(
+		bot,
+		chatId,
+		strings.editHourlyRateMessage,
+		keyboards.hourlyRateKeyboard);
 };
 
 function sendChangeLanguage(chatId) {

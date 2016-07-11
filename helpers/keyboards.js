@@ -24,12 +24,15 @@ let mainMenuKeyboard = [
 let freelanceBusyMenuKeyboard = [
 	[
 		{
-			text: strings.freelanceMenuOptions.changeCategories
+			text: strings.freelanceMenuOptions.editBio
+		},
+		{
+			text: strings.freelanceMenuOptions.editCategories
 		}
 	],
 	[
 		{
-			text: strings.freelanceMenuOptions.changeHourlyRate
+			text: strings.freelanceMenuOptions.editHourlyRate
 		}
 	],
 	[
@@ -45,12 +48,15 @@ let freelanceBusyMenuKeyboard = [
 let freelanceAvailableMenuKeyboard = [
 	[
 		{
-			text: strings.freelanceMenuOptions.changeCategories
+			text: strings.freelanceMenuOptions.editBio
+		},
+		{
+			text: strings.freelanceMenuOptions.editCategories
 		}
 	],
 	[
 		{
-			text: strings.freelanceMenuOptions.changeHourlyRate
+			text: strings.freelanceMenuOptions.editHourlyRate
 		}
 	],
 	[
@@ -59,6 +65,59 @@ let freelanceAvailableMenuKeyboard = [
 		},
 		{
 			text: strings.freelanceMenuOptions.available
+		}
+	]
+];
+
+let hourlyRateKeyboard = [
+	[
+		{ 
+			text: strings.hourlyRateOptions[0],
+			callback_data: strings.hourlyRateOptions[0]
+		},
+		{ 
+			text: strings.hourlyRateOptions[1],
+			callback_data: strings.hourlyRateOptions[1]
+		}
+	],
+	[
+		{ 
+			text: strings.hourlyRateOptions[2],
+			callback_data: strings.hourlyRateOptions[2]
+		},
+		{ 
+			text: strings.hourlyRateOptions[3],
+			callback_data: strings.hourlyRateOptions[3]
+		}
+	],
+	[
+		{ 
+			text: strings.hourlyRateOptions[4],
+			callback_data: strings.hourlyRateOptions[4]
+		},
+		{ 
+			text: strings.hourlyRateOptions[5],
+			callback_data: strings.hourlyRateOptions[5]
+		}
+	],
+	[
+		{ 
+			text: strings.hourlyRateOptions[6],
+			callback_data: strings.hourlyRateOptions[6] 
+		},
+		{ 
+			text: strings.hourlyRateOptions[7],
+			callback_data: strings.hourlyRateOptions[7] 
+		}
+	],
+	[
+		{ 
+			text: strings.hourlyRateOptions[8],
+			callback_data: strings.hourlyRateOptions[8] 
+		},
+		{ 
+			text: strings.hourlyRateOptions[9],
+			callback_data: strings.hourlyRateOptions[9]
 		}
 	]
 ];
@@ -121,6 +180,7 @@ module.exports = {
 	mainMenuKeyboard: mainMenuKeyboard,
 	freelanceBusyMenuKeyboard: freelanceBusyMenuKeyboard,
 	freelanceAvailableMenuKeyboard: freelanceAvailableMenuKeyboard,
+	hourlyRateKeyboard: hourlyRateKeyboard,
 	languageKeyboard: languageKeyboard,
 	helpKeyboard: helpKeyboard,
 	// functions
