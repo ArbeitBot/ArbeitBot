@@ -1,6 +1,6 @@
 let strings = require('./strings');
 
-// Keyboards
+// keyboards
 
 let mainMenuKeyboard = [
 	[
@@ -21,7 +21,16 @@ let mainMenuKeyboard = [
 	]
 ];
 
-// Functions
+let helpKeyboard = [
+	[
+		{ 
+			text: '@borodutch',
+			url: 'http://telegram.me/borodutch' 
+		}
+	]
+];
+
+// functions
 
 function sendKeyboard(bot, chatId, text, keyboard) {
 	var message = {
@@ -37,9 +46,26 @@ function sendKeyboard(bot, chatId, text, keyboard) {
 	.catch(err => console.log(err));
 };
 
+function sendInline(bot, chatId, text, keyboard) {
+	var message = {
+		chat_id: chatId,
+		text: text,
+		reply_markup: {
+			inline_keyboard: keyboard
+		}
+	}
+	message.reply_markup = JSON.stringify(message.reply_markup);
+	bot.sendMessage(message)
+	.catch(err => console.log(err));
+};
+
+// exports
+
 module.exports = {
-	// Keyboards
+	// keyboards
 	mainMenuKeyboard: mainMenuKeyboard,
-	// Functions
-	sendKeyboard: sendKeyboard
+	helpKeyboard: helpKeyboard,
+	// functions
+	sendKeyboard: sendKeyboard,
+	sendInline: sendInline
 };

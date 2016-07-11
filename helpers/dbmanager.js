@@ -13,20 +13,20 @@ var Job = mongoose.model('job');
 // 	.exec(callback);
 // };
 
-// function addFreelancer(freelancer, callback) {
-// 	Freelancer.findOne({id: freelancer.id})
-// 	.populate('categories')
-// 	.exec((err, dbFreelancerObject) => {
-// 		if (err) {
-// 			callback(err);
-// 		} else if (dbFreelancerObject) {
-// 			callback(null, dbFreelancerObject);
-// 		} else {
-// 			let freelancerObject = new Freelancer(freelancer);
-// 			freelancerObject.save(callback);
-// 		}
-// 	});
-// };
+function addUser(user, callback) {
+	User.findOne({id: user.id})
+	.populate('categories', 'jobs')
+	.exec((err, dbuserObject) => {
+		if (err) {
+			callback(err);
+		} else if (dbuserObject) {
+			callback(null, dbuserObject);
+		} else {
+			let userObject = new User(user);
+			userObject.save(callback);
+		}
+	});
+};
 
 // function addCategoryToFreelancer(freelancerId, categoryTitle, callback) {
 
@@ -63,8 +63,8 @@ function getCategories(callback) {
 // Export
 
 module.exports = {
-  // Freelancer
-  // addFreelancer: addFreelancer,
+  // User
+  addUser: addUser,
   // addCategoryToFreelancer: addCategoryToFreelancer,
   // Categories
   getCategories: getCategories
