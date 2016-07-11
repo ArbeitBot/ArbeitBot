@@ -26,6 +26,19 @@ function addUser(user, callback) {
 	});
 };
 
+function toggleUserAvailability(chatId, callback) {
+	getUser(chatId, (err, user) => {
+		if (err) {
+			callback(err);
+		} else if (user) {
+			user.busy = !user.busy;
+			user.save(callback);
+		} else {
+			callback();
+		}
+	});
+};
+
 // function addCategoryToFreelancer(freelancerId, categoryTitle, callback) {
 
 // 	function findFreelancerCallback(err, freelancer, category) {
@@ -64,6 +77,7 @@ module.exports = {
   // User
   getUser: getUser,
   addUser: addUser,
+  toggleUserAvailability: toggleUserAvailability,
   // Categories
   getCategories: getCategories
 };

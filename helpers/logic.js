@@ -43,7 +43,7 @@ function handleInline(msg) {
 	} else if (text == freelanceMenuOptions.back) {
 		sendMainMenu(msg.chat.id);
 	} else if (text == freelanceMenuOptions.busy || text == freelanceMenuOptions.available) {
-		
+		toggleUserAvailability(msg.chat.id);
 	}
 };
 
@@ -90,4 +90,28 @@ function sendHelp(chatId) {
 		chatId,
 		strings.helpMessage,
 		keyboards.helpKeyboard);
+};
+
+// Helpers
+
+function toggleUserAvailability(chatId) {
+	dbmanager.toggleUserAvailability(chatId, (err, user) => {
+		if (err) {
+			// todo: handle error
+		} else if (user) {
+			let keyboard = (user.busy ? 
+				keyboards.freelanceBusyMenuKeyboard : 
+				keyboards.freelanceAvailableMenuKeyboard)
+			let message = (user.busy ? 
+				strings.becameBusyMessage : 
+				strings.becameAvailableMessage)
+			keyboards.sendKeyboard(
+				bot,
+				chatId,
+				message,
+				keyboard);
+		} else {
+			// todo: handle case when user doesn't exist – basically impossible one
+		}
+	});
 };
