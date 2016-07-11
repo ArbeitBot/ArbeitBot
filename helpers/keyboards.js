@@ -21,11 +21,44 @@ let mainMenuKeyboard = [
 	]
 ];
 
-let helpKeyboard = [
+let freelanceBusyMenuKeyboard = [
 	[
-		{ 
-			text: '@borodutch',
-			url: 'http://telegram.me/borodutch' 
+		{
+			text: strings.freelanceMenuOptions.changeCategories
+		}
+	],
+	[
+		{
+			text: strings.freelanceMenuOptions.changeHourlyRate
+		}
+	],
+	[
+		{
+			text: strings.freelanceMenuOptions.back
+		},
+		{
+			text: strings.freelanceMenuOptions.busy
+		}
+	]
+];
+
+let freelanceAvailableMenuKeyboard = [
+	[
+		{
+			text: strings.freelanceMenuOptions.changeCategories
+		}
+	],
+	[
+		{
+			text: strings.freelanceMenuOptions.changeHourlyRate
+		}
+	],
+	[
+		{
+			text: strings.freelanceMenuOptions.back
+		},
+		{
+			text: strings.freelanceMenuOptions.available
 		}
 	]
 ];
@@ -39,6 +72,15 @@ let languageKeyboard = [
 		{ 
 			text: '🇺🇸',
 			callback_data: 'english' 
+		}
+	]
+];
+
+let helpKeyboard = [
+	[
+		{ 
+			text: '@borodutch',
+			url: 'http://telegram.me/borodutch' 
 		}
 	]
 ];
@@ -77,8 +119,10 @@ function sendInline(bot, chatId, text, keyboard) {
 module.exports = {
 	// keyboards
 	mainMenuKeyboard: mainMenuKeyboard,
-	helpKeyboard: helpKeyboard,
+	freelanceBusyMenuKeyboard: freelanceBusyMenuKeyboard,
+	freelanceAvailableMenuKeyboard: freelanceAvailableMenuKeyboard,
 	languageKeyboard: languageKeyboard,
+	helpKeyboard: helpKeyboard,
 	// functions
 	sendKeyboard: sendKeyboard,
 	sendInline: sendInline

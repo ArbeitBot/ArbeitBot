@@ -6,6 +6,11 @@ var userSchema = new Schema({
   first_name: String,
   last_name: String,
   username: String,
+  busy: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
   categories: [{
     type: Schema.ObjectId,
     ref: 'category',

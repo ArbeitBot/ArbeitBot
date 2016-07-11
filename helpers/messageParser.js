@@ -16,7 +16,9 @@ function botCommandStart(message) {
 
 function replyMarkup(message) {
 	let mainMenuOptions = Object.keys(strings.mainMenuOptions).map(key => strings.mainMenuOptions[key]);
-	return mainMenuOptions.indexOf(message.text) > -1
+	let freelanceMenuOptions = Object.keys(strings.freelanceMenuOptions).map(key => strings.freelanceMenuOptions[key]);
+	let allOptions = mainMenuOptions.concat(freelanceMenuOptions)
+	return allOptions.indexOf(message.text) > -1
 };
 
 // Export

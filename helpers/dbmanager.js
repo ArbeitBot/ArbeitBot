@@ -5,18 +5,16 @@ var User = mongoose.model('user');
 var Category = mongoose.model('category');
 var Job = mongoose.model('job');
 
-// Freelancer
+// User
 
-// function getFreelancer(chatId, callback) {
-// 	Freelancer.findOne({id: chatId})
-// 	.populate('categories')
-// 	.exec(callback);
-// };
+function getUser(chatId, callback) {
+	User.findOne({id: chatId})
+	.populate(['categories', 'jobs'])
+	.exec(callback);
+};
 
 function addUser(user, callback) {
-	User.findOne({id: user.id})
-	.populate('categories', 'jobs')
-	.exec((err, dbuserObject) => {
+	getUser(user.id, (err, dbuserObject) => {
 		if (err) {
 			callback(err);
 		} else if (dbuserObject) {
@@ -64,8 +62,8 @@ function getCategories(callback) {
 
 module.exports = {
   // User
+  getUser: getUser,
   addUser: addUser,
-  // addCategoryToFreelancer: addCategoryToFreelancer,
   // Categories
   getCategories: getCategories
 };

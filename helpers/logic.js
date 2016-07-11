@@ -23,9 +23,11 @@ bot.on('message', msg => {
 function handleInline(msg) {
 	let text = msg.text;
 	let mainMenuOptions = strings.mainMenuOptions;
+	let freelanceMenuOptions = strings.freelanceMenuOptions;
 
+	// Check main menu
 	if (text == mainMenuOptions.findJobs) {
-
+		sendFreelanceMenu(msg.chat.id);
 	} else if (text == mainMenuOptions.findContractors) {
 
 	} else if (text == mainMenuOptions.changeLanguage) {
@@ -33,9 +35,46 @@ function handleInline(msg) {
 	} else if (text == mainMenuOptions.help) {
 		sendHelp(msg.chat.id);
 	}
+	// Check freelance menu
+	else if (text == freelanceMenuOptions.changeCategories) {
+
+	} else if (text == freelanceMenuOptions.changeCategories) {
+
+	} else if (text == freelanceMenuOptions.back) {
+		sendMainMenu(msg.chat.id);
+	} else if (text == freelanceMenuOptions.busy || text == freelanceMenuOptions.available) {
+		
+	}
 };
 
 // Sending messages
+
+function sendMainMenu(chatId) {
+	keyboards.sendKeyboard(
+		bot,
+		chatId, 
+		strings.mainMenuMessage, 
+		keyboards.mainMenuKeyboard);
+};
+
+function sendFreelanceMenu(chatId) {
+	dbmanager.getUser(chatId, (err, user) => {
+		if (err) {
+			// todo: handle error
+		} else if (user) {
+			let keyboard = (user.busy ? 
+				keyboards.freelanceBusyMenuKeyboard : 
+				keyboards.freelanceAvailableMenuKeyboard)
+			keyboards.sendKeyboard(
+				bot,
+				chatId,
+				strings.findJobsMessage,
+				keyboard);
+		} else {
+			// todo: handle case when user doesn't exist – basically impossible one
+		}
+	});
+};
 
 function sendChangeLanguage(chatId) {
 	keyboards.sendInline(
@@ -51,12 +90,4 @@ function sendHelp(chatId) {
 		chatId,
 		strings.helpMessage,
 		keyboards.helpKeyboard);
-};
-
-function sendMainMenu(chatId) {
-	keyboards.sendKeyboard(
-		bot,
-		chatId, 
-		strings.mainMenuMessage, 
-		keyboards.mainMenuKeyboard);
 };
