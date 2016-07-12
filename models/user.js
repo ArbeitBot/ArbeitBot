@@ -6,7 +6,9 @@ var userSchema = new Schema({
   first_name: String,
   last_name: String,
   username: String,
+  bio: String,
   hourly_rate: String,
+  input_state: String,
   busy: {
     type: Boolean,
     required: true,

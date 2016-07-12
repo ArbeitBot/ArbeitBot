@@ -5,19 +5,26 @@ let check = require('./messageParser');
 let bot = require('./telegramBot');
 let categoryPicker = require('./categoryPicker');
 let hourlyRatePicker = require('./hourlyRatePicker');
+let textInput = require('./textInput');
 
 // Handle messages
 
 bot.on('message', msg => {
-	if (check.botCommandStart(msg)) {
-		dbmanager.addUser(msg.from, err => {
-			sendMainMenu(msg.chat.id);
-		});
-	} else if (check.replyMarkup(msg)) {
-		handleInline(msg);
-	} else {
-		console.log(msg);
-	}
+	textInput.check(msg, (isTextInput, user) => {
+		if (isTextInput) {
+			textInput.handle(msg, user, bot);
+		} else {
+			if (check.botCommandStart(msg)) {
+				dbmanager.addUser(msg.from, err => {
+					sendMainMenu(msg.chat.id);
+				});
+			} else if (check.replyMarkup(msg)) {
+				handleInline(msg);
+			} else {
+				console.log(msg);
+			}
+		}
+	});
 });
 
 bot.on('inline.callback.query', msg => {
@@ -49,7 +56,7 @@ function handleInline(msg) {
 	}
 	// Check freelance menu
 	else if (text == freelanceMenuOptions.editBio) {
-
+		textInput.askForBio(msg, bot);
 	} else if (text == freelanceMenuOptions.editCategories) {
 		categoryPicker.sendCategories(bot, msg.chat.id);
 	} else if (text == freelanceMenuOptions.editHourlyRate) {
@@ -113,10 +120,6 @@ function sendHelp(chatId) {
 		strings.helpMessage,
 		keyboards.helpKeyboard);
 };
-
-function sendCategories(chatId) {
-
-}
 
 // Helpers
 

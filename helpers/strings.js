@@ -5,6 +5,9 @@ module.exports = {
 	helpMessage: 'If you have any questions or requests please contact my creator:',
 	becameBusyMessage: 'You just set your status to busy. You will not receive any new job offers until you switch back to available',
 	becameAvailableMessage: 'You just switched to available status. You will now receive relevant job offers until you switch back to busy',
+	editBioMessage: 'Please enter your bio (up to 150 characters)',
+	changedBioMessage: 'Congrats! Your new bio is:\n\n',
+	yourCurrentBio: 'Your current bio:',
 	editHourlyRateMessage: 'What is your hourly rate?',
 	pickCategoriesMessage: 'Please pick categories',
 	suggestCategoryMessage: 'Want to suggest category?',
@@ -34,5 +37,6 @@ module.exports = {
 	categoryRight: '>',
 	inlineSeparator: '~~~',
 	categoryInline: 'categoryInline',
-	hourlyRateInline: 'hourlyRateInline'
+	hourlyRateInline: 'hourlyRateInline',
+	inputBioState: 'inputBioState'
 };
