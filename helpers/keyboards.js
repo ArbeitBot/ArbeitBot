@@ -12,9 +12,9 @@ let mainMenuKeyboard = [
 		}
 	],
 	[
-		{
-			text: strings.mainMenuOptions.changeLanguage
-		},
+		// {
+		// 	text: strings.mainMenuOptions.changeLanguage
+		// },
 		{
 			text: strings.mainMenuOptions.help
 		}
