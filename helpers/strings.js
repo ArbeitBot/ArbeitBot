@@ -29,8 +29,10 @@ module.exports = {
 		'$200+'
 	],
 	selectedCategory: '✅ ',
+	selectedHourlyRate: '✅ ',
 	categoryLeft: '<',
 	categoryRight: '>',
 	inlineSeparator: '~~~',
-	categoryInline: 'categoryInline'
+	categoryInline: 'categoryInline',
+	hourlyRateInline: 'hourlyRateInline'
 };

@@ -1,9 +1,8 @@
 let keyboards = require('./keyboards');
 let dbmanager = require('./dbmanager');
 let strings = require('./strings');
-var _ = require('lodash');
 
-let pageSize = 2;
+let pageSize = 8;
 
 function handleInline(bot, msg) {
 	let command = msg.data.split(strings.inlineSeparator)[1];

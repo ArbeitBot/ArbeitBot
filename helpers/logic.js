@@ -4,6 +4,7 @@ let dbmanager = require('./dbmanager');
 let check = require('./messageParser');
 let bot = require('./telegramBot');
 let categoryPicker = require('./categoryPicker');
+let hourlyRatePicker = require('./hourlyRatePicker');
 
 // Handle messages
 
@@ -22,6 +23,10 @@ bot.on('message', msg => {
 bot.on('inline.callback.query', msg => {
 	if (msg.data.indexOf(strings.categoryInline) > -1) {
 		categoryPicker.handleInline(bot, msg);
+	} else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {
+		hourlyRatePicker.handleInline(bot, msg);
+	} else {
+		console.log(msg);
 	}
 });
 
@@ -48,7 +53,7 @@ function handleInline(msg) {
 	} else if (text == freelanceMenuOptions.editCategories) {
 		categoryPicker.sendCategories(bot, msg.chat.id);
 	} else if (text == freelanceMenuOptions.editHourlyRate) {
-		sendEditHourlyRate(msg.chat.id);
+		hourlyRatePicker.sendHourlyRate(bot, msg.chat.id);
 	} else if (text == freelanceMenuOptions.back) {
 		sendMainMenu(msg.chat.id);
 	} else if (text == freelanceMenuOptions.busy || text == freelanceMenuOptions.available) {
