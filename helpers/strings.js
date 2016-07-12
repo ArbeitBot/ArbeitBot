@@ -6,6 +6,8 @@ module.exports = {
 	becameBusyMessage: 'You just set your status to busy. You will not receive any new job offers until you switch back to available',
 	becameAvailableMessage: 'You just switched to available status. You will now receive relevant job offers until you switch back to busy',
 	editHourlyRateMessage: 'What is your hourly rate?',
+	pickCategoriesMessage: 'Please pick categories',
+	suggestCategoryMessage: 'Want to suggest category?',
 	mainMenuOptions: {
 		findJobs: 'Find jobs',
 		findContractors: 'Find contractors',
@@ -21,9 +23,14 @@ module.exports = {
 		available: '✅ Available',
 	},
 	hourlyRateOptions: [
-		'$0...$5', '$5...$10', '$10...$20',
-		'$20...$30', '$30...$40', '$40...$50',
-		'$50...$75', '$75...$100', '$100...$200',
+		'$0 – $5', '$5 – $10', '$10 – $20',
+		'$20 – $30', '$30 – $40', '$40 – $50',
+		'$50 – $75', '$75 – $100', '$100 – $200',
 		'$200+'
-	]
+	],
+	selectedCategory: '✅ ',
+	categoryLeft: '<',
+	categoryRight: '>',
+	inlineSeparator: '~~~',
+	categoryInline: 'categoryInline'
 };

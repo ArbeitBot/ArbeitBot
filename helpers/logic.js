@@ -3,6 +3,7 @@ let keyboards = require('./keyboards');
 let dbmanager = require('./dbmanager');
 let check = require('./messageParser');
 let bot = require('./telegramBot');
+let categoryPicker = require('./categoryPicker');
 
 // Handle messages
 
@@ -15,6 +16,12 @@ bot.on('message', msg => {
 		handleInline(msg);
 	} else {
 		console.log(msg);
+	}
+});
+
+bot.on('inline.callback.query', msg => {
+	if (msg.data.indexOf(strings.categoryInline) > -1) {
+		categoryPicker.handleInline(bot, msg);
 	}
 });
 
@@ -39,7 +46,7 @@ function handleInline(msg) {
 	else if (text == freelanceMenuOptions.editBio) {
 
 	} else if (text == freelanceMenuOptions.editCategories) {
-
+		categoryPicker.sendCategories(bot, msg.chat.id);
 	} else if (text == freelanceMenuOptions.editHourlyRate) {
 		sendEditHourlyRate(msg.chat.id);
 	} else if (text == freelanceMenuOptions.back) {
@@ -101,6 +108,10 @@ function sendHelp(chatId) {
 		strings.helpMessage,
 		keyboards.helpKeyboard);
 };
+
+function sendCategories(chatId) {
+
+}
 
 // Helpers
 
