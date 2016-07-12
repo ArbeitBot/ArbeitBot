@@ -34,36 +34,51 @@ function toggleUserAvailability(chatId, callback) {
 			user.busy = !user.busy;
 			user.save(callback);
 		} else {
-			callback();
+			// todo: handle if user isn't there
 		}
 	});
 };
 
-// function addCategoryToFreelancer(freelancerId, categoryTitle, callback) {
+function toggleCategoryForUser(chatId, categoryId, callback) {
+	function findCategoryCallback(category, user) {
+		var index = -1;
+		for (var i = 0; i < user.categories.length; i++) {
+			var innerCategory = user.categories[i];
+			if (''+innerCategory._id == ''+category._id) {
+				index = i;
+				break;
+			}
+		}
+		if (index < 0) {
+			user.categories.push(category);
+		} else {
+			user.categories.splice(index, 1);
+		}
+		user.save(callback);
+	};
 
-// 	function findFreelancerCallback(err, freelancer, category) {
-// 		if (err) {
-// 	  // todo: handle error
-// 	} else {
-// 		if (freelancer.categories.indexOf(category) < 0) {
-// 			freelancer.categories.push(category);
-// 		}
-// 		freelancer.save(callback);
-// 	}
-// };
+	function findUserCallback(user) {
+		Category.findById(categoryId, (err, category) => {
+			if (err) {
+				// todo: handle error
+			} else if (category) {
+				findCategoryCallback(category, user);
+			} else {
+				// todo: handle if category isn't there
+			}
+		});
+	};
 
-// function findCategoryCallback(err, category) {
-// 	if (err) {
-// 		callback(err);
-// 	} else {
-// 		getFreelancer(freelancerId, (err, freelancer) => {
-// 			findFreelancerCallback(err, freelancer, category);
-// 		});
-// 	}
-// }
-
-// Category.findOne({title: categoryTitle}, findCategoryCallback);
-// }
+	getUser(chatId, (err, user) => {
+		if (err) {
+			callback(err);
+		} else if (user) {
+			findUserCallback(user);
+		} else {
+			// todo: handle is user isn't there
+		}
+	});
+};
 
 // Categories
 
@@ -78,6 +93,7 @@ module.exports = {
   getUser: getUser,
   addUser: addUser,
   toggleUserAvailability: toggleUserAvailability,
+  toggleCategoryForUser: toggleCategoryForUser,
   // Categories
   getCategories: getCategories
 };

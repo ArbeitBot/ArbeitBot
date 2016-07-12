@@ -7,7 +7,20 @@ let pageSize = 2;
 
 function handleInline(bot, msg) {
 	let command = msg.data.split(strings.inlineSeparator)[1];
-	console.log(command);
+	let page = parseInt(msg.data.split(strings.inlineSeparator)[2]);
+	if (command == strings.categoryLeft) {
+		editPage(bot, msg, page-1);
+	} else if (command == strings.categoryRight) {
+		editPage(bot, msg, page+1);
+	} else {
+		dbmanager.toggleCategoryForUser(msg.message.chat.id, command, (err, user) => {
+			if (err) {
+				// todo: handle error
+			} else {
+				editPage(bot, msg, page);
+			}
+		});
+	}
 };
 
 function sendCategories(bot, chatId) {
@@ -31,7 +44,7 @@ function sendCategories(bot, chatId) {
 };
 
 function getCategoriesCallback(categories, user, bot) {
-	let keyboard = categoriesKeyboard(categories, user, 2);
+	let keyboard = categoriesKeyboard(categories, user, 0);
 
 	keyboards.sendInline(
 		bot, 
@@ -40,8 +53,58 @@ function getCategoriesCallback(categories, user, bot) {
 		keyboard);
 };
 
+function editPage(bot, msg, page) {
+	function getCategoriesCallback(categories, user) {
+		var send = {
+			chat_id: msg.message.chat.id,
+			message_id: msg.message.message_id,
+			reply_markup: {
+				inline_keyboard: categoriesKeyboard(categories, user, page)
+			}
+		};
+		send.reply_markup = JSON.stringify(send.reply_markup);
+		bot.editMessageReplyMarkup(send)
+		.catch(err => console.log(err));
+	};
+
+	function getUserCallback(user) {
+		dbmanager.getCategories((err, categories) => {
+			if (err) {
+				// todo: handle error
+			} else if (categories) {
+				getCategoriesCallback(categories, user);
+			} else {
+				// todo: handle if categories are empty
+			}
+		});
+	};
+
+	dbmanager.getUser(msg.message.chat.id, (err, user) => {
+		if (err) {
+			// todo: handle error
+		} else if (user) {
+			getUserCallback(user);
+		} else {
+			// todo: handle if user wasn't found
+		}
+	});
+};
+
 function categoriesKeyboard(categories, user, page) {
-	let categoriesLeft = _.difference(categories, user.categories);
+	var categoriesLeft = [];
+	for (var i in categories) {
+		let cat = categories[i];
+		var shouldAdd = true;
+		for (var j in user.categories) {
+			let inCat = user.categories[j];
+			if (''+inCat._id == ''+cat._id) {
+				shouldAdd = false;
+			}
+		}
+		if (shouldAdd) {
+			categoriesLeft.push(cat);
+		}
+	}
 	let allCategories = user.categories.concat(categoriesLeft);
 	allCategories = allCategories.slice(page*pageSize,page*pageSize+pageSize);
 
@@ -58,7 +121,7 @@ function categoriesKeyboard(categories, user, page) {
 
 		tempRow.push({
 			text: text,
-			callback_data: strings.categoryInline+strings.inlineSeparator+currentCategory._id
+			callback_data: strings.categoryInline+strings.inlineSeparator+currentCategory._id+strings.inlineSeparator+page
 		});
 		if (isOdd || isLast) {
 			keyboard.push(tempRow);
@@ -70,7 +133,7 @@ function categoriesKeyboard(categories, user, page) {
 	if (page > 0) {
 		navButtons.push({
 			text: strings.categoryLeft,
-			callback_data: strings.categoryInline+strings.inlineSeparator+strings.categoryLeft
+			callback_data: strings.categoryInline+strings.inlineSeparator+strings.categoryLeft+strings.inlineSeparator+page
 		});
 	}
 	let remainder = categories.length % pageSize;
@@ -81,7 +144,7 @@ function categoriesKeyboard(categories, user, page) {
 	if (page+1 < lastPage) {
 		navButtons.push({
 			text: strings.categoryRight,
-			callback_data: strings.categoryInline+strings.inlineSeparator+strings.categoryRight
+			callback_data: strings.categoryInline+strings.inlineSeparator+strings.categoryRight+strings.inlineSeparator+page
 		});
 	}
 	keyboard.push(navButtons);
