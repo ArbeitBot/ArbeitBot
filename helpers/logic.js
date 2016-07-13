@@ -49,17 +49,15 @@ function handleInline(msg) {
 		sendFreelanceMenu(msg.chat.id);
 	} else if (text == mainMenuOptions.findContractors) {
 
-	} else if (text == mainMenuOptions.changeLanguage) {
-		sendChangeLanguage(msg.chat.id);
 	} else if (text == mainMenuOptions.help) {
 		sendHelp(msg.chat.id);
 	}
 	// Check freelance menu
-	else if (text == freelanceMenuOptions.editBio) {
+	else if (text == freelanceMenuOptions.editBio || text == freelanceMenuOptions.addBio) {
 		textInput.askForBio(msg, bot);
-	} else if (text == freelanceMenuOptions.editCategories) {
+	} else if (text == freelanceMenuOptions.editCategories || text == freelanceMenuOptions.addCategories) {
 		categoryPicker.sendCategories(bot, msg.chat.id);
-	} else if (text == freelanceMenuOptions.editHourlyRate) {
+	} else if (text == freelanceMenuOptions.editHourlyRate || text == freelanceMenuOptions.addHourlyRate) {
 		hourlyRatePicker.sendHourlyRate(bot, msg.chat.id);
 	} else if (text == freelanceMenuOptions.back) {
 		sendMainMenu(msg.chat.id);
@@ -83,14 +81,22 @@ function sendFreelanceMenu(chatId) {
 		if (err) {
 			// todo: handle error
 		} else if (user) {
-			let keyboard = (user.busy ? 
-				keyboards.freelanceBusyMenuKeyboard : 
-				keyboards.freelanceAvailableMenuKeyboard)
+			var text = user.busy ? 
+				strings.fullFreelancerMessageBusy :
+				strings.fullFreelancerMessageAvailable;
+			if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
+				text = strings.emptyFreelancerMessage;
+			} else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
+				console.log(!user.bio);
+				console.log(user.categories.length <= 0);
+				console.log(!user.hourlyRate);
+				text = strings.missingFreelancerMessage;
+			}
 			keyboards.sendKeyboard(
 				bot,
 				chatId,
-				strings.findJobsMessage,
-				keyboard);
+				text,
+				keyboards.freelancerKeyboard(user));
 		} else {
 			// todo: handle case when user doesn't exist – basically impossible one
 		}
@@ -103,14 +109,6 @@ function sendEditHourlyRate(chatId) {
 		chatId,
 		strings.editHourlyRateMessage,
 		keyboards.hourlyRateKeyboard);
-};
-
-function sendChangeLanguage(chatId) {
-	keyboards.sendInline(
-		bot,
-		chatId,
-		strings.languageMessage,
-		keyboards.languageKeyboard);
 };
 
 function sendHelp(chatId) {
@@ -128,19 +126,21 @@ function toggleUserAvailability(chatId) {
 		if (err) {
 			// todo: handle error
 		} else if (user) {
-			let keyboard = (user.busy ? 
-				keyboards.freelanceBusyMenuKeyboard : 
-				keyboards.freelanceAvailableMenuKeyboard)
-			let message = (user.busy ? 
+			var message = user.busy ? 
 				strings.becameBusyMessage : 
-				strings.becameAvailableMessage)
+				strings.becameAvailableMessage;
+			if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
+				message = user.busy ? 
+				strings.missingBecameBusyMessage : 
+				strings.missingBecameAvailableMessage;
+			}
 			keyboards.sendKeyboard(
 				bot,
 				chatId,
 				message,
-				keyboard);
+				keyboards.freelancerKeyboard(user));
 		} else {
-			// todo: handle case when user doesn't exist – basically impossible one
+			// todo: handle case when user doesn't exist
 		}
 	});
 };

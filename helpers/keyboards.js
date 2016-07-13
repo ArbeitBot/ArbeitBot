@@ -12,86 +12,39 @@ let mainMenuKeyboard = [
 		}
 	],
 	[
-		// {
-		// 	text: strings.mainMenuOptions.changeLanguage
-		// },
 		{
 			text: strings.mainMenuOptions.help
 		}
 	]
 ];
 
-let freelanceBusyMenuKeyboard = [
-	[
-		{
-			text: strings.freelanceMenuOptions.editBio
-		},
-		{
-			text: strings.freelanceMenuOptions.editCategories
-		}
-	],
-	[
-		{
-			text: strings.freelanceMenuOptions.editHourlyRate
-		}
-	],
-	[
-		{
-			text: strings.freelanceMenuOptions.back
-		},
-		{
-			text: strings.freelanceMenuOptions.busy
-		}
-	]
-];
-
-let freelanceAvailableMenuKeyboard = [
-	[
-		{
-			text: strings.freelanceMenuOptions.editBio
-		},
-		{
-			text: strings.freelanceMenuOptions.editCategories
-		}
-	],
-	[
-		{
-			text: strings.freelanceMenuOptions.editHourlyRate
-		}
-	],
-	[
-		{
-			text: strings.freelanceMenuOptions.back
-		},
-		{
-			text: strings.freelanceMenuOptions.available
-		}
-	]
-];
-
-let languageKeyboard = [
-	[
-		{ 
-			text: '🇷🇺',
-			callback_data: 'russian' 
-		},
-		{ 
-			text: '🇺🇸',
-			callback_data: 'english' 
-		}
-	]
-];
-
 let helpKeyboard = [
-	[
-		{ 
-			text: '@borodutch',
-			url: 'http://telegram.me/borodutch' 
-		}
-	]
+	[{	text: '@borodutch',
+		url: 'http://telegram.me/borodutch'}]
 ];
 
 // functions
+
+function freelancerKeyboard(user) {
+	let bioText = (user.bio) ? 
+		strings.freelanceMenuOptions.editBio :
+		strings.freelanceMenuOptions.addBio;
+	let categoriesText = (user.categories.length > 0) ?
+		strings.freelanceMenuOptions.editCategories :
+		strings.freelanceMenuOptions.addCategories;
+	let hourlyRateText = (user.hourly_rate) ?
+		strings.freelanceMenuOptions.editHourlyRate :
+		strings.freelanceMenuOptions.addHourlyRate;
+	let availableText = user.busy ?
+		strings.freelanceMenuOptions.busy :
+		strings.freelanceMenuOptions.available;
+	return [
+		[{ text: bioText },{ text: categoriesText }],
+		[{ text: hourlyRateText }],
+		[{ text: strings.freelanceMenuOptions.back },
+		 { text: availableText }]
+	];
+};
 
 function sendKeyboard(bot, chatId, text, keyboard) {
 	var message = {
@@ -125,11 +78,9 @@ function sendInline(bot, chatId, text, keyboard) {
 module.exports = {
 	// keyboards
 	mainMenuKeyboard: mainMenuKeyboard,
-	freelanceBusyMenuKeyboard: freelanceBusyMenuKeyboard,
-	freelanceAvailableMenuKeyboard: freelanceAvailableMenuKeyboard,
-	languageKeyboard: languageKeyboard,
 	helpKeyboard: helpKeyboard,
 	// functions
+	freelancerKeyboard: freelancerKeyboard,
 	sendKeyboard: sendKeyboard,
 	sendInline: sendInline
 };

@@ -46,12 +46,20 @@ function editHourlyRate(bot, msg) {
 		if (err) {
 			// todo: handle error
 		} else if (user) {
+			let needCongrats = !user.hourly_rate;
 			user.hourly_rate = command;
 			user.save((err, user) => {
 				if (err) {
 					// todo: handle error
 				} else if (user) {
 					getUserCallback(user);
+					if (needCongrats && user.bio && user.categories.length > 0) {
+						keyboards.sendKeyboard(
+							bot,
+							user.id, 
+							strings.filledEverythingMessage, 
+							keyboards.freelancerKeyboard(user));
+					}
 				} else {
 					// todo: handle if user wasn't returned
 				}

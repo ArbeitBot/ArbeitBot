@@ -54,7 +54,9 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
 		} else {
 			user.categories.splice(index, 1);
 		}
-		user.save(callback);
+		user.save((err, user) => {
+			callback(err, user, index < 0);
+		});
 	};
 
 	function findUserCallback(user) {

@@ -2,7 +2,7 @@ let keyboards = require('./keyboards');
 let dbmanager = require('./dbmanager');
 let strings = require('./strings');
 
-let pageSize = 2;
+let pageSize = 8;
 
 function handleInline(bot, msg) {
 	let command = msg.data.split(strings.inlineSeparator)[1];
@@ -12,10 +12,19 @@ function handleInline(bot, msg) {
 	} else if (command == strings.categoryRight) {
 		editPage(bot, msg, page+1);
 	} else {
-		dbmanager.toggleCategoryForUser(msg.message.chat.id, command, (err, user) => {
+		dbmanager.toggleCategoryForUser(msg.message.chat.id, command, (err, user, isAdded) => {
 			if (err) {
 				// todo: handle error
 			} else {
+				if (isAdded) {
+					if (user.bio && user.hourly_rate && user.categories.length == 1) {
+						keyboards.sendKeyboard(
+							bot,
+							user.id, 
+							strings.filledEverythingMessage, 
+							keyboards.freelancerKeyboard(user));
+					}
+				}
 				editPage(bot, msg, page);
 			}
 		});
@@ -115,7 +124,7 @@ function categoriesKeyboard(categories, user, page) {
 		let currentCategory = allCategories[i];
 
 		let text = user.categories.indexOf(currentCategory) > -1 ?
-			strings.selectedCategory+currentCategory.title :
+			currentCategory.title+strings.selectedCategory :
 			currentCategory.title
 
 		tempRow.push({
