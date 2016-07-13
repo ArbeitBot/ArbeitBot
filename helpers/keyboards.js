@@ -1,21 +1,17 @@
 let strings = require('./strings');
 
-// keyboards
+// Keyboards
 
 let mainMenuKeyboard = [
-	[
-		{
-			text: strings.mainMenuOptions.findJobs
-		},
-		{
-			text: strings.mainMenuOptions.findContractors
-		}
-	],
-	[
-		{
-			text: strings.mainMenuOptions.help
-		}
-	]
+	[{ text: strings.mainMenuOptions.findJobs },
+	{ text: strings.mainMenuOptions.findContractors }],
+	[{ text: strings.mainMenuOptions.help }]
+];
+
+let clientKeyboard = [
+	[{ text: strings.clientMenuOptions.postNewJob }],
+	[{ text: strings.clientMenuOptions.back },
+	{ text: strings.clientMenuOptions.myJobs }]
 ];
 
 let helpKeyboard = [
@@ -23,7 +19,7 @@ let helpKeyboard = [
 		url: 'http://telegram.me/borodutch'}]
 ];
 
-// functions
+// Functions
 
 function freelancerKeyboard(user) {
 	let bioText = (user.bio) ? 
@@ -36,8 +32,8 @@ function freelancerKeyboard(user) {
 		strings.freelanceMenuOptions.editHourlyRate :
 		strings.freelanceMenuOptions.addHourlyRate;
 	let availableText = user.busy ?
-		strings.freelanceMenuOptions.busy :
-		strings.freelanceMenuOptions.available;
+		strings.freelanceMenuOptions.available :
+		strings.freelanceMenuOptions.busy;
 	return [
 		[{ text: bioText },{ text: categoriesText }],
 		[{ text: hourlyRateText }],
@@ -73,13 +69,14 @@ function sendInline(bot, chatId, text, keyboard) {
 	.catch(err => console.log(err));
 };
 
-// exports
+// Exports
 
 module.exports = {
-	// keyboards
+	// Keyboards
 	mainMenuKeyboard: mainMenuKeyboard,
+	clientKeyboard: clientKeyboard,
 	helpKeyboard: helpKeyboard,
-	// functions
+	// Functions
 	freelancerKeyboard: freelancerKeyboard,
 	sendKeyboard: sendKeyboard,
 	sendInline: sendInline

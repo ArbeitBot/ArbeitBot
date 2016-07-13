@@ -1,5 +1,9 @@
 module.exports = {
 	mainMenuMessage: 'Welcome to @arbeit_bot! I am a completelly free of charge Telegram based freelance market. Please select whether you are looking for job or contractors.',
+	clientMenuMessage: 'What would you like to do?',
+	selectCategoryMessage: 'Please select category that your job falls into. Number of contractors available can be found between [square brackets].',
+	selectJobHourlyRateMessage: 'Please select how much money would you like to pay. Price is given in USD per hour to identify level of developers. Yet you can negotiate fixed price in private messages with contractor later on. Number of available contractors in selected category for rate is given in [square brackets].',
+	addJobDescriptionMessage: 'Please give us job description (limited to 500 characters). It will be visible to contractors. Please be brief, details can be discussed later with contractors in private dialogues.',
 	filledEverythingMessage: 'You did it! Your profile is now complete. Now just sit back and wait for clients of your categories to offer you work (obviously if they like your bio).',
 	fullFreelancerMessageAvailable: 'You are all set! Sit back and relax – clients from relevant categories will contact you if they like your bio and hourly rate.',
 	fullFreelancerMessageBusy: 'You are all set! However, clients will not bother you as you are in busy status.',
@@ -21,6 +25,11 @@ module.exports = {
 		findJobs: 'Find work',
 		findContractors: 'Find contractors',
 		help: 'Help'
+	},
+	clientMenuOptions: {
+		postNewJob: 'Post new job',
+		myJobs: 'My jobs',
+		back: '🔙 Back'
 	},
 	freelanceMenuOptions: {
 		editBio: 'Edit bio',
@@ -46,5 +55,9 @@ module.exports = {
 	inlineSeparator: '~~~',
 	categoryInline: 'categoryInline',
 	hourlyRateInline: 'hourlyRateInline',
-	inputBioState: 'inputBioState'
+	inputBioState: 'inputBioState',
+	inputCategoryNameState: 'inputCategoryNameState',
+	inputHourlyRateState: 'inputHourlyRateState',
+	inputJobDescriptionState: 'inputJobDescriptionState',
+	jobCreateCancel: '❌ Cancel'
 };

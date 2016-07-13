@@ -42,15 +42,22 @@ bot.on('inline.callback.query', msg => {
 function handleInline(msg) {
 	let text = msg.text;
 	let mainMenuOptions = strings.mainMenuOptions;
+	let clientOptions = strings.clientMenuOptions;
 	let freelanceMenuOptions = strings.freelanceMenuOptions;
 
 	// Check main menu
 	if (text == mainMenuOptions.findJobs) {
 		sendFreelanceMenu(msg.chat.id);
 	} else if (text == mainMenuOptions.findContractors) {
-
+		sendClientMenu(msg.chat.id);
 	} else if (text == mainMenuOptions.help) {
 		sendHelp(msg.chat.id);
+	}
+	// Chack client menu
+	else if (text == clientOptions.postNewJob) {
+		textInput.askForNewJobCategory(msg, bot);
+	} else if (text == clientOptions.myJobs) {
+		// todo: send all jobs as cards
 	}
 	// Check freelance menu
 	else if (text == freelanceMenuOptions.editBio || text == freelanceMenuOptions.addBio) {
@@ -59,10 +66,12 @@ function handleInline(msg) {
 		categoryPicker.sendCategories(bot, msg.chat.id);
 	} else if (text == freelanceMenuOptions.editHourlyRate || text == freelanceMenuOptions.addHourlyRate) {
 		hourlyRatePicker.sendHourlyRate(bot, msg.chat.id);
-	} else if (text == freelanceMenuOptions.back) {
-		sendMainMenu(msg.chat.id);
 	} else if (text == freelanceMenuOptions.busy || text == freelanceMenuOptions.available) {
 		toggleUserAvailability(msg.chat.id);
+	}
+	// Chack back button
+	else if (text == freelanceMenuOptions.back) {
+		sendMainMenu(msg.chat.id);
 	}
 };
 
@@ -76,6 +85,14 @@ function sendMainMenu(chatId) {
 		keyboards.mainMenuKeyboard);
 };
 
+function sendClientMenu(chatId) {
+	keyboards.sendKeyboard(
+		bot,
+		chatId, 
+		strings.clientMenuMessage, 
+		keyboards.clientKeyboard);
+};
+
 function sendFreelanceMenu(chatId) {
 	dbmanager.getUser(chatId, (err, user) => {
 		if (err) {
@@ -87,9 +104,6 @@ function sendFreelanceMenu(chatId) {
 			if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
 				text = strings.emptyFreelancerMessage;
 			} else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
-				console.log(!user.bio);
-				console.log(user.categories.length <= 0);
-				console.log(!user.hourlyRate);
 				text = strings.missingFreelancerMessage;
 			}
 			keyboards.sendKeyboard(

@@ -25,7 +25,11 @@ var userSchema = new Schema({
     ref: 'job',
     required: true,
     default: []
-  }]
+  }],
+  job_draft: {
+    type: Schema.ObjectId,
+    ref: 'job'
+  }
 });
 
 userSchema.methods.name = () => {

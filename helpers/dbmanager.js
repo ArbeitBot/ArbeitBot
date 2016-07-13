@@ -9,7 +9,7 @@ var Job = mongoose.model('job');
 
 function getUser(chatId, callback) {
 	User.findOne({id: chatId})
-	.populate(['categories', 'jobs'])
+	.populate(['categories', 'jobs', 'job_draft'])
 	.exec(callback);
 };
 
@@ -51,11 +51,22 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
 		}
 		if (index < 0) {
 			user.categories.push(category);
+			category.freelancers.push(user);
 		} else {
 			user.categories.splice(index, 1);
+			let i = category.freelancers.indexOf(user);
+			if (i > -1) {
+				category.freelancers.splice(i, 1);
+			}
 		}
 		user.save((err, user) => {
-			callback(err, user, index < 0);
+			category.save((err, category) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					callback(err, user, index < 0);
+				}
+			});
 		});
 	};
 
@@ -84,8 +95,23 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
 
 // Categories
 
+function getCategory(categoryTitle, callback) {
+	Category.findOne({title: categoryTitle})
+	.populate({
+		path: 'freelancers',
+		match: {busy : false}
+	})
+	.exec(callback);
+}
+
 function getCategories(callback) {
-	Category.find({}, callback);
+	Category.find({})
+	.sort('title')
+	.populate({
+		path: 'freelancers',
+		match: {busy : false}
+	})
+	.exec(callback);
 };
 
 // Export
@@ -97,5 +123,6 @@ module.exports = {
   toggleUserAvailability: toggleUserAvailability,
   toggleCategoryForUser: toggleCategoryForUser,
   // Categories
+  getCategory: getCategory,
   getCategories: getCategories
 };
