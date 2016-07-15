@@ -1,8 +1,15 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+let mongoose = require('mongoose');
+let Schema = mongoose.Schema;
+let strings = require('../helpers/strings');
 
 // very basic variant
 var jobSchema = new Schema({
+  state: {
+    type: String,
+    required: true,
+    default: strings.jobStates.searchingForFreelancer
+  },
+  current_inline: String,
   description: String,
   hourly_rate: String,
   category: {

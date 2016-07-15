@@ -1,9 +1,10 @@
 let dbmanager = require('./dbmanager');
 let strings = require('./strings');
 let keyboards = require('./keyboards');
+let jobManager = require('./jobManager'); 
 
-var mongoose = require('mongoose');
-var Job = mongoose.model('job');
+let mongoose = require('mongoose');
+let Job = mongoose.model('job');
 
 function check(msg, callback) {
 	dbmanager.getUser(msg.chat.id, (err, user) => {
@@ -267,13 +268,7 @@ function addDescriptionToJobDraft(description, msg, user, bot) {
 			// todo: handle error
 		} else {
 			user.save((err, user) => {
-				// todo: send a list of available freelancers for this job with inlines
-				console.log('Job created yay!');
-				keyboards.sendKeyboard(
-				bot,
-				msg.chat.id, 
-				'Success! Job has been created but Nikita didn\'t quiet get to freelancers communication. But thanks for testing! :*', 
-				keyboards.clientKeyboard);
+				jobManager.sendJobCreatedMessage(user, bot, draft);
 			});
 		}
 	})

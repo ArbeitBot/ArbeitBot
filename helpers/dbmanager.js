@@ -112,6 +112,9 @@ function getCategory(categoryTitle, callback) {
 				{ bio: { $exists: true } },
 				{ hourly_rate: { $exists: true } }
 			]
+		},
+		options: {
+			sort: { 'name': -1 } 
 		}
 	})
 	.exec(callback);
@@ -128,8 +131,23 @@ function getCategories(callback) {
 				{ bio: { $exists: true } },
 				{ hourly_rate: { $exists: true } }
 			]
+		},
+		options: {
+			sort: { 'name': -1 } 
 		}
 	})
+	.exec(callback);
+};
+
+// Jobs
+
+function freelancersForJob(job, callback) {
+	User.find({ $and: [
+				{ categories: job.category },
+				{ busy: false },
+				{ bio: { $exists: true } },
+				{ hourly_rate: { $exists: true } }
+			]})
 	.exec(callback);
 };
 
@@ -143,5 +161,7 @@ module.exports = {
   toggleCategoryForUser,
   // Categories
   getCategory,
-  getCategories
+  getCategories,
+  // Jobs
+  freelancersForJob
 };

@@ -15,6 +15,7 @@ module.exports = {
 	becameAvailableMessage: 'You just switched to available status. You will now receive relevant job offers until you switch back to busy.',
 	missingBecameBusyMessage: 'You just changed your status to busy. But this doesn\'t mean much as clients will not be able to find you without properly filled bio, categories and hourly rate.',
 	missingBecameAvailableMessage: 'You just changed to available status.  But this doesn\'t mean much as clients will not be able to find you without properly filled bio, categories and hourly rate.',
+	pickFreelancersMessage: 'Success! Job has been created. Please select what freelancers should receive job offer from you:\n',
 	editBioMessage: 'Please enter your bio (up to 150 characters)',
 	changedBioMessage: 'Congrats! Your new bio is:\n\n',
 	yourCurrentBio: 'Your current bio:',
@@ -59,5 +60,10 @@ module.exports = {
 	inputCategoryNameState: 'inputCategoryNameState',
 	inputHourlyRateState: 'inputHourlyRateState',
 	inputJobDescriptionState: 'inputJobDescriptionState',
-	jobCreateCancel: '❌ Cancel'
+	jobCreateCancel: '❌ Cancel',
+	jobStates: {
+		searchingForFreelancer: 'searchingForFreelancer',
+		freelancerChosen: 'freelancerChosen',
+		finished: 'finished'
+	}
 };
