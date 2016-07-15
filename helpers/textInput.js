@@ -116,12 +116,6 @@ function askForNewJobCategory(msg, bot) {
 			} else if (categories) {
 				let categoryButtons = categories.map(category =>
 				{
-					console.log('======');
-					console.log(category.title);
-					console.log('--------');
-					category.freelancers.forEach(usr => {
-						console.log(usr.username);
-					});
 					return [{
 						text: category.title + ' [' + category.freelancers.length + ']'
 					}];

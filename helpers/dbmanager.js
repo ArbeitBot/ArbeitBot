@@ -62,7 +62,6 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
 				break;
 			}
 		}
-			console.log(ind);
 			if (ind > -1) {
 				category.freelancers.splice(ind, 1);
 			}
@@ -123,7 +122,13 @@ function getCategories(callback) {
 	.sort('title')
 	.populate({
 		path: 'freelancers',
-		match: {busy : false}
+		match: {
+			$and: [
+				{ busy: false },
+				{ bio: { $exists: true } },
+				{ hourly_rate: { $exists: true } }
+			]
+		}
 	})
 	.exec(callback);
 };
