@@ -54,9 +54,17 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
 			category.freelancers.push(user);
 		} else {
 			user.categories.splice(index, 1);
-			let i = category.freelancers.indexOf(user);
-			if (i > -1) {
-				category.freelancers.splice(i, 1);
+			let ind = -1;//category.freelancers.indexOf(user);
+			for (var i = 0; i < category.freelancers.length; i++) {
+			var innerFreelancer = category.freelancers[i];
+			if (''+innerFreelancer == ''+user._id) {
+				ind = i;
+				break;
+			}
+		}
+			console.log(ind);
+			if (ind > -1) {
+				category.freelancers.splice(ind, 1);
 			}
 		}
 		user.save((err, user) => {
@@ -96,13 +104,19 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
 // Categories
 
 function getCategory(categoryTitle, callback) {
-	Category.findOne({title: categoryTitle})
+	Category.findOne({ title: categoryTitle })
 	.populate({
 		path: 'freelancers',
-		match: {busy : false}
+		match: {
+			$and: [
+				{ busy: false },
+				{ bio: { $exists: true } },
+				{ hourly_rate: { $exists: true } }
+			]
+		}
 	})
 	.exec(callback);
-}
+};
 
 function getCategories(callback) {
 	Category.find({})
@@ -118,11 +132,11 @@ function getCategories(callback) {
 
 module.exports = {
   // User
-  getUser: getUser,
-  addUser: addUser,
-  toggleUserAvailability: toggleUserAvailability,
-  toggleCategoryForUser: toggleCategoryForUser,
+  getUser,
+  addUser,
+  toggleUserAvailability,
+  toggleCategoryForUser,
   // Categories
-  getCategory: getCategory,
-  getCategories: getCategories
+  getCategory,
+  getCategories
 };
