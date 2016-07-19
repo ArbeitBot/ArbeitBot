@@ -28,12 +28,12 @@ var error = function(status, msg) {
 };
 
 module.exports = {
-  error: error,
-  notFound: notFound,
-  authEmailNotRegistered: authEmailNotRegistered,
-  authWrongPassword: authWrongPassword,
-  authTokenFailed: authTokenFailed,
-  authUserAlreadyExists: authUserAlreadyExists,
-  noApiKey: noApiKey,
-  fieldNotFound: fieldNotFound
+  error,
+  notFound,
+  authEmailNotRegistered,
+  authWrongPassword,
+  authTokenFailed,
+  authUserAlreadyExists,
+  noApiKey,
+  fieldNotFound
 };

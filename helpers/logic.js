@@ -6,6 +6,7 @@ let bot = require('./telegramBot');
 let categoryPicker = require('./categoryPicker');
 let hourlyRatePicker = require('./hourlyRatePicker');
 let textInput = require('./textInput');
+let jobManager = require('./jobManager');
 
 // Handle messages
 
@@ -32,6 +33,10 @@ bot.on('inline.callback.query', msg => {
 		categoryPicker.handleInline(bot, msg);
 	} else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {
 		hourlyRatePicker.handleInline(bot, msg);
+	} else if (msg.data.indexOf(strings.freelancerInline) > -1) {
+		jobManager.handleFreelancerInline(bot, msg);
+	} else if (msg.data.indexOf(strings.freelancerJobInline) > -1) {
+		jobManager.handleFreelancerAnswerInline(bot, msg);
 	} else {
 		console.log(msg);
 	}

@@ -42,7 +42,7 @@ function freelancerKeyboard(user) {
 	];
 };
 
-function sendKeyboard(bot, chatId, text, keyboard) {
+function sendKeyboard(bot, chatId, text, keyboard, then) {
 	var message = {
 		chat_id: chatId,
 		text: text,
@@ -53,6 +53,7 @@ function sendKeyboard(bot, chatId, text, keyboard) {
 	}
 	message.reply_markup = JSON.stringify(message.reply_markup);
 	bot.sendMessage(message)
+	.then(then)
 	.catch(err => console.log(err));
 };
 

@@ -56,12 +56,12 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
 			user.categories.splice(index, 1);
 			let ind = -1;//category.freelancers.indexOf(user);
 			for (var i = 0; i < category.freelancers.length; i++) {
-			var innerFreelancer = category.freelancers[i];
-			if (''+innerFreelancer == ''+user._id) {
-				ind = i;
-				break;
+				var innerFreelancer = category.freelancers[i];
+				if (''+innerFreelancer == ''+user._id) {
+					ind = i;
+					break;
+				}
 			}
-		}
 			if (ind > -1) {
 				category.freelancers.splice(ind, 1);
 			}

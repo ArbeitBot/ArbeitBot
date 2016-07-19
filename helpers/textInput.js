@@ -115,7 +115,9 @@ function askForNewJobCategory(msg, bot) {
 			if (err) {
 				// todo: handle error
 			} else if (categories) {
-				let categoryButtons = categories.map(category =>
+				let categoryButtons = categories
+				.filter(category => category.freelancers.length > 0)
+				.map(category =>
 				{
 					return [{
 						text: category.title + ' [' + category.freelancers.length + ']'
@@ -166,9 +168,11 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
 				}
 			}
 
-			keyboard.push([{
-				text: option + ' [' + count + ']'
-			}])
+			if (count > 0) {
+				keyboard.push([{
+					text: option + ' [' + count + ']'
+				}])
+			}
 		}
 		keyboard.unshift([{text:strings.jobCreateCancel}]);
 		keyboards.sendKeyboard(
