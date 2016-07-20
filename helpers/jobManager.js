@@ -33,7 +33,7 @@ function sendJobCreatedMessage(user, bot, job) {
 	});
 };
 
-function handleFreelancerInline(bot, msg) {
+function handleClientInline(bot, msg) {
 	// Get essential info
 	let freelancerId = msg.data.split(strings.inlineSeparator)[1];
 	let jobId = msg.data.split(strings.inlineSeparator)[2];
@@ -56,6 +56,18 @@ function handleFreelancerInline(bot, msg) {
 				// todo: handle if no job is there
 			}
 		});
+	} else if (freelancerId === strings.jobSelectFreelancer) {
+		Job.findById(jobId)
+		.populate('interestedCandidates')
+		.exec((err, job) => {
+			if (err) {
+				// todo: handle error
+			} else if (job) {
+				showSelectFreelancers(msg, job, bot);
+			} else {
+				// todo: handle if no job is there
+			}
+		});
 	} else {
 		User.findById(freelancerId, (err, user) => {
 			if (err) {
@@ -66,6 +78,26 @@ function handleFreelancerInline(bot, msg) {
 				// todo: handle if no user is there
 			}
 		});
+	}
+};
+
+function handleSelectFreelancerInline(bot, msg) {
+	// Get essential info
+	let freelancerId = msg.data.split(strings.inlineSeparator)[1];
+	let jobId = msg.data.split(strings.inlineSeparator)[2];
+
+	if (freelancerId === strings.selectFreelancerCancel || true) {
+		Job.findById(jobId, (err, job) => {
+			if (err) {
+				// todo: handle error
+			} else if (job) {
+				updateJobMessage(job, bot);
+			} else {
+				// todo: handle if no job is there
+			}
+		});
+	} else {
+		// todo: handle user is selected
 	}
 };
 
@@ -124,6 +156,34 @@ function addFreelancersToCandidates(jobId, users, msg, bot, job) {
 	}
 };
 
+function jobSelectCandidateKeyboard(job) {
+	let keyboard = [];
+	keyboard.push([{
+			text: strings.selectFreelancerCancel,
+			callback_data: 
+				strings.selectFreelancerInline +
+				strings.inlineSeparator +
+				strings.selectFreelancerCancel +
+				strings.inlineSeparator + 
+				job._id
+		}]);
+	for (var i = 0; i < job.interestedCandidates.length; i++) {
+		// Get freelancer
+		let freelancer = job.interestedCandidates[i];
+		// Add freelancer button
+		keyboard.push([{
+			text: freelancer.username,
+			callback_data: 
+				strings.selectFreelancerInline + 
+				strings.inlineSeparator + 
+				freelancer._id +
+				strings.inlineSeparator +
+				job._id
+		}]);
+	}
+	return keyboard;
+};
+
 function jobInlineKeyboard(freelancers, job) {
 	let keyboard = [];
 	if (job.interestedCandidates.length > 0) {
@@ -173,6 +233,17 @@ function jobInlineKeyboard(freelancers, job) {
 	return keyboard;
 };
 
+function showSelectFreelancers(msg, job, bot) {
+	bot.editMessageText({
+		chat_id: msg.message.chat.id,
+		message_id: msg.message.message_id,
+		reply_markup: JSON.stringify({
+			inline_keyboard: jobSelectCandidateKeyboard(job)
+		}),
+		text: strings.selectCandidateMessage
+	}).catch(err => console.log(err));
+};
+
 function updateJobMessage(job, bot) {
 	function updateKeyboard(users) {
 		var send = {
@@ -184,7 +255,7 @@ function updateJobMessage(job, bot) {
 			}
 		};
 		send.reply_markup = JSON.stringify(send.reply_markup);
-		bot.editMessageReplyMarkup(send)
+		bot.editMessageText(send)
 			.catch(err => console.log(err));
 	}
 
@@ -255,19 +326,14 @@ function updateFreelancerMessage(bot, msg, user, job) {
 	var send = {
 		chat_id: msg.message.chat.id,
 		message_id: msg.message.message_id,
+		text: prefix + job.description,
 		reply_markup: {
 			inline_keyboard: []
 		}
 	};
 	send.reply_markup = JSON.stringify(send.reply_markup);
-	bot.editMessageReplyMarkup(send)
-		.then(data => {
-			bot.editMessageText({
-				chat_id: msg.message.chat.id,
-				message_id: msg.message.message_id,
-				text: prefix + job.description,
-			}).catch(err => console.log(err));
-		}).catch(err => console.log(err));
+	bot.editMessageText(send)
+		.catch(err => console.log(err));
 };
 
 // Freelancer options
@@ -315,6 +381,7 @@ function reportJob(bot, msg, job, user) {
 // Exports
 module.exports = {
 	sendJobCreatedMessage,
-	handleFreelancerInline,
+	handleClientInline,
+	handleSelectFreelancerInline,
 	handleFreelancerAnswerInline
 };

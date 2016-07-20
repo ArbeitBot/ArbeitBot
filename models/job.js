@@ -44,13 +44,7 @@ var jobSchema = new Schema({
     ref: 'user',
     required: false,
     default: []
-  }],
-  // removedCandidates: [{
-  //   type: Schema.ObjectId,
-  //   ref: 'freelancer',
-  //   required: false,
-  //   default: []
-  // }]
+  }]
 });
 
 mongoose.model('job', jobSchema);

@@ -34,9 +34,11 @@ bot.on('inline.callback.query', msg => {
 	} else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {
 		hourlyRatePicker.handleInline(bot, msg);
 	} else if (msg.data.indexOf(strings.freelancerInline) > -1) {
-		jobManager.handleFreelancerInline(bot, msg);
+		jobManager.handleClientInline(bot, msg);
 	} else if (msg.data.indexOf(strings.freelancerJobInline) > -1) {
 		jobManager.handleFreelancerAnswerInline(bot, msg);
+	} else if (msg.data.indexOf(strings.selectFreelancerInline) > -1) {
+		jobManager.handleSelectFreelancerInline(bot, msg);
 	} else {
 		console.log(msg);
 	}
