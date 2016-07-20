@@ -155,20 +155,20 @@ function jobInlineKeyboard(freelancers, job) {
 			postfix = strings.pendingOption;
 		} else if (job.interestedCandidates.indexOf(freelancer._id) > -1) {
 			postfix = strings.interestedOption;
-		} else if (job.notInterestedCandidates.indexOf(freelancer._id) > -1) {
-			postfix = strings.notInterestedOption;
 		}
- 
-		// Add freelancer button
-		keyboard.push([{
-			text: freelancer.username + ' ' + postfix,
-			callback_data: 
-				strings.freelancerInline + 
-				strings.inlineSeparator + 
-				freelancer._id +
-				strings.inlineSeparator +
-				job._id
-		}]);
+
+		if (job.notInterestedCandidates.indexOf(freelancer._id) < 0) {
+			// Add freelancer button
+			keyboard.push([{
+				text: freelancer.username + ' ' + postfix,
+				callback_data: 
+					strings.freelancerInline + 
+					strings.inlineSeparator + 
+					freelancer._id +
+					strings.inlineSeparator +
+					job._id
+			}]);
+		}
 	}
 	return keyboard;
 };
