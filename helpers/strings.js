@@ -64,9 +64,9 @@ module.exports = {
 	inputJobDescriptionState: 'inputJobDescriptionState',
 	jobCreateCancel: '❌ Cancel',
 	jobSendAllFreelancers: 'Send to all',
-	interestedOption: ' ✅',
-	notInterestedOption: ' ❌',
-	pendingOption: ' 🕒',
+	interestedOption: '✅',
+	notInterestedOption: '❌',
+	pendingOption: '🕒',
 	jobStates: {
 		searchingForFreelancer: 'searchingForFreelancer',
 		freelancerChosen: 'freelancerChosen',
