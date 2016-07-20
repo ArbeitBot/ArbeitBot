@@ -126,6 +126,17 @@ function addFreelancersToCandidates(jobId, users, msg, bot, job) {
 
 function jobInlineKeyboard(freelancers, job) {
 	let keyboard = [];
+	if (job.interestedCandidates.length > 0) {
+		keyboard.push([{
+				text: strings.jobSelectFreelancer,
+				callback_data: 
+					strings.freelancerInline +
+					strings.inlineSeparator +
+					strings.jobSelectFreelancer +
+					strings.inlineSeparator + 
+					job._id
+			}]);
+	}
 	keyboard.push([{
 			text: strings.jobSendAllFreelancers,
 			callback_data: 
