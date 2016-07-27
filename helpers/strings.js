@@ -60,6 +60,7 @@ module.exports = {
 	freelancerInline: 'fI',
 	freelancerJobInline: 'fJI',
 	selectFreelancerInline: 'sFI',
+	completeJobInline: 'cJI',
 	inputBioState: 'inputBioState',
 	inputCategoryNameState: 'inputCategoryNameState',
 	inputHourlyRateState: 'inputHourlyRateState',

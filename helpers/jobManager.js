@@ -23,61 +23,29 @@ function sendJobCreatedMessage(user, bot, job) {
 			}));
 	};
 
-	dbmanager.freelancersForJob(job, (err, users) => {
-		if (err) {
-			// todo: handle error
-			console.log(err);
-		} else {
-			sendKeyboard(users);
-		}
+	dbmanager.freelancersForJob(job, users => {
+		sendKeyboard(users);
 	});
 };
 
 function handleClientInline(bot, msg) {
 	// Get essential info
-	let freelancerId = msg.data.split(strings.inlineSeparator)[1];
-	let jobId = msg.data.split(strings.inlineSeparator)[2];
-
+	let options = msg.data.split(strings.inlineSeparator);
+	let freelancerId = options[1];
+	let jobId = options[2];
 	// Check if select all touched
 	if (freelancerId === strings.jobSendAllFreelancers) {
-		Job.findById(jobId, (err, job) => {
-			if (err) {
-				// todo: handle error
-			} else if (job) {
-				dbmanager.freelancersForJob(job, (err, users) => {
-					if (err) {
-						// todo: handle error
-						console.log(err);
-					} else {
-						addFreelancersToCandidates(jobId, users, msg, bot, job);
-					}
-				});
-			} else {
-				// todo: handle if no job is there
-			}
+		dbmanager.freelancersForJobId(jobId, users => {
+			addFreelancersToCandidates(jobId, users, msg, bot, job);
 		});
 	} else if (freelancerId === strings.jobSelectFreelancer) {
-		Job.findById(jobId)
-		.populate('interestedCandidates')
-		.exec((err, job) => {
-			if (err) {
-				// todo: handle error
-			} else if (job) {
-				showSelectFreelancers(msg, job, bot);
-			} else {
-				// todo: handle if no job is there
-			}
-		});
+		dbmanager.findJobById(jobId, job => {
+			showSelectFreelancers(msg, job, bot);
+		}, 'interestedCandidates');
 	} else {
-		User.findById(freelancerId, (err, user) => {
-			if (err) {
-				// todo: handle error
-			} else if (user) {
-				addFreelancersToCandidates(jobId, [user], msg, bot);
-			} else {
-				// todo: handle if no user is there
-			}
-		});
+		dbmanager.findUserById(freelancerId, user => {
+			addFreelancersToCandidates(jobId, [user], msg, bot);
+		})
 	}
 };
 
@@ -87,45 +55,28 @@ function handleSelectFreelancerInline(bot, msg) {
 	let jobId = msg.data.split(strings.inlineSeparator)[2];
 
 	if (freelancerId === strings.selectFreelancerCancel || true) {
-		Job.findById(jobId, (err, job) => {
-			if (err) {
-				// todo: handle error
-			} else if (job) {
-				updateJobMessage(job, bot);
-			} else {
-				// todo: handle if no job is there
-			}
+		dbmanager.findJobById(jobId, job => {
+			updateJobMessage(job, bot);
 		});
 	} else {
-		// todo: handle user is selected
+		selectFreelancerForJob(bot, msg, freelancerId, jobId);
 	}
 };
 
 function handleFreelancerAnswerInline(bot, msg) {
-	let jobId = msg.data.split(strings.inlineSeparator)[1];
-	let option = msg.data.split(strings.inlineSeparator)[2];
-	let freelancerUsername = msg.data.split(strings.inlineSeparator)[3];
+	let options = msg.data.split(strings.inlineSeparator);
+	let jobId = options[1];
+	let option = options[2];
+	let freelancerUsername = options[3];
 
-	Job.findById(jobId, (err, job) => {
-		if (err) {
-			// todo: handle error
-		} else if (job) {
-			User.findOne({ username: freelancerUsername }, (err, user) => {
-				if (err) {
-					// todo: handle error
-				} else if (user) {
-					handleFreelancerAnswer(bot, msg, option, job, user);
-				} else {
-					// todo: handle if no user is there
-				}
-			})
-		} else {
-			// todo: handle if no job is there
-		}
+	dbmanager.findJobById(jobId, job => {
+		dbmanager.findUser({ username: freelancerUsername }, user => {
+			handleFreelancerAnswer(bot, msg, option, job, user);
+		});
 	});
 };
 
-// Helpers
+// Client side
 
 function addFreelancersToCandidates(jobId, users, msg, bot, job) {
 	function jobCallback(job) {
@@ -144,14 +95,8 @@ function addFreelancersToCandidates(jobId, users, msg, bot, job) {
 	if (job) {
 		jobCallback(job);
 	} else {
-		Job.findById(jobId, (err, job) => {
-			if (err) {
-				// todo: handle error
-			} else if (job) {
-				jobCallback(job);
-			} else {
-				// todo: handle if no job is there
-			}
+		dbmanager.findJobById(jobId, newJob => {
+			jobCallback(newJob);
 		});
 	}
 };
@@ -167,10 +112,7 @@ function jobSelectCandidateKeyboard(job) {
 				strings.inlineSeparator + 
 				job._id
 		}]);
-	for (var i = 0; i < job.interestedCandidates.length; i++) {
-		// Get freelancer
-		let freelancer = job.interestedCandidates[i];
-		// Add freelancer button
+	job.interestedCandidates.forEach(freelancer => {
 		keyboard.push([{
 			text: freelancer.username,
 			callback_data: 
@@ -180,7 +122,7 @@ function jobSelectCandidateKeyboard(job) {
 				strings.inlineSeparator +
 				job._id
 		}]);
-	}
+	});
 	return keyboard;
 };
 
@@ -206,9 +148,7 @@ function jobInlineKeyboard(freelancers, job) {
 				strings.inlineSeparator + 
 				job._id
 		}]);
-	for (var i in freelancers) {
-		// Get freelancer
-		let freelancer = freelancers[i];
+	freelancers.forEach(freelancer => {
 		// Get postfix
 		var postfix = '';
 		if (job.candidates.indexOf(freelancer._id) > -1) {
@@ -216,20 +156,17 @@ function jobInlineKeyboard(freelancers, job) {
 		} else if (job.interestedCandidates.indexOf(freelancer._id) > -1) {
 			postfix = strings.interestedOption;
 		}
-
-		if (job.notInterestedCandidates.indexOf(freelancer._id) < 0) {
-			// Add freelancer button
-			keyboard.push([{
-				text: freelancer.username + ' ' + postfix,
-				callback_data: 
-					strings.freelancerInline + 
-					strings.inlineSeparator + 
-					freelancer._id +
-					strings.inlineSeparator +
-					job._id
-			}]);
-		}
-	}
+		// Add freelancer button
+		keyboard.push([{
+			text: freelancer.username + ' ' + postfix,
+			callback_data: 
+				strings.freelancerInline + 
+				strings.inlineSeparator + 
+				freelancer._id +
+				strings.inlineSeparator +
+				job._id
+		}]);
+	});
 	return keyboard;
 };
 
@@ -245,6 +182,17 @@ function showSelectFreelancers(msg, job, bot) {
 };
 
 function updateJobMessage(job, bot) {
+	// todo: handle when freelancer is selected
+	if (job.state === strings.jobStates.searchingForFreelancer) {
+		updateJobMessageForSearch(job, bot);
+	} else if (job.state === strings.jobStates.freelancerChosen) {
+		updateJobMessageForSelected(job, bot);
+	} else if (job.state === strings.jobStates.finished) {
+		updateJobMessageForFinished(job, bot);
+	}
+};
+
+function updateJobMessageForSearch(job, bot) {
 	function updateKeyboard(users) {
 		var send = {
 			chat_id: job.current_inline_chat_id,
@@ -259,13 +207,27 @@ function updateJobMessage(job, bot) {
 			.catch(err => console.log(err));
 	}
 
-	dbmanager.freelancersForJob(job, (err, users) => {
-		if (err) {
-			// todo: handle error
-		} else {
-			updateKeyboard(users);
-		}
+	dbmanager.freelancersForJob(job, users => {
+		updateKeyboard(users);
 	});
+};
+
+function updateJobMessageForSelected(job, bot) {
+	var send = {
+			chat_id: job.current_inline_chat_id,
+			message_id: job.current_inline_message_id,
+			text: messageFromFreelancers(users),
+			reply_markup: {
+				inline_keyboard: jobInlineKeyboard(users, job)
+			}
+		};
+	send.reply_markup = JSON.stringify(send.reply_markup);
+	bot.editMessageText(send)
+		.catch(err => console.log(err));
+};
+
+function updateJobMessageForFinished(job, bot) {
+	// todo: update job when it is finished
 };
 
 function messageFromFreelancers(users) {
@@ -277,6 +239,24 @@ function messageFromFreelancers(users) {
 	}
 	return message;
 };
+
+function selectFreelancerForJob(bot, msg, userId, jobId) {
+	dbmanager.findJobById(jobId, job => {
+		dbmanager.findUserById(userId, user => {
+			job.selectedCandidate = user._id;
+			job.state = strings.jobStates.freelancerChosen;
+			job.save((err, newJob) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					updateJobMessage(newJob, bot);
+				}
+			})
+		});
+	});
+};
+
+// Freelancers side 
 
 function sendUsersJobOffer(bot, users, job) {
 	if (job.state === strings.jobStates.searchingForFreelancer) {
@@ -336,7 +316,9 @@ function updateFreelancerMessage(bot, msg, user, job) {
 		.catch(err => console.log(err));
 };
 
-// Freelancer options
+function sendUser() {
+
+};
 
 function handleFreelancerAnswer(bot, msg, answer, job, user) {
 	if (answer === strings.freelancerOptions.interested) {
@@ -365,6 +347,8 @@ function makeInterested(interested, bot, msg, job, user) {
 	// Add user to interesed or not interested
 	if (interested) {
 		job.interestedCandidates.push(user._id);
+		job.freelancer_inline_message_id = msg.message.id;
+		job.freelancer_inline_chat_id = msg.message.chat.id;
 	} else {
 		job.notInterestedCandidates.push(user._id);
 	}

@@ -13,6 +13,30 @@ function getUser(chatId, callback) {
 	.exec(callback);
 };
 
+function findUser(query, callback) {
+	User.findOne(query)
+	.populate(['categories', 'jobs', 'job_draft'])
+	.exec((err, user) => {
+		if (err) {
+			// todo: handle error
+		} else {
+			callback(user);
+		}
+	});
+};
+
+function findUserById(id, callback) {
+	User.findById(id)
+	.populate(['categories', 'jobs', 'job_draft'])
+	.exec((err, user) => {
+		if (err) {
+			// todo: handle error
+		} else {
+			callback(user);
+		}
+	});
+};
+
 function addUser(user, callback) {
 	getUser(user.id, (err, dbuserObject) => {
 		if (err) {
@@ -141,14 +165,42 @@ function getCategories(callback) {
 
 // Jobs
 
+function findJobById(id, callback, populate) {
+	Job.findById(id)
+	.populate(populate || '')
+	.exec((err, job) => {
+		if (err) {
+			// todo: handle error
+		} else {
+			callback(job);
+		}
+	})
+};
+
 function freelancersForJob(job, callback) {
 	User.find({ $and: [
 				{ categories: job.category },
 				{ busy: false },
 				{ bio: { $exists: true } },
-				{ hourly_rate: { $exists: true } }
+				{ hourly_rate: { $exists: true } },
+				{ _id: { $nin: job.notInterestedCandidates } }
 			]})
-	.exec(callback);
+	.exec(function(err, users) {
+		if (err) {
+			// todo: handle error
+			console.log(err);
+		} else {
+			callback(users);
+		}
+	});
+};
+
+function freelancersForJobId(id, callback) {
+	findJobById(jobId, job => {
+		freelancersForJob(job, users => {
+			callback(users);	
+		});
+	});
 };
 
 // Export
@@ -156,6 +208,8 @@ function freelancersForJob(job, callback) {
 module.exports = {
   // User
   getUser,
+  findUser,
+  findUserById,
   addUser,
   toggleUserAvailability,
   toggleCategoryForUser,
@@ -163,5 +217,7 @@ module.exports = {
   getCategory,
   getCategories,
   // Jobs
-  freelancersForJob
+  findJobById,
+  freelancersForJob,
+  freelancersForJobId
 };
