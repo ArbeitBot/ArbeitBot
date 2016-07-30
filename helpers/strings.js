@@ -80,6 +80,6 @@ module.exports = {
 	freelancerOptions: {
 		interested: 'Interested',
 		notInterested: 'Not interested',
-		//report: 'Report'
+		report: 'Report'
 	}
 };

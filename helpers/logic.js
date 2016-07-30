@@ -11,7 +11,7 @@ let jobManager = require('./jobManager');
 // Handle messages
 
 bot.on('message', msg => {
-	if (msg === undefined) return;
+  if (msg == null) return;
 	textInput.check(msg, (isTextInput, user) => {
 		if (isTextInput) {
 			textInput.handle(msg, user, bot);
@@ -77,7 +77,7 @@ function handleInline(msg) {
 	} else if (text == freelanceMenuOptions.busy || text == freelanceMenuOptions.available) {
 		toggleUserAvailability(msg.chat.id);
 	}
-	// Chack back button
+	// Check back button
 	else if (text == freelanceMenuOptions.back) {
 		sendMainMenu(msg.chat.id);
 	}
@@ -102,6 +102,12 @@ function sendClientMenu(chatId) {
 };
 
 function sendFreelanceMenu(chatId) {
+  /** Main freelancer keyboard.
+   * It appears after pressing "Find Work" button
+   * Here freelancer can add his Bio,
+   * Set categories, edit hourly rate,
+   * and set Busy status.
+   */
 	dbmanager.getUser(chatId, (err, user) => {
 		if (err) {
 			// todo: handle error

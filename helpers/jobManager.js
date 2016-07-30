@@ -265,8 +265,8 @@ function sendUsersJobOffer(bot, users, job) {
 
 			let keyboard = [];
 			let keys = Object.keys(strings.freelancerOptions);
-			for (var i in keys) {
-				let option = strings.freelancerOptions[keys[i]];
+			for (var j in keys) {
+				let option = strings.freelancerOptions[keys[j]];
 				keyboard.push([{
 					text: option,
 					callback_data: 

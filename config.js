@@ -1,7 +1,8 @@
 module.exports = {
-	telegram_api_key: '218612482:AAEF4e0orNtzf_PCZCtSyz-19PFvJh1b7wc',
-	database: 'mongodb://localhost:27017',
+	telegram_api_key: '254748739:AAEsoVXQbrFvcMtijSm1SjSn8yp8NFrR9Jg',
+	database: 'mongodb://localhost:27017/arbeit_bot',
 	debug: {
-		borodutch: 145501099
+		// pinkinice's id
+		borodutch: 74169393
 	}
 };
