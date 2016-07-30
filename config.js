@@ -1,7 +1,7 @@
 module.exports = {
-	telegram_api_key: '228035986:AAERAyWOeVkItMQV-9t3Ab82q5hRemuGlPw',
+	telegram_api_key: '218612482:AAEF4e0orNtzf_PCZCtSyz-19PFvJh1b7wc',
 	database: 'mongodb://localhost:27017',
 	debug: {
-		borodutch: 76104711
+		borodutch: 145501099
 	}
 };
