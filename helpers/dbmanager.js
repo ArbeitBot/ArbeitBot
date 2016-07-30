@@ -196,7 +196,7 @@ function freelancersForJob(job, callback) {
 };
 
 function freelancersForJobId(id, callback) {
-	findJobById(jobId, job => {
+	findJobById(id, job => {
 		freelancersForJob(job, users => {
 			callback(users);	
 		});

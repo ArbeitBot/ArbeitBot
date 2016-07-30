@@ -36,7 +36,7 @@ function handleClientInline(bot, msg) {
 	// Check if select all touched
 	if (freelancerId === strings.jobSendAllFreelancers) {
 		dbmanager.freelancersForJobId(jobId, users => {
-			addFreelancersToCandidates(jobId, users, msg, bot, job);
+			addFreelancersToCandidates(jobId, users, msg, bot, null);
 		});
 	} else if (freelancerId === strings.jobSelectFreelancer) {
 		dbmanager.findJobById(jobId, job => {
@@ -64,11 +64,11 @@ function handleSelectFreelancerInline(bot, msg) {
 };
 
 function handleFreelancerAnswerInline(bot, msg) {
+  console.log(msg.data)
 	let options = msg.data.split(strings.inlineSeparator);
 	let jobId = options[1];
 	let option = options[2];
 	let freelancerUsername = options[3];
-
 	dbmanager.findJobById(jobId, job => {
 		dbmanager.findUser({ username: freelancerUsername }, user => {
 			handleFreelancerAnswer(bot, msg, option, job, user);
@@ -178,7 +178,7 @@ function showSelectFreelancers(msg, job, bot) {
 			inline_keyboard: jobSelectCandidateKeyboard(job)
 		}),
 		text: strings.selectCandidateMessage
-	}).catch(err => console.log(err));
+	}).catch(err => console.log(181, err));
 };
 
 function updateJobMessage(job, bot) {
@@ -204,7 +204,7 @@ function updateJobMessageForSearch(job, bot) {
 		};
 		send.reply_markup = JSON.stringify(send.reply_markup);
 		bot.editMessageText(send)
-			.catch(err => console.log(err));
+			.catch(err => console.log(207, err));
 	}
 
 	dbmanager.freelancersForJob(job, users => {
@@ -223,7 +223,7 @@ function updateJobMessageForSelected(job, bot) {
 		};
 	send.reply_markup = JSON.stringify(send.reply_markup);
 	bot.editMessageText(send)
-		.catch(err => console.log(err));
+		.catch(err => console.log(226, err));
 };
 
 function updateJobMessageForFinished(job, bot) {
@@ -313,7 +313,7 @@ function updateFreelancerMessage(bot, msg, user, job) {
 	};
 	send.reply_markup = JSON.stringify(send.reply_markup);
 	bot.editMessageText(send)
-		.catch(err => console.log(err));
+		.catch(err => console.log(316, err));
 };
 
 function sendUser() {
@@ -359,7 +359,7 @@ function makeInterested(interested, bot, msg, job, user) {
 };
 
 function reportJob(bot, msg, job, user) {
-	//  todo: handle report
+	
 };
 
 // Exports
