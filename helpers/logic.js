@@ -11,6 +11,7 @@ let jobManager = require('./jobManager');
 // Handle messages
 
 bot.on('message', msg => {
+	if (msg === undefined) return;
 	textInput.check(msg, (isTextInput, user) => {
 		if (isTextInput) {
 			textInput.handle(msg, user, bot);
