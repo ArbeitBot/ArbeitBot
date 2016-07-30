@@ -23,6 +23,10 @@ module.exports = {
 	editHourlyRateMessage: 'What is your hourly rate?',
 	pickCategoriesMessage: 'Please pick categories',
 	suggestCategoryMessage: 'Want to suggest a category?',
+	waitContractorResponseMessage: 'waitContractorResponseMessage',
+	waitClientResponseMessage: 'waitClientResponseMessage',
+	contactWithFreelancerMessage: 'contactWithFreelancerMessage',
+	clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
 	mainMenuOptions: {
 		findJobs: 'Find work',
 		findContractors: 'Find contractors',
@@ -60,6 +64,7 @@ module.exports = {
 	freelancerInline: 'fI',
 	freelancerJobInline: 'fJI',
 	selectFreelancerInline: 'sFI',
+	selectAnotherFreelancerInline: 'sAFI',
 	completeJobInline: 'cJI',
 	inputBioState: 'inputBioState',
 	inputCategoryNameState: 'inputCategoryNameState',
@@ -69,8 +74,11 @@ module.exports = {
 	selectFreelancerCancel: '❌ Cancel',
 	jobSendAllFreelancers: 'Send to all',
 	jobSelectFreelancer: 'Select contractor',
+	jobSelectAnotherFreelancer: 'Select another contractor',
 	interestedOption: '✅',
 	notInterestedOption: '❌',
+	acceptOption: '✅',
+	refuseOption: '❌',
 	pendingOption: '🕒',
 	jobStates: {
 		searchingForFreelancer: 'searchingForFreelancer',
@@ -81,5 +89,9 @@ module.exports = {
 		interested: 'Interested',
 		notInterested: 'Not interested',
 		//report: 'Report'
+	},
+	freelancerAcceptOptions: {
+		accept: 'Accept',
+		refuse: 'Refuse'
 	}
 };
