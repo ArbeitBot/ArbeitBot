@@ -61,7 +61,7 @@ function handleInline(msg) {
 	} else if (text == mainMenuOptions.help) {
 		sendHelp(msg.chat.id);
 	}
-	// Chack client menu
+	// Check client menu
 	else if (text == clientOptions.postNewJob) {
 		textInput.askForNewJobCategory(msg, bot);
 	} else if (text == clientOptions.myJobs) {

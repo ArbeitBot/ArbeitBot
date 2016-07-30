@@ -64,7 +64,6 @@ function handleSelectFreelancerInline(bot, msg) {
 };
 
 function handleFreelancerAnswerInline(bot, msg) {
-  console.log(msg.data)
 	let options = msg.data.split(strings.inlineSeparator);
 	let jobId = options[1];
 	let option = options[2];
