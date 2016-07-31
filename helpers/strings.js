@@ -1,3 +1,7 @@
+/**
+ * Storage for all the strings in project; change once, use everywhere ;)
+ */
+
 module.exports = {
 	mainMenuMessage: 'Welcome to @arbeit_bot! I am a completelly free of charge Telegram based freelance market. Please select whether you are looking for job or contractors.',
 	clientMenuMessage: 'What would you like to do?',
@@ -23,6 +27,10 @@ module.exports = {
 	editHourlyRateMessage: 'What is your hourly rate?',
 	pickCategoriesMessage: 'Please pick categories',
 	suggestCategoryMessage: 'Want to suggest a category?',
+	waitContractorResponseMessage: 'waitContractorResponseMessage',
+	waitClientResponseMessage: 'waitClientResponseMessage',
+	contactWithFreelancerMessage: 'contactWithFreelancerMessage',
+	clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
 	mainMenuOptions: {
 		findJobs: 'Find work',
 		findContractors: 'Find contractors',
@@ -60,6 +68,7 @@ module.exports = {
 	freelancerInline: 'fI',
 	freelancerJobInline: 'fJI',
 	selectFreelancerInline: 'sFI',
+	selectAnotherFreelancerInline: 'sAFI',
 	completeJobInline: 'cJI',
 	inputBioState: 'inputBioState',
 	inputCategoryNameState: 'inputCategoryNameState',
@@ -70,8 +79,11 @@ module.exports = {
 	selectFreelancerCancel: '❌ Cancel',
 	jobSendAllFreelancers: 'Send to all',
 	jobSelectFreelancer: 'Select contractor',
+	jobSelectAnotherFreelancer: 'Select another contractor',
 	interestedOption: '✅',
 	notInterestedOption: '❌',
+	acceptOption: '✅',
+	refuseOption: '❌',
 	pendingOption: '🕒',
 	jobStates: {
 		searchingForFreelancer: 'searchingForFreelancer',
@@ -81,6 +93,11 @@ module.exports = {
 	freelancerOptions: {
 		interested: 'Interested',
 		notInterested: 'Not interested',
+		reported: 'Report'
+	},
+	freelancerAcceptOptions: {
+		accept: 'Accept',
+		refuse: 'Refuse',
 		report: 'Report'
 	}
 };

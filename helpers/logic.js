@@ -1,3 +1,7 @@
+/**
+ * Main bot logic that handles incoming messages and routes logic to helpers files
+ */
+
 let strings = require('./strings');
 let keyboards = require('./keyboards');
 let dbmanager = require('./dbmanager');
@@ -10,6 +14,10 @@ let jobManager = require('./jobManager');
 
 // Handle messages
 
+/**
+ * Fired when bot receives a message
+ * @param {Telegram:Message} msg Message received by bot
+ */
 bot.on('message', msg => {
   if (msg == null) return;
 	textInput.check(msg, (isTextInput, user) => {
@@ -21,7 +29,7 @@ bot.on('message', msg => {
 					sendMainMenu(msg.chat.id);
 				});
 			} else if (check.replyMarkup(msg)) {
-				handleInline(msg);
+				handleKeyboard(msg);
 			} else {
 				console.log(msg);
 			}
@@ -29,7 +37,12 @@ bot.on('message', msg => {
 	});
 });
 
+/**
+ * Fired when user clicks button on inlline keyboard
+ * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
+ */
 bot.on('inline.callback.query', msg => {
+	console.log(msg.data);
 	if (msg.data.indexOf(strings.categoryInline) > -1) {
 		categoryPicker.handleInline(bot, msg);
 	} else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {
@@ -47,7 +60,11 @@ bot.on('inline.callback.query', msg => {
 
 // Helpers
 
-function handleInline(msg) {
+/**
+ * Handler for custom keyboard button clicks
+ * @param {Telegram:Message} msg Message that is passed with click and keyboard option
+ */
+function handleKeyboard(msg) {
 	let text = msg.text;
 	let mainMenuOptions = strings.mainMenuOptions;
 	let clientOptions = strings.clientMenuOptions;
@@ -85,6 +102,10 @@ function handleInline(msg) {
 
 // Sending messages
 
+/**
+ * Sends main menu keyboard to user with chat id
+ * @param {Number} chatId Chat id of user who should receive this keyboard
+ */
 function sendMainMenu(chatId) {
 	keyboards.sendKeyboard(
 		bot,
@@ -93,6 +114,10 @@ function sendMainMenu(chatId) {
 		keyboards.mainMenuKeyboard);
 };
 
+/**
+ * Sends client menu to user with chat id
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
 function sendClientMenu(chatId) {
 	keyboards.sendKeyboard(
 		bot,
@@ -101,6 +126,10 @@ function sendClientMenu(chatId) {
 		keyboards.clientKeyboard);
 };
 
+/**
+ * Sends freelancer menu to user with chat id; checks if user is busy or not, filled bio, hourly rate, categories or not; and sends relevant menu buttons
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
 function sendFreelanceMenu(chatId) {
   /** Main freelancer keyboard.
    * It appears after pressing "Find Work" button
@@ -131,14 +160,10 @@ function sendFreelanceMenu(chatId) {
 	});
 };
 
-function sendEditHourlyRate(chatId) {
-	keyboards.sendInline(
-		bot,
-		chatId,
-		strings.editHourlyRateMessage,
-		keyboards.hourlyRateKeyboard);
-};
-
+/**
+ * Sends menu with help to user chat id
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
 function sendHelp(chatId) {
 	keyboards.sendInline(
 		bot,
@@ -149,6 +174,10 @@ function sendHelp(chatId) {
 
 // Helpers
 
+/**
+ * Toggles user 'busy' status – if it was true, makes it false and vice versa; sends freelancer menu afterwards
+ * @param {Number} chatId Chat id of user who should have his busy status toggled
+ */
 function toggleUserAvailability(chatId) {
 	dbmanager.toggleUserAvailability(chatId, (err, user) => {
 		if (err) {

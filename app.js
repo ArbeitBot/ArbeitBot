@@ -1,6 +1,7 @@
 /**
- * Arbeit Telergam Bot
+ * Arbeit Telergam Bot executable file; loads all mongoose models and starts logic.js
  */
+require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
@@ -16,4 +17,5 @@ fs.readdirSync(path.join(__dirname, '/models')).forEach(function(filename) {
 
 // start bot
 require('./helpers/logic');
+// print a message to assure that bot is up and running
 console.log('Bot is up and running!');
