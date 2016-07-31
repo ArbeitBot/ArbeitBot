@@ -9,6 +9,7 @@ let dbmanager = require('./dbmanager');
 let mongoose = require('mongoose');
 let Job = mongoose.model('job');
 let User = mongoose.model('user');
+var Review = mongoose.model('review');
 let strings = require('./strings');
 
 // Main functions
@@ -22,16 +23,16 @@ let strings = require('./strings');
 function sendJobCreatedMessage(user, bot, job) {
 	// todo: handle if user doesn't have username
 	function sendKeyboard(freelancers) {
-		keyboards.sendKeyboard(bot, 
-			user.id, 
+		keyboards.sendKeyboard(bot,
+			user.id,
 			strings.pickFreelancersMessage, 
 			keyboards.clientKeyboard,
 			(data => {
 				keyboards.sendInline(
-						bot,
-						user.id,
-						messageFromFreelancers(freelancers),
-						jobInlineKeyboard(freelancers, job));
+					bot,
+					user.id,
+					messageFromFreelancers(freelancers),
+					jobInlineKeyboard(freelancers, job));
 			}));
 	};
 
@@ -39,6 +40,8 @@ function sendJobCreatedMessage(user, bot, job) {
 		sendKeyboard(users);
 	});
 }
+
+// Handles
 
 /**
  * Handles case when client selects a freelancer (that should receive a job offer from client later on) from the list of available freelancers; also handles option when sending to all freelancers
@@ -53,12 +56,18 @@ function handleClientInline(bot, msg) {
 	// Check if select all touched
 	if (freelancerId === strings.jobSendAllFreelancers) {
 		dbmanager.freelancersForJobId(jobId, users => {
-			addFreelancersToCandidates(jobId, users, msg, bot, job);
+			addFreelancersToCandidates(jobId, users, msg, bot);
 		});
 	} else if (freelancerId === strings.jobSelectFreelancer) {
 		dbmanager.findJobById(jobId, job => {
 			showSelectFreelancers(msg, job, bot);
 		}, 'interestedCandidates');
+	} else if (freelancerId === strings.jobFinishedOptions.report) {
+		dbmanager.findJobById(jobId, job => {
+			dbmanager.findUserById(options[3], user => {
+				reportFreelancer(bot, msg, job, user);
+			});
+		});
 	} else {
 		dbmanager.findUserById(freelancerId, user => {
 			addFreelancersToCandidates(jobId, [user], msg, bot);
@@ -90,234 +99,41 @@ function handleSelectFreelancerInline(bot, msg) {
 function handleFreelancerAnswerInline(bot, msg) {
 	let options = msg.data.split(strings.inlineSeparator);
 	let jobId = options[1];
-	let option = options[2];
-	let freelancerUsername = options[3];
+	let answer = options[2];
 
-	dbmanager.findJobById(jobId, job => {
-		dbmanager.findUser({ username: freelancerUsername }, user => {
-			handleFreelancerAnswer(bot, msg, option, job, user);
+	if (answer === strings.jobFinishedOptions.rate) {
+		let data = options[3];
+
+		dbmanager.findJobById(jobId, job => {
+			dbmanager.findUserById(job.selectedCandidate, user => {
+				reviewClient(data, bot, msg, job, user);
+			});
 		});
-	});
-}
-
-// Client side
-
-function addFreelancersToCandidates(jobId, users, msg, bot, job) {
-	function jobCallback(job) {
-		job.current_inline_chat_id = msg.message.chat.id;
-		job.current_inline_message_id = msg.message.message_id;
-		users.forEach(user => job.candidates.push(user));
-		job.save((err, newJob) => {
-			if (err) {
-				// todo: handle error
-			} else {
-				sendUsersJobOffer(bot, users, newJob);
-				updateJobMessage(newJob, bot);
-			}
-		});
-	};
-	if (job) {
-		jobCallback(job);
 	} else {
-		dbmanager.findJobById(jobId, newJob => {
-			jobCallback(newJob);
-		});
-	}
-}
+		let freelancerUsername = options[3];
 
-function jobSelectCandidateKeyboard(job) {
-	let keyboard = [];
-	keyboard.push([{
-			text: strings.selectFreelancerCancel,
-			callback_data: 
-				strings.selectFreelancerInline +
-				strings.inlineSeparator +
-				strings.selectFreelancerCancel +
-				strings.inlineSeparator + 
-				job._id
-		}]);
-	job.interestedCandidates.forEach(freelancer => {
-		keyboard.push([{
-			text: freelancer.username,
-			callback_data: 
-				strings.selectFreelancerInline + 
-				strings.inlineSeparator + 
-				freelancer._id +
-				strings.inlineSeparator +
-				job._id
-		}]);
-	});
-	return keyboard;
-}
-
-function jobInlineKeyboard(freelancers, job) {
-	let keyboard = [];
-	if (job.interestedCandidates.length > 0) {
-		keyboard.push([{
-				text: strings.jobSelectFreelancer,
-				callback_data: 
-					strings.freelancerInline +
-					strings.inlineSeparator +
-					strings.jobSelectFreelancer +
-					strings.inlineSeparator + 
-					job._id
-			}]);
-	}
-	keyboard.push([{
-			text: strings.jobSendAllFreelancers,
-			callback_data: 
-				strings.freelancerInline +
-				strings.inlineSeparator +
-				strings.jobSendAllFreelancers +
-				strings.inlineSeparator + 
-				job._id
-		}]);
-	freelancers.forEach(freelancer => {
-		// Get postfix
-		var postfix = '';
-		if (job.candidates.indexOf(freelancer._id) > -1) {
-			postfix = strings.pendingOption;
-		} else if (job.interestedCandidates.indexOf(freelancer._id) > -1) {
-			postfix = strings.interestedOption;
-		}
-		// Add freelancer button
-		keyboard.push([{
-			text: freelancer.username + ' ' + postfix,
-			callback_data: 
-				strings.freelancerInline + 
-				strings.inlineSeparator + 
-				freelancer._id +
-				strings.inlineSeparator +
-				job._id
-		}]);
-	});
-	return keyboard;
-}
-
-function showSelectFreelancers(msg, job, bot) {
-	bot.editMessageText({
-		chat_id: msg.message.chat.id,
-		message_id: msg.message.message_id,
-		reply_markup: JSON.stringify({
-			inline_keyboard: jobSelectCandidateKeyboard(job)
-		}),
-		text: strings.selectCandidateMessage
-	}).catch(err => console.log(err));
-}
-
-function updateJobMessage(job, bot) {
-	if (job.state === strings.jobStates.searchingForFreelancer) {
-		updateJobMessageForSearch(job, bot);
-	} else if (job.state === strings.jobStates.freelancerChosen) {
-		updateJobMessageForSelected(job, bot);
-	} else if (job.state === strings.jobStates.finished) {
-		updateJobMessageForFinished(job, bot);
-	}
-}
-
-function updateJobMessageForSearch(job, bot) {
-	function updateKeyboard(users) {
-		let send = {
-			chat_id: job.current_inline_chat_id,
-			message_id: job.current_inline_message_id,
-			text: messageFromFreelancers(users),
-			reply_markup: {
-				inline_keyboard: jobInlineKeyboard(users, job)
-			}
-		};
-		send.reply_markup = JSON.stringify(send.reply_markup);
-		bot.editMessageText(send)
-			.catch(err => console.log(err));
-	}
-
-	dbmanager.freelancersForJob(job, users => {
-		updateKeyboard(users);
-	});
-}
-
-function updateJobMessageForSelected(job, bot) {
-	let send = {
-			chat_id: job.current_inline_chat_id,
-			message_id: job.current_inline_message_id,
-			text: strings.waitContractorResponseMessage,
-			reply_markup: {
-				inline_keyboard: [[{
-					text: strings.jobSelectAnotherFreelancer,
-					callback_data:
-						strings.selectFreelancerInline +
-						strings.inlineSeparator +
-						strings.selectAnotherFreelancerInline +
-						strings.inlineSeparator +
-						job._id
-				}]]
-			}
-		};
-	send.reply_markup = JSON.stringify(send.reply_markup);
-	bot.editMessageText(send)
-		.catch(err => console.log(err));
-}
-
-function updateJobMessageForFinished(job, bot) {
-	dbmanager.findUserById(job.selectedCandidate, user => {
-		let send = {
-			chat_id: job.current_inline_chat_id,
-			message_id: job.current_inline_message_id,
-			text: `${strings.contactWithFreelancerMessage} @${user.username}`,
-			reply_markup: {
-				inline_keyboard: []
-			}
-		};
-		send.reply_markup = JSON.stringify(send.reply_markup);
-		bot.editMessageText(send)
-		.catch(err => console.log(err));
-	});
-}
-
-function messageFromFreelancers(users) {
-	// todo: handle if user doesn't have username
-	var message = '';
-	for (var i in users) {
-		var user = users[i];
-		message = message + (i == 0 ? '' : '\n') + '@' + user.username + '\n' + user.bio;
-	}
-	return message;
-}
-
-function selectFreelancerForJob(bot, msg, userId, jobId) {
-	dbmanager.findJobById(jobId, job => {
-		dbmanager.findUserById(userId, user => {
-			job.selectedCandidate = user._id;
-			job.state = strings.jobStates.freelancerChosen;
-			job.save((err, newJob) => {
-				if (err) {
-					// todo: handle error
-				} else {
-					updateJobMessage(newJob, bot);
-					sendUsersJobOffer(bot, [user], newJob);
+		dbmanager.findJobById(jobId, job => {
+			dbmanager.findUser({username: freelancerUsername}, user => {
+				if (answer === strings.freelancerOptions.interested) {
+					makeInterested(true, bot, msg, job, user);
+				} else if (answer === strings.freelancerOptions.notInterested) {
+					makeInterested(false, bot, msg, job, user);
+				} else if (answer === strings.freelancerOptions.report) {
+					reportClient(bot, msg, job, user);
+				} else if (answer === strings.freelancerAcceptOptions.accept) {
+					makeAccepted(true, bot, msg, job, user);
+				} else if (answer === strings.freelancerAcceptOptions.refuse) {
+					makeAccepted(false, bot, msg, job, user);
 				}
-			})
+			});
 		});
-	});
+	}
 }
 
-function selectAnotherFreelancerForJob(bot, jobId) {
-	dbmanager.findJobById(jobId, job => {
-		dbmanager.findUserById(job.selectedCandidate, user => {
-			job.selectedCandidate = null;
-			job.state = strings.jobStates.searchingForFreelancer;
-			job.save((err, newJob) => {
-				if (err) {
-					// todo: handle error
-				} else {
-					updateJobMessage(newJob, bot);
-					sendUsersJobOffer(bot, strings.selectAnotherFreelancerInline, newJob);
-				}
-			})
-		});
-	});
-}
 
-// Freelancers side 
+//// Client side
+
+// Functions
 
 function sendUsersJobOffer(bot, users, job) {
 	if (users === strings.selectAnotherFreelancerInline) {
@@ -335,27 +151,23 @@ function sendUsersJobOffer(bot, users, job) {
 	} else if (job.state === strings.jobStates.searchingForFreelancer) {
 		for (let i in users) {
 			let user = users[i];
-
-			let keyboard = [];
-			let keys = Object.keys(strings.freelancerOptions);
-			for (let j in keys) {
-				let option = strings.freelancerOptions[keys[j]];
-				keyboard.push([{
-					text: option,
-					callback_data: 
-						strings.freelancerJobInline + 
-						strings.inlineSeparator + 
-						job._id + 
-						strings.inlineSeparator + 
-						option + 
-						strings.inlineSeparator + 
+				let keyboard = [];
+				let keys = Object.keys(strings.freelancerOptions);
+				for (let j in keys) {
+					let option = strings.freelancerOptions[keys[j]];
+					keyboard.push([{
+						text: option,
+						callback_data:
+						strings.freelancerJobInline +
+						strings.inlineSeparator +
+						job._id +
+						strings.inlineSeparator +
+						option +
+						strings.inlineSeparator +
 						user.username
-				}]);
-			}
-			keyboards.sendInline(bot,
-								user.id,
-								job.description,
-								keyboard);
+					}]);
+				}
+				keyboards.sendInline(bot, user.id, job.description, keyboard);
 		}
 	} else if (job.state === strings.jobStates.freelancerChosen) {
 		let user = users[0];
@@ -401,136 +213,311 @@ function sendUsersJobOffer(bot, users, job) {
 	}
 }
 
-function updateFreelancerMessage(bot, msg, user, job) {
-	if (job.state === strings.jobStates.searchingForFreelancer) {
-		updateFreelancerMessageForSearch(bot, msg, user, job);
-	} else if (job.state === strings.jobStates.freelancerChosen) {
-		updateFreelancerMessageForSelected(bot, msg, user, job);
-	} else if (job.state === strings.jobStates.finished) {
-		updateFreelancerMessageForFinished(bot, msg, user, job);
-	}
-}
-
-function updateFreelancerMessageForSearch(bot, msg, user, job) {
-	let prefix = 'chacha';
-	if (job.interestedCandidates.indexOf(user._id) > -1) {
-		prefix = `${strings.interestedOption} ${strings.freelancerOptions.interested}\n\n`;
-	} else if (job.notInterestedCandidates.indexOf(user._id) > -1) {
-		prefix = `${strings.notInterestedOption} ${strings.freelancerOptions.notInterested}\n\n`;
-	}
-
-	let send = {
+function showSelectFreelancers(msg, job, bot) {
+	bot.editMessageText({
 		chat_id: msg.message.chat.id,
 		message_id: msg.message.message_id,
-		text: `${prefix}\n\n${job.description}`,
-		reply_markup: {
-			inline_keyboard: []
-		}
-	};
-
-	send.reply_markup = JSON.stringify(send.reply_markup);
-	bot.editMessageText(send)
-	.catch(err => console.log(err));
+		reply_markup: JSON.stringify({
+			inline_keyboard: jobSelectCandidateKeyboard(job)
+		}),
+		text: strings.selectCandidateMessage
+	}).catch(err => console.log(err));
 }
 
-function updateFreelancerMessageForSelected(bot, msg, user, job) {
-	if (job.state == strings.jobStates.freelancerChosen) {
-		let prefix = `${strings.refuseOption} ${strings.freelancerAcceptOptions.refuse}`;
+function reportFreelancer(bot, msg, job, user) {
+	//  todo: handle report
+}
+
+// Management freelancers
+
+function addFreelancersToCandidates(jobId, users, msg, bot, job) {
+	function jobCallback(job) {
+		if (job) {
+			users = users.filter((user) => {
+				return !job.candidates || (job.candidates.indexOf(user._id) === -1 && job.interestedCandidates.indexOf(user._id) === -1 && job.notInterestedCandidates.indexOf(user._id) === -1);
+			});
+			job.current_inline_chat_id = msg.message.chat.id;
+			job.current_inline_message_id = msg.message.message_id;
+			users.forEach(user => job.candidates.push(user));
+			job.save((err, newJob) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					sendUsersJobOffer(bot, users, newJob);
+					updateJobMessage(newJob, bot);
+				}
+			});
+		} else {
+			// todo: handle error
+		}
+	}
+	if (job) {
+		jobCallback(job);
+	} else {
+		dbmanager.findJobById(jobId, newJob => {
+			jobCallback(newJob);
+		});
+	}
+}
+
+function selectFreelancerForJob(bot, msg, userId, jobId) {
+	dbmanager.findJobById(jobId, job => {
+		dbmanager.findUserById(userId, user => {
+			job.selectedCandidate = user._id;
+			job.state = strings.jobStates.freelancerChosen;
+			job.save((err, newJob) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					updateJobMessage(newJob, bot);
+					sendUsersJobOffer(bot, [user], newJob);
+				}
+			})
+		});
+	});
+}
+
+function selectAnotherFreelancerForJob(bot, jobId) {
+	dbmanager.findJobById(jobId, job => {
+		dbmanager.findUserById(job.selectedCandidate, user => {
+			job.selectedCandidate = null;
+			job.state = strings.jobStates.searchingForFreelancer;
+			job.save((err, newJob) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					updateJobMessage(newJob, bot);
+					sendUsersJobOffer(bot, strings.selectAnotherFreelancerInline, newJob);
+				}
+			})
+		});
+	});
+}
+
+// Update message
+
+function updateJobMessage(job, bot) {
+	if (job.state === strings.jobStates.searchingForFreelancer) {
+		updateJobMessageForSearch(job, bot);
+	} else if (job.state === strings.jobStates.freelancerChosen) {
+		updateJobMessageForSelected(job, bot);
+	} else if (job.state === strings.jobStates.finished) {
+		updateJobMessageForFinished(job, bot);
+	}
+}
+
+function updateJobMessageForSearch(job, bot) {
+	function updateKeyboard(users) {
+		let send = {
+			chat_id: job.current_inline_chat_id,
+			message_id: job.current_inline_message_id,
+			text: messageFromFreelancers(users),
+			reply_markup: {
+				inline_keyboard: jobInlineKeyboard(users, job)
+			}
+		};
+		send.reply_markup = JSON.stringify(send.reply_markup);
+		bot.editMessageText(send)
+		.catch(err => {
+			if (err.error.description !== 'Bad Request: message is not modified') {
+				console.log(err);
+			}
+		});
+	}
+
+	dbmanager.freelancersForJob(job, users => {
+		updateKeyboard(users);
+	});
+}
+
+function updateJobMessageForSelected(job, bot) {
+	let send = {
+		chat_id: job.current_inline_chat_id,
+		message_id: job.current_inline_message_id,
+		text: strings.waitContractorResponseMessage,
+		reply_markup: {
+			inline_keyboard: [[{
+				text: strings.jobSelectAnotherFreelancer,
+				callback_data:
+				strings.selectFreelancerInline +
+				strings.inlineSeparator +
+				strings.selectAnotherFreelancerInline +
+				strings.inlineSeparator +
+				job._id
+			}]]
+		}
+	};
+	send.reply_markup = JSON.stringify(send.reply_markup);
+	bot.editMessageText(send)
+	.catch(err => {
+		if (err.error.description !== 'Bad Request: message is not modified') {
+			console.log(err);
+		}
+	});
+}
+
+function updateJobMessageForFinished(job, bot) {
+	dbmanager.findUserById(job.selectedCandidate, user => {
+		let keyboard = [[{
+				text: strings.jobFinishedOptions.rate,
+				callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + job._id + strings.inlineSeparator + user._id
+			},
+			{
+				text: strings.jobFinishedOptions.report,
+				callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + job._id + strings.inlineSeparator + user._id
+			}
+		]];
 
 		let send = {
-			chat_id: msg.message.chat.id,
+			chat_id: job.current_inline_chat_id,
+			message_id: job.current_inline_message_id,
+			text: `${strings.contactWithFreelancerMessage} @${user.username}`,
+			reply_markup: {
+				inline_keyboard: keyboard
+			}
+		};
+		send.reply_markup = JSON.stringify(send.reply_markup);
+		bot.editMessageText(send)
+		.catch(err => {
+			if (err.error.description !== 'Bad Request: message is not modified') {
+				console.log(err);
+			}
+		});
+	});
+}
+
+// Keyboards
+
+function jobInlineKeyboard(freelancers, job) {
+	let keyboard = [];
+	if (job.interestedCandidates.length > 0) {
+		keyboard.push([{
+			text: strings.jobSelectFreelancer,
+			callback_data:
+			strings.freelancerInline +
+			strings.inlineSeparator +
+			strings.jobSelectFreelancer +
+			strings.inlineSeparator +
+			job._id
+		}]);
+	}
+	keyboard.push([{
+		text: strings.jobSendAllFreelancers,
+		callback_data:
+		strings.freelancerInline +
+		strings.inlineSeparator +
+		strings.jobSendAllFreelancers +
+		strings.inlineSeparator +
+		job._id
+	}]);
+	freelancers.forEach(freelancer => {
+		// Get postfix
+		var postfix = '';
+		if (job.candidates.indexOf(freelancer._id) > -1) {
+			postfix = strings.pendingOption;
+		} else if (job.interestedCandidates.indexOf(freelancer._id) > -1) {
+			postfix = strings.interestedOption;
+		}
+		// Add freelancer button
+		keyboard.push([{
+			text: freelancer.username + ' ' + postfix,
+			callback_data:
+			strings.freelancerInline +
+			strings.inlineSeparator +
+			freelancer._id +
+			strings.inlineSeparator +
+			job._id
+		}]);
+	});
+	return keyboard;
+}
+
+function jobSelectCandidateKeyboard(job) {
+	let keyboard = [];
+	keyboard.push([{
+		text: strings.selectFreelancerCancel,
+		callback_data:
+		strings.selectFreelancerInline +
+		strings.inlineSeparator +
+		strings.selectFreelancerCancel +
+		strings.inlineSeparator +
+		job._id
+	}]);
+	job.interestedCandidates.forEach(freelancer => {
+		keyboard.push([{
+			text: freelancer.username,
+			callback_data:
+			strings.selectFreelancerInline +
+			strings.inlineSeparator +
+			freelancer._id +
+			strings.inlineSeparator +
+			job._id
+		}]);
+	});
+	return keyboard;
+}
+
+// Helpers
+
+function messageFromFreelancers(users) {
+	// todo: handle if user doesn't have username
+	var message = '';
+	for (var i in users) {
+		var user = users[i];
+		message = message + (i == 0 ? '' : '\n') + '@' + user.username + '\n' + user.bio;
+	}
+	return message;
+}
+
+//// End client side
+
+
+//// Freelancers side
+
+// Functions
+
+function makeInterested(interested, bot, msg, job, user) {
+	if (job.state !== strings.jobStates.searchingForFreelancer) {
+		var send = {
+			chat_id: msg.from.id,
 			message_id: msg.message.message_id,
-			text: `${prefix}\n\n${job.description}`,
+			text: strings.clientHasChosenAnotherFreelancer,
 			reply_markup: {
 				inline_keyboard: []
 			}
 		};
-
 		send.reply_markup = JSON.stringify(send.reply_markup);
 		bot.editMessageText(send)
-		.catch(err => console.log(err))
-		.then(data => {
-			job.freelancer_inline_chat_id = data.chat.id;
-			job.freelancer_inline_message_id = data.message_id;
-			job.save((err, newJob) => {
-				if (err) {
-					// todo: handle error
-				}
-			})
-		});
-
-		job.state = strings.jobStates.searchingForFreelancer;
-		job.save((err, newJob) => {
-			updateJobMessage(newJob, bot);
-		});
-	}
-}
-
-function updateFreelancerMessageForFinished(bot, msg, user, job) {
-	let prefix = `${strings.acceptOption} ${strings.freelancerAcceptOptions.accept}\n${strings.waitClientResponseMessage}`;
-
-	let send = {
-		chat_id: msg.message.chat.id,
-		message_id: msg.message.message_id,
-		text: `${prefix}\n\n${job.description}`,
-		reply_markup: {
-			inline_keyboard: []
-		}
-	};
-
-	send.reply_markup = JSON.stringify(send.reply_markup);
-	bot.editMessageText(send)
-	.catch(err => console.log(err));
-
-	updateJobMessage(job, bot);
-}
-
-function sendUser() {
-
-}
-
-function handleFreelancerAnswer(bot, msg, answer, job, user) {
-	if (answer === strings.freelancerOptions.interested) {
-		makeInterested(true, bot, msg, job, user);
-	} else if (answer === strings.freelancerOptions.notInterested) {
-		makeInterested(false, bot, msg, job, user);
-	} else if (answer === strings.freelancerOptions.report) {
-		reportJob(bot, msg, job, user);
-	} else if (answer === strings.freelancerAcceptOptions.accept) {
-		makeAccepted(true, bot, msg, job, user);
-	} else if (answer === strings.freelancerAcceptOptions.refuse) {
-		makeAccepted(false, bot, msg, job, user);
-	}
-}
-
-function makeInterested(interested, bot, msg, job, user) {
-	// Remove user from candidates
-	var candIndex = job.candidates.indexOf(user._id);
-	var intIndex = job.interestedCandidates.indexOf(user._id);
-	var notIntIndex = job.notInterestedCandidates.indexOf(user._id);
-	if (candIndex > -1) {
-		job.candidates.splice(candIndex, 1);
-	}
-	if (intIndex > -1) {
-		job.interestedCandidates.splice(intIndex, 1);
-	}
-	if (notIntIndex > -1) {
-		job.notInterestedCandidates.splice(notIntIndex, 1);
-	}
-	// Add user to interesed or not interested
-	if (interested) {
-		job.interestedCandidates.push(user._id);
+		.catch(err => console.log(err));
 	} else {
-		job.notInterestedCandidates.push(user._id);
-	}
-	job.save((err, newJob) => {
-		if (err) {
-			// todo: handle error
-		} else {
-			updateJobMessage(newJob, bot);
-			updateFreelancerMessage(bot, msg, user, newJob);
+		// Remove user from candidates
+		var candIndex = job.candidates.indexOf(user._id);
+		var intIndex = job.interestedCandidates.indexOf(user._id);
+		var notIntIndex = job.notInterestedCandidates.indexOf(user._id);
+		if (candIndex > -1) {
+			job.candidates.splice(candIndex, 1);
 		}
-	});
+		if (intIndex > -1) {
+			job.interestedCandidates.splice(intIndex, 1);
+		}
+		if (notIntIndex > -1) {
+			job.notInterestedCandidates.splice(notIntIndex, 1);
+		}
+		// Add user to interesed or not interested
+		if (interested) {
+			job.interestedCandidates.push(user._id);
+		} else {
+			job.notInterestedCandidates.push(user._id);
+		}
+		job.save((err, newJob) => {
+			if (err) {
+				// todo: handle error
+			} else {
+				updateJobMessage(newJob, bot);
+				updateFreelancerMessage(bot, msg, user, newJob);
+			}
+		});
+	}
 }
 
 function makeAccepted(accept, bot, msg, job, user) {
@@ -567,9 +554,274 @@ function makeAccepted(accept, bot, msg, job, user) {
 	}
 }
 
-function reportJob(bot, msg, job, user) {
+function reviewClient(data, bot, msg, job, user) {
+	if (user.input_state === strings.reviewStates.rate) {
+		if (data === strings.rateOptions.back) {
+			user.input_state = null;
+			user.save((err, user) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					updateFreelancerMessage(bot, msg, user, job);
+				}
+			});
+		} else if (data === strings.reviewOptions.review) {
+			//todo
+			//user.input_state === strings.reviewStates.review;
+		} else if (data === strings.reviewOptions.no || data === strings.saveReviewOption) {
+			let reviewObject = new Review({
+				byUser: user._id,
+				job: job._id,
+				rate: user.input_state_data,
+				review: '',
+				reviewType: strings.reviewTypes.byFreelancer
+			});
+			dbmanager.addReview(reviewObject, (err, dbReviewObject) => {
+
+				if (err) {
+					// todo: handle error
+				} else {
+					dbmanager.findUserById(job.client, client => {
+						client.reviews.push(dbReviewObject._id);
+						client.save((err, client) => {
+							if (err) {
+								// todo: handle error
+							} else {
+								user.input_state = null;
+								user.input_state_data = null;
+								user.save((err, user) => {
+									if (err) {
+										// todo: handle error
+									} else {
+										let send = {
+											chat_id: job.freelancer_inline_chat_id,
+											message_id: job.freelancer_inline_message_id,
+											text: strings.thanksReviewMessage,
+											reply_markup: {
+												inline_keyboard: []
+											}
+										};
+										send.reply_markup = JSON.stringify(send.reply_markup);
+										bot.editMessageText(send)
+										.catch(err => {
+											if (err.error.description !== 'Bad Request: message is not modified') {
+												console.log(err);
+											}
+										});
+									}
+								});
+							}
+						});
+					});
+				}
+			});
+		} else {
+			let rate = 0;
+			if (data === strings.rateOptions.oneStar) rate = 1;
+			else if (data === strings.rateOptions.twoStars) rate = 2;
+			else if (data === strings.rateOptions.threeStars) rate = 3;
+			else if (data === strings.rateOptions.fourStars) rate = 4;
+			else if (data === strings.rateOptions.fiveStars) rate = 5;
+
+			user.input_state_data = rate;
+			user.save((err, user) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					let keyboard = [];
+					let keys = Object.keys(strings.reviewOptions);
+					for (let j in keys) {
+						let option = strings.reviewOptions[keys[j]];
+						keyboard.push([{
+							text: option,
+							callback_data: strings.freelancerJobInline +
+							strings.inlineSeparator +
+							job._id +
+							strings.inlineSeparator +
+							strings.jobFinishedOptions.rate +
+							strings.inlineSeparator +
+							option
+						}]);
+					}
+
+					let send = {
+						chat_id: job.freelancer_inline_chat_id,
+						message_id: job.freelancer_inline_message_id,
+						text: strings.reviewClientMessage,
+						reply_markup: {
+							inline_keyboard: keyboard
+						}
+					};
+					send.reply_markup = JSON.stringify(send.reply_markup);
+					bot.editMessageText(send)
+					.catch(err => {
+						if (err.error.description !== 'Bad Request: message is not modified') {
+							console.log(err);
+						}
+					});
+				}
+			});
+		}
+	} else if (user.input_state === strings.reviewStates.review) {
+
+	} else {
+		let keyboard = [];
+		let keys = Object.keys(strings.rateOptions);
+		for (let j in keys) {
+			let option = strings.rateOptions[keys[j]];
+			keyboard.push([{
+				text: option,
+				callback_data: strings.freelancerJobInline +
+				strings.inlineSeparator +
+				job._id +
+				strings.inlineSeparator +
+				strings.jobFinishedOptions.rate +
+				strings.inlineSeparator +
+				option
+			}]);
+		}
+
+		let send = {
+			chat_id: job.freelancer_inline_chat_id,
+			message_id: job.freelancer_inline_message_id,
+			text: strings.rateClientMessage,
+			reply_markup: {
+				inline_keyboard: keyboard
+			}
+		};
+		send.reply_markup = JSON.stringify(send.reply_markup);
+
+
+		user.input_state = strings.reviewStates.rate;
+		user.save((err, user) => {
+			if (err) {
+				// todo: handle error
+			} else {
+				bot.editMessageText(send)
+				.catch(err => {
+					if (err.error.description !== 'Bad Request: message is not modified') {
+						console.log(err);
+					}
+				});
+			}
+		});
+	}
+}
+
+function reportClient(bot, msg, job, user) {
 	//  todo: handle report
 }
+
+// Update message
+
+function updateFreelancerMessage(bot, msg, user, job) {
+	if (job.state === strings.jobStates.searchingForFreelancer) {
+		updateFreelancerMessageForSearch(bot, msg, user, job);
+	} else if (job.state === strings.jobStates.freelancerChosen) {
+		updateFreelancerMessageForSelected(bot, msg, user, job);
+	} else if (job.state === strings.jobStates.finished) {
+		updateFreelancerMessageForFinished(bot, msg, user, job);
+	}
+}
+
+function updateFreelancerMessageForSearch(bot, msg, user, job) {
+	let prefix = 'chacha';
+	if (job.interestedCandidates.indexOf(user._id) > -1) {
+		prefix = `${strings.interestedOption} ${strings.freelancerOptions.interested}\n\n`;
+	} else if (job.notInterestedCandidates.indexOf(user._id) > -1) {
+		prefix = `${strings.notInterestedOption} ${strings.freelancerOptions.notInterested}\n\n`;
+	}
+
+	let send = {
+		chat_id: msg.message.chat.id,
+		message_id: msg.message.message_id,
+		text: `${prefix}\n\n${job.description}`,
+		reply_markup: {
+			inline_keyboard: []
+		}
+	};
+
+	send.reply_markup = JSON.stringify(send.reply_markup);
+	bot.editMessageText(send)
+	.catch(err => {
+		if (err.error.description !== 'Bad Request: message is not modified') {
+			console.log(err);
+		}
+	});
+}
+
+function updateFreelancerMessageForSelected(bot, msg, user, job) {
+	if (job.state == strings.jobStates.freelancerChosen) {
+		let prefix = `${strings.refuseOption} ${strings.freelancerAcceptOptions.refuse}`;
+
+		let send = {
+			chat_id: msg.message.chat.id,
+			message_id: msg.message.message_id,
+			text: `${prefix}\n\n${job.description}`,
+			reply_markup: {
+				inline_keyboard: []
+			}
+		};
+
+		send.reply_markup = JSON.stringify(send.reply_markup);
+		bot.editMessageText(send)
+		.catch(err => {
+			if (err.error.description !== 'Bad Request: message is not modified') {
+				console.log(err);
+			}
+		})
+		.then(data => {
+			job.freelancer_inline_chat_id = data.chat.id;
+			job.freelancer_inline_message_id = data.message_id;
+			job.save((err, newJob) => {
+				if (err) {
+					// todo: handle error
+				}
+			})
+		});
+
+		job.state = strings.jobStates.searchingForFreelancer;
+		job.save((err, newJob) => {
+			updateJobMessage(newJob, bot);
+		});
+	}
+}
+
+function updateFreelancerMessageForFinished(bot, msg, user, job) {
+	let prefix = `${strings.acceptOption} ${strings.freelancerAcceptOptions.accept}\n${strings.waitClientResponseMessage}`;
+
+	let keyboard = [[{
+			text: strings.jobFinishedOptions.rate,
+			callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + user.username
+		},
+		{
+			text: strings.jobFinishedOptions.report,
+			callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + user.username
+		}
+	]];
+
+	let send = {
+		chat_id: msg.message.chat.id,
+		message_id: msg.message.message_id,
+		text: `${prefix}\n\n${job.description}`,
+		reply_markup: {
+			inline_keyboard: keyboard
+		}
+	};
+
+	send.reply_markup = JSON.stringify(send.reply_markup);
+	bot.editMessageText(send)
+	.catch(err => {
+		if (err.error.description !== 'Bad Request: message is not modified') {
+			console.log(err);
+		}
+	});
+
+	updateJobMessage(job, bot);
+}
+
+//// End Freelancers side
+
 
 // Exports
 module.exports = {

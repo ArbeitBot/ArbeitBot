@@ -30,6 +30,11 @@ module.exports = {
 	waitContractorResponseMessage: 'waitContractorResponseMessage',
 	waitClientResponseMessage: 'waitClientResponseMessage',
 	contactWithFreelancerMessage: 'contactWithFreelancerMessage',
+	rateFreelancerMessage: 'rateFreelancerMessage',
+	rateClientMessage: 'rateClientMessage',
+	reviewFreelancerMessage: 'reviewFreelancerMessage',
+	reviewClientMessage: 'reviewClientMessage',
+	thanksReviewMessage: 'thanksReviewMessage',
 	clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
 	mainMenuOptions: {
 		findJobs: 'Find work',
@@ -69,6 +74,8 @@ module.exports = {
 	freelancerJobInline: 'fJI',
 	selectFreelancerInline: 'sFI',
 	selectAnotherFreelancerInline: 'sAFI',
+	rateClientFreelancerInline: 'rCFI',
+	reviewClientFreelancerInline: 'reCFI',
 	completeJobInline: 'cJI',
 	inputBioState: 'inputBioState',
 	inputCategoryNameState: 'inputCategoryNameState',
@@ -84,18 +91,43 @@ module.exports = {
 	acceptOption: '✅',
 	refuseOption: '❌',
 	pendingOption: '🕒',
+	saveReviewOption: 'saveReview',
 	jobStates: {
 		searchingForFreelancer: 'searchingForFreelancer',
 		freelancerChosen: 'freelancerChosen',
 		finished: 'finished'
 	},
+	reviewStates: {
+		rate: 'rate',
+		review: 'review'
+	},
+	reviewTypes: {
+		byClient: 'byClient',
+		byFreelancer: 'byFreelancer'
+	},
 	freelancerOptions: {
 		interested: 'Interested',
 		notInterested: 'Not interested',
-		//report: 'Report'
+		report: 'Report'
 	},
 	freelancerAcceptOptions: {
 		accept: 'Accept',
 		refuse: 'Refuse'
+	},
+	jobFinishedOptions: {
+		rate: 'Rate',
+		report: 'Report'
+	},
+	rateOptions: {
+		back: '🔙 Back',
+		oneStar: '⭐️',
+		twoStars: '⭐️⭐️',
+		threeStars: '⭐️⭐️⭐️',
+		fourStars: '⭐️⭐️⭐️⭐️',
+		fiveStars: '⭐️⭐️⭐️⭐️⭐️',
+	},
+	reviewOptions: {
+		review: 'Review',
+		no: 'No'
 	}
 };
