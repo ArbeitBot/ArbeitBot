@@ -102,8 +102,7 @@ module.exports = {
 	},
 	freelancerAcceptOptions: {
 		accept: 'Accept',
-		refuse: 'Refuse',
-		report: 'Report'
+		refuse: 'Refuse'
 	},
 	jobFinishedOptions: {
 		rate: 'Rate',
