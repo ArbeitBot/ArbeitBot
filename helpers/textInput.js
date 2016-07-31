@@ -369,14 +369,15 @@ function completeReport(reportMessage, msg, user, bot) {
   // Обнуляем состояние драфта, т.к. у нас есть вся необходимая информация:
   // Юзер, который репортит, id работы, которую репортят и сообщение.
   user.report_draft = undefined;
-
+  user.input_state = undefined;
+  user.save();
   // Создаем новый обьект Report с полученной информацией
   let report = new Report({
     user: user._id,
     message: reportMessage
   });
   report.save();
-  
+
   dbmanager.findJobById(jobId, job => {
     // Обновить обьект job добавив туда новый Report
     job.reports.push(report);
@@ -390,6 +391,10 @@ function completeReport(reportMessage, msg, user, bot) {
       client.reports.push(report);
       client.reportedBy.push(user._id);
       client.save();
+    });
+    bot.sendMessage({
+      chat_id: msg.from.id,
+      text: 'Спасибо за вашу бдительность!'
     });
     console.log('New report here!')
   })
