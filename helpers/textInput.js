@@ -1,3 +1,7 @@
+/**
+ * Handles all text inputs in bot like inputting freelancer bio or job description
+ */
+
 let dbmanager = require('./dbmanager');
 let strings = require('./strings');
 let keyboards = require('./keyboards');
@@ -6,6 +10,11 @@ let jobManager = require('./jobManager');
 let mongoose = require('mongoose');
 let Job = mongoose.model('job');
 
+/**
+ * Checks if state of user that sent message is one of input ones 
+ * @param  {Telegram:Messahe}   msg      Message received
+ * @param  {Function} callback Callback(input_state, user) that is called when check is done
+ */
 function check(msg, callback) {
 	dbmanager.getUser(msg.chat.id, (err, user) => {
 		if (err) {
@@ -20,6 +29,12 @@ function check(msg, callback) {
 	});
 };
 
+/**
+ * Handler for user inputs, ran after check for input state was positive; depending on user's input state saves right values to db
+ * @param  {Telegram:Message} msg  Message that was received
+ * @param  {Mongoose:User} user User that sent the Message
+ * @param  {Telegram:Bot} bot  Bot that should respond
+ */
 function handle(msg, user, bot) {
 	if (user.input_state == strings.inputBioState) {
 		let newBio = msg.text.substring(0, 150);
@@ -77,6 +92,11 @@ function handle(msg, user, bot) {
 	}
 };
 
+/**
+ * Sends message to user asking for bio and adds relevant flags to user's object
+ * @param  {Telegram:Message} msg Message received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function askForBio(msg, bot) {
 	dbmanager.getUser(msg.chat.id, (err, user) => {
 		if (err) {
@@ -109,6 +129,12 @@ function askForBio(msg, bot) {
 	});
 };
 
+/**
+ * Sends message asking for job category of job that is being created, saves relevant flag to db for user
+ * @todo: Maybe we can move this to job manager?
+ * @param  {Telegram:Message} msg Message received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function askForNewJobCategory(msg, bot) {
 	function saveUserCallback(user) {
 		dbmanager.getCategories((err, categories) => {
@@ -152,6 +178,15 @@ function askForNewJobCategory(msg, bot) {
 	});
 };
 
+/**
+ *  * Sends message asking for job hourly rate of job that is being created, saves relevant flag to db for user
+ * @todo: Maybe we can move this to job manager?
+ * @param  {Telegram:Message} msg Message received
+ * @param  {Mongoose:User} user Owner of job
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Mongoose:Job} job Job that should be altered
+ * @param  {Mongoose:Category} category Job's current category
+ */
 function askForNewJobPriceRange(msg, user, bot, job, category) {
 	user.input_state = strings.inputHourlyRateState;
 	user.save((err, user) => {
@@ -183,6 +218,12 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
 	});
 };
 
+/**
+ * Sends message asking for job description of job that is being created, saves relevant flag to db for user
+ * @param  {Telegram:Message} msg Message received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * * @param  {Mongoose:User} user Owner of job
+ */
 function askForNewJobDescription(msg, bot, user) {
 	user.input_state = strings.inputJobDescriptionState;
 	user.save((err, user) => {
@@ -204,6 +245,12 @@ function askForNewJobDescription(msg, bot, user) {
 	});
 };
 
+/**
+ * Cancels job creation, removes job draft and resets user's input state
+ * @param  {Telegram:Message} msg  Message received
+ * @param  {Mongoose:User} user Owner of job
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function cancelJobCreation(msg, user, bot) {
 	user.input_state = undefined;
 	user.job_draft = undefined;
@@ -220,6 +267,13 @@ function cancelJobCreation(msg, user, bot) {
 	});
 };
 
+/**
+ * Creates job draft for user
+ * @param  {String} categoryTitle Title of job's category
+ * @param  {Telegram:message} msg Message received
+ * @param  {Mongoose:User} user Owner of job
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function startJobDraft(categoryTitle, msg, user, bot) {
 	dbmanager.getCategory(categoryTitle, (err, category) => {
 		if (err) {
@@ -250,6 +304,13 @@ function startJobDraft(categoryTitle, msg, user, bot) {
 	});
 };
 
+/**
+ * Adds hourly rate to job draft and sends next step
+ * @param {String} hourlyRate Picked hourly rate
+ * @param {Telegram:Message} msg        Message received
+ * @param {Mongoose:User} user       Job owner
+ * @param {Telegram:Bot} bot        Bot that should respond
+ */
 function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
 	user.job_draft.hourly_rate = hourlyRate;
 	user.job_draft.save((err, draft) => {
@@ -261,6 +322,13 @@ function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
 	})
 };
 
+/**
+ * Adds desctiption to job draft and sends next step
+ * @param {String} description Description of job
+ * @param {Telegram:Message} msg        Message received
+ * @param {Mongoose:User} user       Job owner
+ * @param {Telegram:Bot} bot        Bot that should respond
+ */
 function addDescriptionToJobDraft(description, msg, user, bot) {
 	user.job_draft.description = description;
 	let jobDraft = user.job_draft;
