@@ -92,10 +92,15 @@ module.exports = {
 	freelancerOptions: {
 		interested: 'Interested',
 		notInterested: 'Not interested',
-		//report: 'Report'
+		report: 'Report'
 	},
 	freelancerAcceptOptions: {
 		accept: 'Accept',
-		refuse: 'Refuse'
+		refuse: 'Refuse',
+		report: 'Report'
+	},
+	jobFinishedOptions: {
+		rate: 'Rate',
+		report: 'Report'
 	}
 };

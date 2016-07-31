@@ -255,7 +255,7 @@ function freelancersForJob(job, callback) {
  * @param  {Mongo:Object id} job Job id object for which freelancers are returned
  * @param  {Function} callback Callback (freelancers) that is called when users are obtained from db
  */
-function freelancersForJobId(id, callback) {
+function freelancersForJobId(jobId, callback) {
 	findJobById(jobId, job => {
 		freelancersForJob(job, users => {
 			callback(users);	
