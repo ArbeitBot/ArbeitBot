@@ -1,3 +1,7 @@
+/**
+ * Used to initialize Telegam bot
+ */
+
 let telegram = require('telegram-bot-api');
 let config = require('../config');
 
