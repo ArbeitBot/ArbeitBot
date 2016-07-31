@@ -289,8 +289,7 @@ function addReview(review, callback) {
 		} else if (dbReviewObject) {
 			callback(null, dbReviewObject);
 		} else {
-			let reviewObject = new Review(user);
-			reviewObject.save(callback);
+			review.save(callback);
 		}
 	});
 }

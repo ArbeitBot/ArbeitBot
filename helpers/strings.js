@@ -30,6 +30,11 @@ module.exports = {
 	waitContractorResponseMessage: 'waitContractorResponseMessage',
 	waitClientResponseMessage: 'waitClientResponseMessage',
 	contactWithFreelancerMessage: 'contactWithFreelancerMessage',
+	rateFreelancerMessage: 'rateFreelancerMessage',
+	rateClientMessage: 'rateClientMessage',
+	reviewFreelancerMessage: 'reviewFreelancerMessage',
+	reviewClientMessage: 'reviewClientMessage',
+	thanksReviewMessage: 'thanksReviewMessage',
 	clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
 	mainMenuOptions: {
 		findJobs: 'Find work',
@@ -86,10 +91,15 @@ module.exports = {
 	acceptOption: '✅',
 	refuseOption: '❌',
 	pendingOption: '🕒',
+	saveReviewOption: 'saveReview',
 	jobStates: {
 		searchingForFreelancer: 'searchingForFreelancer',
 		freelancerChosen: 'freelancerChosen',
 		finished: 'finished'
+	},
+	reviewStates: {
+		rate: 'rate',
+		review: 'review'
 	},
 	reviewTypes: {
 		byClient: 'byClient',
@@ -107,5 +117,17 @@ module.exports = {
 	jobFinishedOptions: {
 		rate: 'Rate',
 		report: 'Report'
+	},
+	rateOptions: {
+		back: '🔙 Back',
+		oneStar: '⭐️',
+		twoStars: '⭐️⭐️',
+		threeStars: '⭐️⭐️⭐️',
+		fourStars: '⭐️⭐️⭐️⭐️',
+		fiveStars: '⭐️⭐️⭐️⭐️⭐️',
+	},
+	reviewOptions: {
+		review: 'Review',
+		no: 'No'
 	}
 };
