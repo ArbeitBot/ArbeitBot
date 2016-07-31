@@ -9,6 +9,12 @@ var userSchema = new Schema({
   bio: String,
   hourly_rate: String,
   input_state: String,
+  reviews: [{
+    type: Schema.ObjectId,
+    ref: 'review',
+    required: true,
+    default: []
+  }],
   busy: {
     type: Boolean,
     required: true,

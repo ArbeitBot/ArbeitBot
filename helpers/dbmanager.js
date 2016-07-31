@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 var User = mongoose.model('user');
 var Category = mongoose.model('category');
 var Job = mongoose.model('job');
+var Review = mongoose.model('review');
 
 // User
 
@@ -20,7 +21,7 @@ function getUser(chatId, callback) {
 	User.findOne({ id: chatId })
 	.populate(['categories', 'jobs', 'job_draft'])
 	.exec(callback);
-};
+}
 
 /**
  * Getting a user with search querry from mongo db, populates 'categories', 'jobs' and 'job_draft'
@@ -37,7 +38,7 @@ function findUser(query, callback) {
 			callback(user);
 		}
 	});
-};
+}
 
 /**
  * Get user from mongo by id, populates 'categories', 'jobs' and 'job_draft'
@@ -54,7 +55,7 @@ function findUserById(id, callback) {
 			callback(user);
 		}
 	});
-};
+}
 
 /**
  * Add user object to mongo db; returns existing user if user with the same 'id' field exists or creates a new one from user parameter
@@ -72,7 +73,7 @@ function addUser(user, callback) {
 			userObject.save(callback);
 		}
 	});
-};
+}
 
 /**
  * Changes user's busy field to true or false
@@ -90,7 +91,7 @@ function toggleUserAvailability(chatId, callback) {
 			// todo: handle if user isn't there
 		}
 	});
-};
+}
 
 /**
  * Adds or removes user to or from the specified category
@@ -157,7 +158,7 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
 			// todo: handle is user isn't there
 		}
 	});
-};
+}
 
 // Categories
 
@@ -182,7 +183,7 @@ function getCategory(categoryTitle, callback) {
 		}
 	})
 	.exec(callback);
-};
+}
 
 /**
  * Get all categories from db; populates 'freelancers', returns only freelancers available for work and with full profile, sorts them by name for now
@@ -205,7 +206,7 @@ function getCategories(callback) {
 		}
 	})
 	.exec(callback);
-};
+}
 
 // Jobs
 
@@ -225,7 +226,7 @@ function findJobById(id, callback, populate) {
 			callback(job);
 		}
 	})
-};
+}
 
 /**
  * Gets a list of available freelancers for job
@@ -248,11 +249,11 @@ function freelancersForJob(job, callback) {
 			callback(users);
 		}
 	});
-};
+}
 
 /**
  * Gets a list of available freelancers for job
- * @param  {Mongo:Object id} job Job id object for which freelancers are returned
+ * @param  {Mongo:Object id} jobId Job id object for which freelancers are returned
  * @param  {Function} callback Callback (freelancers) that is called when users are obtained from db
  */
 function freelancersForJobId(jobId, callback) {
@@ -265,23 +266,53 @@ function freelancersForJobId(jobId, callback) {
 			callback(null);
 		}
 	});
-};
+}
+
+// Review
+
+function findReviewById(id, callback, populate) {
+	Review.findById(id)
+	.populate(populate || '')
+	.exec((err, job) => {
+		if (err) {
+			// todo: handle error
+		} else {
+			callback(job);
+		}
+	})
+}
+
+function addReview(review, callback) {
+	findReviewById(review._id, (err, dbReviewObject) => {
+		if (err) {
+			callback(err);
+		} else if (dbReviewObject) {
+			callback(null, dbReviewObject);
+		} else {
+			let reviewObject = new Review(user);
+			reviewObject.save(callback);
+		}
+	});
+}
 
 // Export
 
 module.exports = {
-  // User
-  getUser,
-  findUser,
-  findUserById,
-  addUser,
-  toggleUserAvailability,
-  toggleCategoryForUser,
-  // Categories
-  getCategory,
-  getCategories,
-  // Jobs
-  findJobById,
-  freelancersForJob,
-  freelancersForJobId
+	// User
+	getUser,
+	findUser,
+	findUserById,
+	addUser,
+	toggleUserAvailability,
+	toggleCategoryForUser,
+	// Categories
+	getCategory,
+	getCategories,
+	// Jobs
+	findJobById,
+	freelancersForJob,
+	freelancersForJobId,
+	//Review
+	findReviewById,
+	addReview
 };

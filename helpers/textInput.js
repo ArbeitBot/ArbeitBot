@@ -187,7 +187,7 @@ function askForNewJobCategory(msg, bot) {
 };
 
 /**
- *  * Sends message asking for job hourly rate of job that is being created, saves relevant flag to db for user
+ * Sends message asking for job hourly rate of job that is being created, saves relevant flag to db for user
  * @todo: Maybe we can move this to job manager?
  * @param  {Telegram:Message} msg Message received
  * @param  {Mongoose:User} user Owner of job
