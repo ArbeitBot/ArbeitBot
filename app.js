@@ -16,4 +16,5 @@ fs.readdirSync(path.join(__dirname, '/models')).forEach(function(filename) {
 
 // start bot
 require('./helpers/logic');
+// print a message to assure that bot is up and running
 console.log('Bot is up and running!');
