@@ -257,9 +257,13 @@ function freelancersForJob(job, callback) {
  */
 function freelancersForJobId(jobId, callback) {
 	findJobById(jobId, job => {
-		freelancersForJob(job, users => {
-			callback(users);	
-		});
+		if (job) {
+			freelancersForJob(job, users => {
+				callback(users);
+			});
+		} else {
+			callback(null);
+		}
 	});
 };
 

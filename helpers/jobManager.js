@@ -133,27 +133,23 @@ function sendUsersJobOffer(bot, users, job) {
 	} else if (job.state === strings.jobStates.searchingForFreelancer) {
 		for (let i in users) {
 			let user = users[i];
-
-			let keyboard = [];
-			let keys = Object.keys(strings.freelancerOptions);
-			for (let j in keys) {
-				let option = strings.freelancerOptions[keys[j]];
-				keyboard.push([{
-					text: option,
-					callback_data:
-					strings.freelancerJobInline +
-					strings.inlineSeparator +
-					job._id +
-					strings.inlineSeparator +
-					option +
-					strings.inlineSeparator +
-					user.username
-				}]);
-			}
-			keyboards.sendInline(bot,
-				user.id,
-				job.description,
-				keyboard);
+				let keyboard = [];
+				let keys = Object.keys(strings.freelancerOptions);
+				for (let j in keys) {
+					let option = strings.freelancerOptions[keys[j]];
+					keyboard.push([{
+						text: option,
+						callback_data:
+						strings.freelancerJobInline +
+						strings.inlineSeparator +
+						job._id +
+						strings.inlineSeparator +
+						option +
+						strings.inlineSeparator +
+						user.username
+					}]);
+				}
+				keyboards.sendInline(bot, user.id, job.description, keyboard);
 		}
 	} else if (job.state === strings.jobStates.freelancerChosen) {
 		let user = users[0];
@@ -214,17 +210,24 @@ function showSelectFreelancers(msg, job, bot) {
 
 function addFreelancersToCandidates(jobId, users, msg, bot, job) {
 	function jobCallback(job) {
-		job.current_inline_chat_id = msg.message.chat.id;
-		job.current_inline_message_id = msg.message.message_id;
-		users.forEach(user => job.candidates.push(user));
-		job.save((err, newJob) => {
-			if (err) {
-				// todo: handle error
-			} else {
-				sendUsersJobOffer(bot, users, newJob);
-				updateJobMessage(newJob, bot);
-			}
-		});
+		if (job) {
+			users = users.filter((user) => {
+				return !job.candidates || (job.candidates.indexOf(user._id) === -1 && job.interestedCandidates.indexOf(user._id) === -1 && job.notInterestedCandidates.indexOf(user._id) === -1);
+			});
+			job.current_inline_chat_id = msg.message.chat.id;
+			job.current_inline_message_id = msg.message.message_id;
+			users.forEach(user => job.candidates.push(user));
+			job.save((err, newJob) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					sendUsersJobOffer(bot, users, newJob);
+					updateJobMessage(newJob, bot);
+				}
+			});
+		} else {
+			// todo: handle error
+		}
 	}
 	if (job) {
 		jobCallback(job);
@@ -293,7 +296,11 @@ function updateJobMessageForSearch(job, bot) {
 		};
 		send.reply_markup = JSON.stringify(send.reply_markup);
 		bot.editMessageText(send)
-		.catch(err => console.log(err));
+		.catch(err => {
+			if (err.error.description !== 'Bad Request: message is not modified') {
+				console.log(err);
+			}
+		});
 	}
 
 	dbmanager.freelancersForJob(job, users => {
@@ -320,7 +327,11 @@ function updateJobMessageForSelected(job, bot) {
 	};
 	send.reply_markup = JSON.stringify(send.reply_markup);
 	bot.editMessageText(send)
-	.catch(err => console.log(err));
+	.catch(err => {
+		if (err.error.description !== 'Bad Request: message is not modified') {
+			console.log(err);
+		}
+	});
 }
 
 function updateJobMessageForFinished(job, bot) {
@@ -352,7 +363,11 @@ function updateJobMessageForFinished(job, bot) {
 		};
 		send.reply_markup = JSON.stringify(send.reply_markup);
 		bot.editMessageText(send)
-		.catch(err => console.log(err));
+		.catch(err => {
+			if (err.error.description !== 'Bad Request: message is not modified') {
+				console.log(err);
+			}
+		});
 	});
 }
 
@@ -545,7 +560,11 @@ function updateFreelancerMessageForSearch(bot, msg, user, job) {
 
 	send.reply_markup = JSON.stringify(send.reply_markup);
 	bot.editMessageText(send)
-	.catch(err => console.log(err));
+	.catch(err => {
+		if (err.error.description !== 'Bad Request: message is not modified') {
+			console.log(err);
+		}
+	});
 }
 
 function updateFreelancerMessageForSelected(bot, msg, user, job) {
@@ -563,7 +582,11 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
 
 		send.reply_markup = JSON.stringify(send.reply_markup);
 		bot.editMessageText(send)
-		.catch(err => console.log(err))
+		.catch(err => {
+			if (err.error.description !== 'Bad Request: message is not modified') {
+				console.log(err);
+			}
+		})
 		.then(data => {
 			job.freelancer_inline_chat_id = data.chat.id;
 			job.freelancer_inline_message_id = data.message_id;
@@ -612,7 +635,11 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
 
 	send.reply_markup = JSON.stringify(send.reply_markup);
 	bot.editMessageText(send)
-	.catch(err => console.log(err));
+	.catch(err => {
+		if (err.error.description !== 'Bad Request: message is not modified') {
+			console.log(err);
+		}
+	});
 
 	updateJobMessage(job, bot);
 }
