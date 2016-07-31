@@ -1,7 +1,7 @@
 /**
  * Arbeit Telergam Bot executable file; loads all mongoose models and starts logic.js
  */
-
+require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');

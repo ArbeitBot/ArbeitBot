@@ -8,7 +8,7 @@ var categorySchema = new Schema({
     ref: 'user',
     required: true,
     default: []
-  }], 
+  }]
 });
 
 mongoose.model('category', categorySchema);
