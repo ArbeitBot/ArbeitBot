@@ -61,6 +61,12 @@ function handleClientInline(bot, msg) {
 		dbmanager.findJobById(jobId, job => {
 			showSelectFreelancers(msg, job, bot);
 		}, 'interestedCandidates');
+	} else if (freelancerId === strings.jobFinishedOptions.report) {
+		dbmanager.findJobById(jobId, job => {
+			dbmanager.findUserById(options[3], user => {
+				reportFreelancer(bot, msg, job, user);
+			});
+		});
 	} else {
 		dbmanager.findUserById(freelancerId, user => {
 			addFreelancersToCandidates(jobId, [user], msg, bot);
@@ -102,7 +108,7 @@ function handleFreelancerAnswerInline(bot, msg) {
 			} else if (answer === strings.freelancerOptions.notInterested) {
 				makeInterested(false, bot, msg, job, user);
 			} else if (answer === strings.freelancerOptions.report) {
-				reportJob(bot, msg, job, user);
+				reportClient(bot, msg, job, user);
 			} else if (answer === strings.freelancerAcceptOptions.accept) {
 				makeAccepted(true, bot, msg, job, user);
 			} else if (answer === strings.freelancerAcceptOptions.refuse) {
@@ -206,6 +212,10 @@ function showSelectFreelancers(msg, job, bot) {
 		}),
 		text: strings.selectCandidateMessage
 	}).catch(err => console.log(err));
+}
+
+function reportFreelancer(bot, msg, job, user) {
+	//  todo: handle report
 }
 
 // Management freelancers
@@ -340,11 +350,11 @@ function updateJobMessageForFinished(job, bot) {
 	dbmanager.findUserById(job.selectedCandidate, user => {
 		let keyboard = [[{
 				text: strings.jobFinishedOptions.rate,
-				callback_data: strings.freelancerInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + user.username
+				callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + job._id + strings.inlineSeparator + user._id
 			},
 			{
 				text: strings.jobFinishedOptions.report,
-				callback_data: strings.freelancerInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + user.username
+				callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + job._id + strings.inlineSeparator + user._id
 			}
 		]];
 
@@ -530,7 +540,7 @@ function reviewClient(bot, msg, job, user) {
 	}*/
 }
 
-function reportJob(bot, msg, job, user) {
+function reportClient(bot, msg, job, user) {
 	//  todo: handle report
 }
 
