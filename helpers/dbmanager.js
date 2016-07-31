@@ -270,26 +270,36 @@ function freelancersForJobId(jobId, callback) {
 
 // Review
 
+/**
+ * Get review by id
+ * @param  {Mongo:ObjectId}   id       Id of review to retrieve
+ * @param  {Function} callback Callback (review) that is called upon obtaining of the review from db
+ * @param  {JS Object or String}   populate Option to populate fields in query result
+ */
 function findReviewById(id, callback, populate) {
 	Review.findById(id)
 	.populate(populate || '')
-	.exec((err, job) => {
+	.exec((err, review) => {
 		if (err) {
 			// todo: handle error
 		} else {
-			callback(job);
+			callback(review);
 		}
 	})
 }
 
+/**
+ * Add review object
+ * @param {JS Object}   review   Review template to add to db
+ * @param {Function} callback Callback (review) that's called when review is added to db
+ */
 function addReview(review, callback) {
-	findReviewById(review._id, (err, dbReviewObject) => {
+	const reviewObject = new Review(review);
+	reviewObject.save((err, newReviewObject) => {
 		if (err) {
-			callback(err);
-		} else if (dbReviewObject) {
-			callback(null, dbReviewObject);
+			// todo: handle error
 		} else {
-			review.save(callback);
+			callback(newReviewObject);
 		}
 	});
 }

@@ -6,10 +6,6 @@
 
 let keyboards = require('./keyboards');
 let dbmanager = require('./dbmanager');
-let mongoose = require('mongoose');
-let Job = mongoose.model('job');
-let User = mongoose.model('user');
-var Review = mongoose.model('review');
 let strings = require('./strings');
 
 // Main functions
@@ -569,51 +565,46 @@ function reviewClient(data, bot, msg, job, user) {
 			//todo
 			//user.input_state === strings.reviewStates.review;
 		} else if (data === strings.reviewOptions.no || data === strings.saveReviewOption) {
-			let reviewObject = new Review({
+			let reviewObject = {
 				byUser: user._id,
 				job: job._id,
 				rate: user.input_state_data,
 				review: '',
 				reviewType: strings.reviewTypes.byFreelancer
-			});
-			dbmanager.addReview(reviewObject, (err, dbReviewObject) => {
-
-				if (err) {
-					// todo: handle error
-				} else {
-					dbmanager.findUserById(job.client, client => {
-						client.reviews.push(dbReviewObject._id);
-						client.save((err, client) => {
-							if (err) {
-								// todo: handle error
-							} else {
-								user.input_state = null;
-								user.input_state_data = null;
-								user.save((err, user) => {
-									if (err) {
-										// todo: handle error
-									} else {
-										let send = {
-											chat_id: job.freelancer_inline_chat_id,
-											message_id: job.freelancer_inline_message_id,
-											text: strings.thanksReviewMessage,
-											reply_markup: {
-												inline_keyboard: []
-											}
-										};
-										send.reply_markup = JSON.stringify(send.reply_markup);
-										bot.editMessageText(send)
-										.catch(err => {
-											if (err.error.description !== 'Bad Request: message is not modified') {
-												console.log(err);
-											}
-										});
-									}
-								});
-							}
-						});
+			};
+			dbmanager.addReview(reviewObject, dbReviewObject => {
+				dbmanager.findUserById(job.client, client => {
+					client.reviews.push(dbReviewObject._id);
+					client.save((err, client) => {
+						if (err) {
+							// todo: handle error
+						} else {
+							user.input_state = null;
+							user.input_state_data = null;
+							user.save((err, user) => {
+								if (err) {
+									// todo: handle error
+								} else {
+									let send = {
+										chat_id: job.freelancer_inline_chat_id,
+										message_id: job.freelancer_inline_message_id,
+										text: strings.thanksReviewMessage,
+										reply_markup: {
+											inline_keyboard: []
+										}
+									};
+									send.reply_markup = JSON.stringify(send.reply_markup);
+									bot.editMessageText(send)
+									.catch(err => {
+										if (err.error.description !== 'Bad Request: message is not modified') {
+											console.log(err);
+										}
+									});
+								}
+							});
+						}
 					});
-				}
+				});
 			});
 		} else {
 			let rate = 0;
