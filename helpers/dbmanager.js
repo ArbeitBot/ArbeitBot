@@ -23,7 +23,7 @@ function getUser(chatId, callback) {
 };
 
 /**
- * Getting a user with search querry from mongo db
+ * Getting a user with search querry from mongo db, populates 'categories', 'jobs' and 'job_draft'
  * @param  {Mongo:SearchQuery} query Search query to find user
  * @param  {Function} callback Function (user) that is called when user is obtained from db
  */
@@ -39,6 +39,11 @@ function findUser(query, callback) {
 	});
 };
 
+/**
+ * Get user from mongo by id, populates 'categories', 'jobs' and 'job_draft'
+ * @param  {Mongo:ObjectId} id User id from mongo db
+ * @param  {Function} callback Callback function (user) that is called when user is obtained from db
+ */
 function findUserById(id, callback) {
 	User.findById(id)
 	.populate(['categories', 'jobs', 'job_draft'])
@@ -51,6 +56,11 @@ function findUserById(id, callback) {
 	});
 };
 
+/**
+ * Add user object to mongo db; returns existing user if user with the same 'id' field exists or creates a new one from user parameter
+ * @param {Object} user Javascript object with fields for new user
+ * @param {Function} callback Callback (user) that is called when user is added to db or retrieved from db
+ */
 function addUser(user, callback) {
 	getUser(user.id, (err, dbuserObject) => {
 		if (err) {
@@ -64,6 +74,11 @@ function addUser(user, callback) {
 	});
 };
 
+/**
+ * Changes user's busy field to true or false
+ * @param  {Number} chatId Chat id of user that should have busy status toggled
+ * @param  {Function} callback Callback (err, user) that is called when user's busy status is toggled
+ */
 function toggleUserAvailability(chatId, callback) {
 	getUser(chatId, (err, user) => {
 		if (err) {
@@ -77,6 +92,12 @@ function toggleUserAvailability(chatId, callback) {
 	});
 };
 
+/**
+ * Adds or removes user to or from the specified category
+ * @param  {Number}   chatId     Chat id of user that should have category added\removed
+ * @param  {Mongo:ObjectId}   categoryId Id of category that should be added\removed to\from user
+ * @param  {Function} callback   Callback (err, user, addedCategory) that is called when category is added or removed; addedCategory specifies if category was added or removed (boolean), can't remember if it returns true or false when category is added
+ */
 function toggleCategoryForUser(chatId, categoryId, callback) {
 	function findCategoryCallback(category, user) {
 		var index = -1;
@@ -140,6 +161,11 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
 
 // Categories
 
+/**
+ * Get category by it's title; populates 'freelancers', returns only freelancers available for work and with full profile, sorts them by name for now
+ * @param  {String}   categoryTitle Category title
+ * @param  {Function} callback      Callback (err, category) that is called upon obtaining category from db
+ */
 function getCategory(categoryTitle, callback) {
 	Category.findOne({ title: categoryTitle })
 	.populate({
@@ -158,6 +184,10 @@ function getCategory(categoryTitle, callback) {
 	.exec(callback);
 };
 
+/**
+ * Get all categories from db; populates 'freelancers', returns only freelancers available for work and with full profile, sorts them by name for now
+ * @param {Function} callback Callback (err, categories) that is called upon obtaining categories from db
+ */
 function getCategories(callback) {
 	Category.find({})
 	.sort('title')
@@ -179,6 +209,12 @@ function getCategories(callback) {
 
 // Jobs
 
+/**
+ * Getting job from db by it's id
+ * @param  {Mongo:ObjectId} id Id of job to get
+ * @param  {Function} callback Callback (job) that is called when job is obtained from db
+ * @param  {JS Object} populate Can be String or usual JS object, this is passed to .populate()
+ */
 function findJobById(id, callback, populate) {
 	Job.findById(id)
 	.populate(populate || '')
@@ -191,6 +227,11 @@ function findJobById(id, callback, populate) {
 	})
 };
 
+/**
+ * Gets a list of available freelancers for job
+ * @param  {Mongo:Job} job Job object for which freelancers are returned
+ * @param  {Function} callback Callback (freelancers) that is called when users are obtained from db
+ */
 function freelancersForJob(job, callback) {
 	User.find({ $and: [
 				{ categories: job.category },
@@ -209,6 +250,11 @@ function freelancersForJob(job, callback) {
 	});
 };
 
+/**
+ * Gets a list of available freelancers for job
+ * @param  {Mongo:Object id} job Job id object for which freelancers are returned
+ * @param  {Function} callback Callback (freelancers) that is called when users are obtained from db
+ */
 function freelancersForJobId(id, callback) {
 	findJobById(jobId, job => {
 		freelancersForJob(job, users => {
