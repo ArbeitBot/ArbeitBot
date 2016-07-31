@@ -1,6 +1,5 @@
 /**
  * File that should handle all keyboards creations and functions (ideally)
- * Please see docs/job_process.txt
  */
 
 let strings = require('./strings');

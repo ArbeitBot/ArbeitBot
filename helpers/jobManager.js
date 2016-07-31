@@ -1,3 +1,9 @@
+/**
+ * Handles thw whole life cycle of job after creation: from showing a list 
+ * of available freelancers to client to rating client and freelancer
+ * Please see docs/job_process.txt to get better idea on job life cycle
+ */
+
 let keyboards = require('./keyboards');
 let dbmanager = require('./dbmanager');
 let mongoose = require('mongoose');
@@ -7,6 +13,12 @@ let strings = require('./strings');
 
 // Main functions
 
+/**
+ * Sending a message to client after job has been created; message includes inline with freelancers available and suitalbe for this job
+ * @param  {Mongoose:User} user Owner of this job
+ * @param  {Telegram:Bot} bot  Bot that should send message
+ * @param  {Mongoose:Job} job  Relevant job
+ */
 function sendJobCreatedMessage(user, bot, job) {
 	// todo: handle if user doesn't have username
 	function sendKeyboard(freelancers) {
@@ -28,6 +40,11 @@ function sendJobCreatedMessage(user, bot, job) {
 	});
 }
 
+/**
+ * Handles case when client selects a freelancer (that should receive a job offer from client later on) from the list of available freelancers; also handles option when sending to all freelancers
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
 function handleClientInline(bot, msg) {
 	// Get essential info
 	let options = msg.data.split(strings.inlineSeparator);
@@ -49,6 +66,11 @@ function handleClientInline(bot, msg) {
 	}
 }
 
+/**
+ * Handles case when freelancer should be selected for job from client
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
 function handleSelectFreelancerInline(bot, msg) {
 	// Get essential info
 	let freelancerId = msg.data.split(strings.inlineSeparator)[1];
