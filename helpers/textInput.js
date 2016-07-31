@@ -381,6 +381,9 @@ function completeReport(reportMessage, msg, user, bot) {
   dbmanager.findJobById(jobId, job => {
     // Обновить обьект job добавив туда новый Report
     job.reports.push(report);
+    if (job.reports.length >= 2) {
+      job.state = strings.jobStates.frozen;
+    }
     job.reportedBy.push(user._id);
     job.save();
     
@@ -394,13 +397,13 @@ function completeReport(reportMessage, msg, user, bot) {
     });
     bot.sendMessage({
       chat_id: msg.from.id,
-      text: 'Спасибо за вашу бдительность!'
+      text: strings.report.thanks
     });
     console.log('New report here!')
   })
 }
-// Exports
 
+// Exports
 module.exports = {
 	check: check,
 	handle: handle,
