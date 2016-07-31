@@ -1,13 +1,25 @@
+/**
+ * Used to send hourly rate picker to freelancers as inlines and to handle answers to those inlines
+ */
+
 let keyboards = require('./keyboards');
 let dbmanager = require('./dbmanager');
 let strings = require('./strings');
 
-let pageSize = 8;
-
+/**
+ * Handles inline answers from users
+ * @param  {Telegram:Bot} bot Bot that should edit or send hourly rate keyboard
+ * @param  {Telegram:Message} msg Message that came along with inline button click
+ */
 function handleInline(bot, msg) {
 	editHourlyRate(bot, msg);
 };
 
+/**
+ * Sends initial message with hourly rate picker inline
+ * @param  {Telegram:Bot} bot Bot that should send message and inline
+ * @param  {Number} chatId Chat id of user who should receive inline
+ */
 function sendHourlyRate(bot, chatId) {
 	dbmanager.getUser(chatId, (err, user) => {
 		if (err) {
@@ -26,6 +38,11 @@ function sendHourlyRate(bot, chatId) {
 	});
 };
 
+/**
+ * Used to edit existing message with inline of user who has changed his hourly rate
+ * @param  {Telegram:Bot} bot Bot that should edit message
+ * @param  {Telegram:Message} msg Message that came along with inline button click
+ */
 function editHourlyRate(bot, msg) {
 	let command = msg.data.split(strings.inlineSeparator)[1];
 
@@ -70,6 +87,12 @@ function editHourlyRate(bot, msg) {
 	});
 };
 
+/**
+ * Gets hourly rate inline keyboard for freelancer; highlights hourly rate that is currently selected
+ * @param  {Mongoose:User} user User that should receive keyboard later
+ * @param  {[String]} hourlyRates A list of all hourly rates that should be shown to user
+ * @return {Telegram:Inline} Inline keyboard that gets created depending on user's picked hourly rate
+ */
 function hourlyRateKeyboard(user, hourlyRates) {
 	let hourlyRate = user.hourly_rate;
 

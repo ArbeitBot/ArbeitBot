@@ -1,9 +1,18 @@
+/**
+ * Category picker is a file that manages category picking for freelancers through inline keyboards
+ */
+
 let keyboards = require('./keyboards');
 let dbmanager = require('./dbmanager');
 let strings = require('./strings');
 
 let pageSize = 8;
 
+/**
+ * Handles incoming message that's send when user selects an inline button
+ * @param  {Telegram:Bot} bot Bot that should send a response to this action
+ * @param  {Telegram:Message} msg Message that was received upon clicking an inline button
+ */
 function handleInline(bot, msg) {
 	let command = msg.data.split(strings.inlineSeparator)[1];
 	let page = parseInt(msg.data.split(strings.inlineSeparator)[2]);
@@ -31,6 +40,11 @@ function handleInline(bot, msg) {
 	}
 };
 
+/**
+ * Sends freelancer list of categories with inline buttons to pick categories
+ * @param  {Telegram:Bot} bot Bot that should send keyboard
+ * @param  {Number} chatId Chat id of user that should receive keyboard
+ */
 function sendCategories(bot, chatId) {
 	dbmanager.getUser(chatId, (err, user) => {
 		if (err) {
@@ -51,6 +65,12 @@ function sendCategories(bot, chatId) {
 	});
 };
 
+/**
+ * Callback function that is used when user and categories are obtained from Mongo DB – triggers sending of categories picker to user
+ * @param  {[Mongoose:Category]} categories A list of categories that should be available for picking
+ * @param  {Mongoose:User} user User that should receive a keyboard
+ * @param  {Telegram:Bot} bot Bot that should send a keyboard
+ */
 function getCategoriesCallback(categories, user, bot) {
 	let keyboard = categoriesKeyboard(categories, user, 0);
 
@@ -61,6 +81,12 @@ function getCategoriesCallback(categories, user, bot) {
 		keyboard);
 };
 
+/**
+ * Edits message and it's inline buttons for category picker message – mainly used for paging and if we need to update message with category picker
+ * @param  {Telegram:Bot} bot Bot that should edit message
+ * @param  {Telegram:Message} msg Message that should be editted, usually obtained with inline button click callback
+ * @param  {Number} page Page of the list of categories that should be displayed
+ */
 function editPage(bot, msg, page) {
 	function getCategoriesCallback(categories, user) {
 		var send = {
@@ -98,6 +124,13 @@ function editPage(bot, msg, page) {
 	});
 };
 
+/**
+ * Returns inline keyboard for freelancer; decorates it with checkmark if category is picked, supports multiple categories to be picked; shows picked categories on top of the list; supports paging
+ * @param  {[Mongoose:Category]} categories A list of all categories that should be shown
+ * @param  {Mongoose:User} user User that requested keyboards
+ * @param  {Number} page Page for which the keyboard should be sent; i.e. page 1 will return categories 0 through pageSize, page 2 will return pages pageSize through pageSize*2
+ * @return {Telegram:InlineKeyboard} Keyboard with paging buttons if required and a list of categories with picked indicator for specified user
+ */
 function categoriesKeyboard(categories, user, page) {
 	var categoriesLeft = [];
 	for (var i in categories) {

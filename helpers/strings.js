@@ -1,3 +1,7 @@
+/**
+ * Storage for all the strings in project; change once, use everywhere ;)
+ */
+
 module.exports = {
 	mainMenuMessage: 'Welcome to @arbeit_bot! I am a completelly free of charge Telegram based freelance market. Please select whether you are looking for job or contractors.',
 	clientMenuMessage: 'What would you like to do?',
