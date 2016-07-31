@@ -107,6 +107,8 @@ function handleFreelancerAnswerInline(bot, msg) {
 				makeAccepted(true, bot, msg, job, user);
 			} else if (answer === strings.freelancerAcceptOptions.refuse) {
 				makeAccepted(false, bot, msg, job, user);
+			} else if (answer === strings.jobFinishedOptions.rate) {
+				reviewClient(bot, msg, job, user);
 			}
 		});
 	});
@@ -336,22 +338,15 @@ function updateJobMessageForSelected(job, bot) {
 
 function updateJobMessageForFinished(job, bot) {
 	dbmanager.findUserById(job.selectedCandidate, user => {
-		let keyboard = [];
-		let keys = Object.keys(strings.jobFinishedOptions);
-		for (let i in keys) {
-			let option = strings.jobFinishedOptions[keys[i]];
-			keyboard.push([{
-				text: option,
-				callback_data:
-				strings.freelancerInline +
-				strings.inlineSeparator +
-				job._id +
-				strings.inlineSeparator +
-				option +
-				strings.inlineSeparator +
-				user.username
-			}]);
-		}
+		let keyboard = [[{
+				text: strings.jobFinishedOptions.rate,
+				callback_data: strings.freelancerInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + user.username
+			},
+			{
+				text: strings.jobFinishedOptions.report,
+				callback_data: strings.freelancerInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + user.username
+			}
+		]];
 
 		let send = {
 			chat_id: job.current_inline_chat_id,
@@ -525,6 +520,16 @@ function makeAccepted(accept, bot, msg, job, user) {
 	}
 }
 
+function reviewClient(bot, msg, job, user) {
+
+	/*
+	if ('' === strings.rateClientFreelancerInline) {
+
+	} else if ('' === strings.reviewClientFreelancerInline) {
+
+	}*/
+}
+
 function reportJob(bot, msg, job, user) {
 	//  todo: handle report
 }
@@ -607,22 +612,15 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
 function updateFreelancerMessageForFinished(bot, msg, user, job) {
 	let prefix = `${strings.acceptOption} ${strings.freelancerAcceptOptions.accept}\n${strings.waitClientResponseMessage}`;
 
-	let keyboard = [];
-	let keys = Object.keys(strings.jobFinishedOptions);
-	for (let i in keys) {
-		let option = strings.jobFinishedOptions[keys[i]];
-		keyboard.push([{
-			text: option,
-			callback_data:
-			strings.freelancerJobInline +
-			strings.inlineSeparator +
-			job._id +
-			strings.inlineSeparator +
-			option +
-			strings.inlineSeparator +
-			user.username
-		}]);
-	}
+	let keyboard = [[{
+			text: strings.jobFinishedOptions.rate,
+			callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + user.username
+		},
+		{
+			text: strings.jobFinishedOptions.report,
+			callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + user.username
+		}
+	]];
 
 	let send = {
 		chat_id: msg.message.chat.id,

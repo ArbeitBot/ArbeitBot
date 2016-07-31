@@ -69,6 +69,8 @@ module.exports = {
 	freelancerJobInline: 'fJI',
 	selectFreelancerInline: 'sFI',
 	selectAnotherFreelancerInline: 'sAFI',
+	rateClientFreelancerInline: 'rCFI',
+	reviewClientFreelancerInline: 'reCFI',
 	completeJobInline: 'cJI',
 	inputBioState: 'inputBioState',
 	inputCategoryNameState: 'inputCategoryNameState',
@@ -88,6 +90,10 @@ module.exports = {
 		searchingForFreelancer: 'searchingForFreelancer',
 		freelancerChosen: 'freelancerChosen',
 		finished: 'finished'
+	},
+	reviewTypes: {
+		byClient: 'byClient',
+		byFreelancer: 'byFreelancer'
 	},
 	freelancerOptions: {
 		interested: 'Interested',
