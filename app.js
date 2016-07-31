@@ -1,6 +1,7 @@
 /**
- * Arbeit Telergam Bot
+ * Arbeit Telergam Bot executable file; loads all mongoose models and starts logic.js
  */
+
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
