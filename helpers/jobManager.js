@@ -9,6 +9,7 @@ let dbmanager = require('./dbmanager');
 let mongoose = require('mongoose');
 let Job = mongoose.model('job');
 let User = mongoose.model('user');
+var Review = mongoose.model('review');
 let strings = require('./strings');
 
 // Main functions
@@ -99,25 +100,34 @@ function handleFreelancerAnswerInline(bot, msg) {
 	let options = msg.data.split(strings.inlineSeparator);
 	let jobId = options[1];
 	let answer = options[2];
-	let freelancerUsername = options[3];
 
-	dbmanager.findJobById(jobId, job => {
-		dbmanager.findUser({ username: freelancerUsername }, user => {
-			if (answer === strings.freelancerOptions.interested) {
-				makeInterested(true, bot, msg, job, user);
-			} else if (answer === strings.freelancerOptions.notInterested) {
-				makeInterested(false, bot, msg, job, user);
-			} else if (answer === strings.freelancerOptions.report) {
-				reportClient(bot, msg, job, user);
-			} else if (answer === strings.freelancerAcceptOptions.accept) {
-				makeAccepted(true, bot, msg, job, user);
-			} else if (answer === strings.freelancerAcceptOptions.refuse) {
-				makeAccepted(false, bot, msg, job, user);
-			} else if (answer === strings.jobFinishedOptions.rate) {
-				reviewClient(bot, msg, job, user);
-			}
+	if (answer === strings.jobFinishedOptions.rate) {
+		let data = options[3];
+
+		dbmanager.findJobById(jobId, job => {
+			dbmanager.findUserById(job.selectedCandidate, user => {
+				reviewClient(data, bot, msg, job, user);
+			});
 		});
-	});
+	} else {
+		let freelancerUsername = options[3];
+
+		dbmanager.findJobById(jobId, job => {
+			dbmanager.findUser({username: freelancerUsername}, user => {
+				if (answer === strings.freelancerOptions.interested) {
+					makeInterested(true, bot, msg, job, user);
+				} else if (answer === strings.freelancerOptions.notInterested) {
+					makeInterested(false, bot, msg, job, user);
+				} else if (answer === strings.freelancerOptions.report) {
+					reportClient(bot, msg, job, user);
+				} else if (answer === strings.freelancerAcceptOptions.accept) {
+					makeAccepted(true, bot, msg, job, user);
+				} else if (answer === strings.freelancerAcceptOptions.refuse) {
+					makeAccepted(false, bot, msg, job, user);
+				}
+			});
+		});
+	}
 }
 
 
@@ -467,33 +477,47 @@ function messageFromFreelancers(users) {
 // Functions
 
 function makeInterested(interested, bot, msg, job, user) {
-	// Remove user from candidates
-	var candIndex = job.candidates.indexOf(user._id);
-	var intIndex = job.interestedCandidates.indexOf(user._id);
-	var notIntIndex = job.notInterestedCandidates.indexOf(user._id);
-	if (candIndex > -1) {
-		job.candidates.splice(candIndex, 1);
-	}
-	if (intIndex > -1) {
-		job.interestedCandidates.splice(intIndex, 1);
-	}
-	if (notIntIndex > -1) {
-		job.notInterestedCandidates.splice(notIntIndex, 1);
-	}
-	// Add user to interesed or not interested
-	if (interested) {
-		job.interestedCandidates.push(user._id);
+	if (job.state !== strings.jobStates.searchingForFreelancer) {
+		var send = {
+			chat_id: msg.from.id,
+			message_id: msg.message.message_id,
+			text: strings.clientHasChosenAnotherFreelancer,
+			reply_markup: {
+				inline_keyboard: []
+			}
+		};
+		send.reply_markup = JSON.stringify(send.reply_markup);
+		bot.editMessageText(send)
+		.catch(err => console.log(err));
 	} else {
-		job.notInterestedCandidates.push(user._id);
-	}
-	job.save((err, newJob) => {
-		if (err) {
-			// todo: handle error
-		} else {
-			updateJobMessage(newJob, bot);
-			updateFreelancerMessage(bot, msg, user, newJob);
+		// Remove user from candidates
+		var candIndex = job.candidates.indexOf(user._id);
+		var intIndex = job.interestedCandidates.indexOf(user._id);
+		var notIntIndex = job.notInterestedCandidates.indexOf(user._id);
+		if (candIndex > -1) {
+			job.candidates.splice(candIndex, 1);
 		}
-	});
+		if (intIndex > -1) {
+			job.interestedCandidates.splice(intIndex, 1);
+		}
+		if (notIntIndex > -1) {
+			job.notInterestedCandidates.splice(notIntIndex, 1);
+		}
+		// Add user to interesed or not interested
+		if (interested) {
+			job.interestedCandidates.push(user._id);
+		} else {
+			job.notInterestedCandidates.push(user._id);
+		}
+		job.save((err, newJob) => {
+			if (err) {
+				// todo: handle error
+			} else {
+				updateJobMessage(newJob, bot);
+				updateFreelancerMessage(bot, msg, user, newJob);
+			}
+		});
+	}
 }
 
 function makeAccepted(accept, bot, msg, job, user) {
@@ -530,14 +554,158 @@ function makeAccepted(accept, bot, msg, job, user) {
 	}
 }
 
-function reviewClient(bot, msg, job, user) {
+function reviewClient(data, bot, msg, job, user) {
+	if (user.input_state === strings.reviewStates.rate) {
+		if (data === strings.rateOptions.back) {
+			user.input_state = null;
+			user.save((err, user) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					updateFreelancerMessage(bot, msg, user, job);
+				}
+			});
+		} else if (data === strings.reviewOptions.review) {
+			//todo
+			//user.input_state === strings.reviewStates.review;
+		} else if (data === strings.reviewOptions.no || data === strings.saveReviewOption) {
+			let reviewObject = new Review({
+				byUser: user._id,
+				job: job._id,
+				rate: user.input_state_data,
+				review: '',
+				reviewType: strings.reviewTypes.byFreelancer
+			});
+			dbmanager.addReview(reviewObject, (err, dbReviewObject) => {
 
-	/*
-	if ('' === strings.rateClientFreelancerInline) {
+				if (err) {
+					// todo: handle error
+				} else {
+					dbmanager.findUserById(job.client, client => {
+						client.reviews.push(dbReviewObject._id);
+						client.save((err, client) => {
+							if (err) {
+								// todo: handle error
+							} else {
+								user.input_state = null;
+								user.input_state_data = null;
+								user.save((err, user) => {
+									if (err) {
+										// todo: handle error
+									} else {
+										let send = {
+											chat_id: job.freelancer_inline_chat_id,
+											message_id: job.freelancer_inline_message_id,
+											text: strings.thanksReviewMessage,
+											reply_markup: {
+												inline_keyboard: []
+											}
+										};
+										send.reply_markup = JSON.stringify(send.reply_markup);
+										bot.editMessageText(send)
+										.catch(err => {
+											if (err.error.description !== 'Bad Request: message is not modified') {
+												console.log(err);
+											}
+										});
+									}
+								});
+							}
+						});
+					});
+				}
+			});
+		} else {
+			let rate = 0;
+			if (data === strings.rateOptions.oneStar) rate = 1;
+			else if (data === strings.rateOptions.twoStars) rate = 2;
+			else if (data === strings.rateOptions.threeStars) rate = 3;
+			else if (data === strings.rateOptions.fourStars) rate = 4;
+			else if (data === strings.rateOptions.fiveStars) rate = 5;
 
-	} else if ('' === strings.reviewClientFreelancerInline) {
+			user.input_state_data = rate;
+			user.save((err, user) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					let keyboard = [];
+					let keys = Object.keys(strings.reviewOptions);
+					for (let j in keys) {
+						let option = strings.reviewOptions[keys[j]];
+						keyboard.push([{
+							text: option,
+							callback_data: strings.freelancerJobInline +
+							strings.inlineSeparator +
+							job._id +
+							strings.inlineSeparator +
+							strings.jobFinishedOptions.rate +
+							strings.inlineSeparator +
+							option
+						}]);
+					}
 
-	}*/
+					let send = {
+						chat_id: job.freelancer_inline_chat_id,
+						message_id: job.freelancer_inline_message_id,
+						text: strings.reviewClientMessage,
+						reply_markup: {
+							inline_keyboard: keyboard
+						}
+					};
+					send.reply_markup = JSON.stringify(send.reply_markup);
+					bot.editMessageText(send)
+					.catch(err => {
+						if (err.error.description !== 'Bad Request: message is not modified') {
+							console.log(err);
+						}
+					});
+				}
+			});
+		}
+	} else if (user.input_state === strings.reviewStates.review) {
+
+	} else {
+		let keyboard = [];
+		let keys = Object.keys(strings.rateOptions);
+		for (let j in keys) {
+			let option = strings.rateOptions[keys[j]];
+			keyboard.push([{
+				text: option,
+				callback_data: strings.freelancerJobInline +
+				strings.inlineSeparator +
+				job._id +
+				strings.inlineSeparator +
+				strings.jobFinishedOptions.rate +
+				strings.inlineSeparator +
+				option
+			}]);
+		}
+
+		let send = {
+			chat_id: job.freelancer_inline_chat_id,
+			message_id: job.freelancer_inline_message_id,
+			text: strings.rateClientMessage,
+			reply_markup: {
+				inline_keyboard: keyboard
+			}
+		};
+		send.reply_markup = JSON.stringify(send.reply_markup);
+
+
+		user.input_state = strings.reviewStates.rate;
+		user.save((err, user) => {
+			if (err) {
+				// todo: handle error
+			} else {
+				bot.editMessageText(send)
+				.catch(err => {
+					if (err.error.description !== 'Bad Request: message is not modified') {
+						console.log(err);
+					}
+				});
+			}
+		});
+	}
 }
 
 function reportClient(bot, msg, job, user) {

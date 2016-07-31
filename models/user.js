@@ -9,6 +9,7 @@ var userSchema = new Schema({
   bio: String,
   hourly_rate: String,
   input_state: String,
+  input_state_data: String,
   reviews: [{
     type: Schema.ObjectId,
     ref: 'review',
