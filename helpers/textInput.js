@@ -9,6 +9,7 @@ let jobManager = require('./jobManager');
 
 let mongoose = require('mongoose');
 let Job = mongoose.model('job');
+let Report = mongoose.model('report');
 
 /**
  * Checks if state of user that sent message is one of input ones 
@@ -75,6 +76,7 @@ function handle(msg, user, bot) {
 		} else {
 			console.log(msg);
 		}
+    
 	} else if (user.input_state == strings.inputHourlyRateState) {
 		if (msg.text == strings.jobCreateCancel) {
 			cancelJobCreation(msg, user, bot);
@@ -87,10 +89,16 @@ function handle(msg, user, bot) {
 	} else if (user.input_state == strings.inputJobDescriptionState) {
 		let description = msg.text.substring(0, 500);
 		addDescriptionToJobDraft(description, msg, user, bot);
+    // TODO: REPORT SYSTEM HERE
+	} else if (user.input_state == strings.inputReportMessage) {
+		let reportMessage = msg.text.substring(0, 200);
+    completeReport(reportMessage, msg, user, bot);
 	} else {
 		console.log(msg);
 	}
 };
+
+
 
 /**
  * Sends message to user asking for bio and adds relevant flags to user's object
@@ -127,7 +135,7 @@ function askForBio(msg, bot) {
 			// todo: handle if no user
 		}
 	});
-};
+}
 
 /**
  * Sends message asking for job category of job that is being created, saves relevant flag to db for user
@@ -330,8 +338,9 @@ function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
  * @param {Telegram:Bot} bot        Bot that should respond
  */
 function addDescriptionToJobDraft(description, msg, user, bot) {
-	user.job_draft.description = description;
-	let jobDraft = user.job_draft;
+  let jobDraft = user.job_draft;
+	jobDraft.description = description;
+	
 	user.job_draft = undefined;
 	user.jobs.push(jobDraft);
 	user.input_state = undefined;
@@ -346,6 +355,45 @@ function addDescriptionToJobDraft(description, msg, user, bot) {
 	})
 };
 
+//
+function completeReport(reportMessage, msg, user, bot) {
+  // TODO: Нет обработки ошибок
+  // TODO: Поблагодарить пользователя за репорт
+  /**
+   * Вызывается после того, как мы получили сообщение
+   * от пользователя, если он был в состоянии написания репорта
+   * @type {undefined|*}
+   */
+  // Записываем jobId
+  let jobId = user.report_draft;
+  // Обнуляем состояние драфта, т.к. у нас есть вся необходимая информация:
+  // Юзер, который репортит, id работы, которую репортят и сообщение.
+  user.report_draft = undefined;
+
+  // Создаем новый обьект Report с полученной информацией
+  let report = new Report({
+    user: user._id,
+    message: reportMessage
+  });
+  report.save();
+  
+  dbmanager.findJobById(jobId, job => {
+    // Обновить обьект job добавив туда новый Report
+    job.reports.push(report);
+    job.reportedBy.push(user._id);
+    job.save();
+    
+    //Получаем обьект работодателя
+    let clientId = job.client;
+    dbmanager.findUserById(clientId, client => {
+      //Добавляем Report в обьект работодателя
+      client.reports.push(report);
+      client.reportedBy.push(user._id);
+      client.save();
+    });
+    console.log('New report here!')
+  })
+}
 // Exports
 
 module.exports = {
