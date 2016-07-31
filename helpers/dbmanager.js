@@ -1,3 +1,7 @@
+/**
+ * Mongo DB manager – used for all the requests to database; ideally mongoose should be required only here
+ */
+
 var mongoose = require('mongoose');
 
 // Get schemas
@@ -7,12 +11,22 @@ var Job = mongoose.model('job');
 
 // User
 
+/**
+ * This method is deprecated due to not handling errors, please use 'findUser'. Used to get a User object for chat id, populates 'categories', 'jobs' and 'job_draft'
+ * @param  {Number} chatId User's chat id
+ * @param  {Function} callback Callback with (err, user) that is called when user is obtained from the db
+ */
 function getUser(chatId, callback) {
-	User.findOne({id: chatId})
+	User.findOne({ id: chatId })
 	.populate(['categories', 'jobs', 'job_draft'])
 	.exec(callback);
 };
 
+/**
+ * Getting a user with search querry from mongo db
+ * @param  {Mongo:SearchQuery} query Search query to find user
+ * @param  {Function} callback Function (user) that is called when user is obtained from db
+ */
 function findUser(query, callback) {
 	User.findOne(query)
 	.populate(['categories', 'jobs', 'job_draft'])
