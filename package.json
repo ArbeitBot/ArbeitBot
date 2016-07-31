@@ -6,7 +6,6 @@
     "start": "node ./app.js"
   },
   "dependencies": {
-    "dotenv": "^2.0.0",
     "mongoose": "^4.5.3",
     "telegram-bot-api": "^1.1.0"
   }
