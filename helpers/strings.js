@@ -74,7 +74,6 @@ module.exports = {
 	inputCategoryNameState: 'inputCategoryNameState',
 	inputHourlyRateState: 'inputHourlyRateState',
 	inputJobDescriptionState: 'inputJobDescriptionState',
-	inputReportMessage: 'inputReportMessage',
 	jobCreateCancel: '❌ Cancel',
 	selectFreelancerCancel: '❌ Cancel',
 	jobSendAllFreelancers: 'Send to all',
@@ -93,11 +92,15 @@ module.exports = {
 	freelancerOptions: {
 		interested: 'Interested',
 		notInterested: 'Not interested',
-		reported: 'Report'
+		report: 'Report'
 	},
 	freelancerAcceptOptions: {
 		accept: 'Accept',
 		refuse: 'Refuse',
+		report: 'Report'
+	},
+	jobFinishedOptions: {
+		rate: 'Rate',
 		report: 'Report'
 	}
 };
