@@ -4,3 +4,4 @@ node_modules
 *.swo
 config.js
 npm-debug.log
+.env
