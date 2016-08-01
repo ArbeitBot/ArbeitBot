@@ -556,6 +556,14 @@ function messageFromFreelancers(users) {
 
 // Functions
 
+/**
+ * Adds freelancer to list of interested or not interested candidates of given job
+ * @param  {Boolean} interested If true, adds candidate to the list of interested candidates, otherwise to list of not interested candidates
+ * @param  {Telegram:Bot} bot        Bot that should respond
+ * @param  {Telegram:Message} msg        Message that came along with inline action
+ * @param  {Mongoose:Job} job        Job where to add freelancer
+ * @param  {Mongoose:User} user       Freelancer object to add to job list
+ */
 function makeInterested(interested, bot, msg, job, user) {
 	if (job.state !== strings.jobStates.searchingForFreelancer) {
 		var send = {
@@ -600,6 +608,14 @@ function makeInterested(interested, bot, msg, job, user) {
 	}
 }
 
+/**
+ * Adds/removes user to/from field "selected candidate" of given job
+ * @param  {Boolean} accept If true sets freelancer as selected candidate for job, otherwise removes him
+ * @param  {Telegram:Bot} bot    Bot that should respond
+ * @param  {Telegram:Message} msg    Message that came with inline action
+ * @param  {Mongoose:Job} job    Job where to add freelancer
+ * @param  {Mongoose:User} user   Freelancer to operate with
+ */
 function makeAccepted(accept, bot, msg, job, user) {
 	var intIndex = job.interestedCandidates.indexOf(user._id);
 
@@ -634,6 +650,14 @@ function makeAccepted(accept, bot, msg, job, user) {
 	}
 }
 
+/**
+ * Reviewing client
+ * @param  {Strings:RateOption} data Review option (1-5 stars usually) 
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Message} msg Message came along with inline action
+ * @param  {Mongoose:Job} job Relevant job
+ * @param  {Mongoose:User} user Client to rate
+ */
 function reviewClient(data, bot, msg, job, user) {
 	if (user.input_state === strings.reviewStates.rate) {
 		if (data === strings.rateOptions.back) {
@@ -783,12 +807,26 @@ function reviewClient(data, bot, msg, job, user) {
 	}
 }
 
+/**
+ * Report client
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Message} msg Message came along with inline action
+ * @param  {Mongoose:Job} job Relevant job
+ * @param  {Mongoose:User} user Client to report
+ */
 function reportClient(bot, msg, job, user) {
 	//  todo: handle report
 }
 
 // Update message
 
+/**
+ * Used to update job messahe from freelancer side; uses updateFreelancerMessageForSearch, updateFreelancerMessageForSelected and updateFreelancerMessageForFinished respectively
+ * @param  {Telegram:Bot} bot  Bot that should edit message
+ * @param  {Telegram:Message} msg  Message that came along with action
+ * @param  {Mongoose:User} user Freelancer whos message should be editted
+ * @param  {Mongoose:Job} job  Relevant job
+ */
 function updateFreelancerMessage(bot, msg, user, job) {
 	if (job.state === strings.jobStates.searchingForFreelancer) {
 		updateFreelancerMessageForSearch(bot, msg, user, job);
@@ -799,6 +837,13 @@ function updateFreelancerMessage(bot, msg, user, job) {
 	}
 }
 
+/**
+ * Updates freelancer's job message with buttons 'interested' and 'not interested'
+ * @param  {Telegram:Bot} bot  Bot that should edit message
+ * @param  {Telegram:Message} msg  Message that came along with action
+ * @param  {Mongoose:User} user Freelancer whos message should be editted
+ * @param  {Mongoose:Job} job  Relevant job
+ */
 function updateFreelancerMessageForSearch(bot, msg, user, job) {
 	let prefix = 'chacha';
 	if (job.interestedCandidates.indexOf(user._id) > -1) {
@@ -825,6 +870,13 @@ function updateFreelancerMessageForSearch(bot, msg, user, job) {
 	});
 }
 
+/**
+ * Updates freeelancer's job message when job's state is 'freelancer selected'
+ * @param  {Telegram:Bot} bot  Bot that should edit message
+ * @param  {Telegram:Message} msg  Message that came along with action
+ * @param  {Mongoose:User} user Freelancer whos message should be editted
+ * @param  {Mongoose:Job} job  Relevant job
+ */
 function updateFreelancerMessageForSelected(bot, msg, user, job) {
 	if (job.state == strings.jobStates.freelancerChosen) {
 		let prefix = `${strings.refuseOption} ${strings.freelancerAcceptOptions.refuse}`;
@@ -862,6 +914,13 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
 	}
 }
 
+/**
+ * Updates freeelancer's job message when job's state is 'job finished'
+ * @param  {Telegram:Bot} bot  Bot that should edit message
+ * @param  {Telegram:Message} msg  Message that came along with action
+ * @param  {Mongoose:User} user Freelancer whos message should be editted
+ * @param  {Mongoose:Job} job  Relevant job
+ */
 function updateFreelancerMessageForFinished(bot, msg, user, job) {
 	let prefix = `${strings.acceptOption} ${strings.freelancerAcceptOptions.accept}\n${strings.waitClientResponseMessage}`;
 
