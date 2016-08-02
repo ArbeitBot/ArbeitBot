@@ -122,11 +122,11 @@ module.exports = {
 	},
 	rateOptions: {
 		back: '🔙 Back',
-		oneStar: '⭐️',
-		twoStars: '⭐️⭐️',
-		threeStars: '⭐️⭐️⭐️',
-		fourStars: '⭐️⭐️⭐️⭐️',
-		fiveStars: '⭐️⭐️⭐️⭐️⭐️',
+		oneStar: '⭐',
+		twoStars: '⭐⭐',
+		threeStars: '⭐⭐⭐',
+		fourStars: '⭐⭐⭐⭐',
+		fiveStars: '⭐⭐⭐⭐⭐',
 	},
 	reviewOptions: {
 		review: 'Review',

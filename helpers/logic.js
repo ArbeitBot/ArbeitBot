@@ -42,7 +42,6 @@ bot.on('message', msg => {
  * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
  */
 bot.on('inline.callback.query', msg => {
-	console.log(msg.data);
 	if (msg.data.indexOf(strings.categoryInline) > -1) {
 		categoryPicker.handleInline(bot, msg);
 	} else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {

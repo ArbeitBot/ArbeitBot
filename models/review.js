@@ -6,6 +6,10 @@ var reviewSchema = new Schema({
         type: Schema.ObjectId,
         ref: 'user'
     },
+    toUser: {
+        type: Schema.ObjectId,
+        ref: 'user'
+    },
     job: {
         type: Schema.ObjectId,
         ref: 'job'

@@ -16,6 +16,12 @@ var userSchema = new Schema({
     required: true,
     default: []
   }],
+  writeReview: [{
+    type: Schema.ObjectId,
+    ref: 'review',
+    required: true,
+    default: []
+  }],
   busy: {
     type: Boolean,
     required: true,
