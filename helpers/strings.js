@@ -95,7 +95,9 @@ module.exports = {
 	jobStates: {
 		searchingForFreelancer: 'searchingForFreelancer',
 		freelancerChosen: 'freelancerChosen',
-		finished: 'finished'
+		finished: 'finished',
+		frozen: 'frozen',
+		banned: 'banned'
 	},
 	reviewStates: {
 		rate: 'rate',
@@ -118,13 +120,17 @@ module.exports = {
 		rate: 'Rate',
 		report: 'Report'
 	},
+	report: {
+		thanks: 'Спасибо за вашу бдительность!',
+		reason: 'В чем причина репорта?'
+	},
 	rateOptions: {
 		back: '🔙 Back',
 		oneStar: '⭐️',
 		twoStars: '⭐️⭐️',
 		threeStars: '⭐️⭐️⭐️',
 		fourStars: '⭐️⭐️⭐️⭐️',
-		fiveStars: '⭐️⭐️⭐️⭐️⭐️',
+		fiveStars: '⭐️⭐️⭐️⭐️⭐️'
 	},
 	reviewOptions: {
 		review: 'Review',

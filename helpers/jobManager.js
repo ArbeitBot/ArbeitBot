@@ -120,7 +120,7 @@ function handleFreelancerAnswerInline(bot, msg) {
 				} else if (answer === strings.freelancerOptions.notInterested) {
 					makeInterested(false, bot, msg, job, user);
 				} else if (answer === strings.freelancerOptions.report) {
-					reportClient(bot, msg, job, user);
+					reportJob(bot, msg, job, user);
 				} else if (answer === strings.freelancerAcceptOptions.accept) {
 					makeAccepted(true, bot, msg, job, user);
 				} else if (answer === strings.freelancerAcceptOptions.refuse) {
@@ -818,6 +818,30 @@ function reportClient(bot, msg, job, user) {
 	//  todo: handle report
 }
 
+/**
+ * Инициирует процесс репортинга
+ * @param bot
+ * @param msg
+ * @param job
+ * @param user
+ */
+function reportJob(bot, msg, job, user) {
+	user.input_state = strings.inputReportMessage;
+  user.report_draft = job._id;
+
+  user.save(err => {
+    if (!err) {
+      bot.sendMessage({
+        chat_id: msg.from.id,
+        text: strings.report.reason
+      });
+      makeInterested(false, bot, msg, job, user);
+      updateJobMessage(job, bot);
+      updateFreelancerMessage(bot, msg, user, job);
+    }
+  });
+  
+}
 // Update message
 
 /**
