@@ -19,7 +19,7 @@ let jobManager = require('./jobManager');
  * @param {Telegram:Message} msg Message received by bot
  */
 bot.on('message', msg => {
-	if (msg === undefined) return;
+  if (msg == null) return;
 	textInput.check(msg, (isTextInput, user) => {
 		if (isTextInput) {
 			textInput.handle(msg, user, bot);
@@ -42,6 +42,7 @@ bot.on('message', msg => {
  * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
  */
 bot.on('inline.callback.query', msg => {
+	console.log(msg.data);
 	if (msg.data.indexOf(strings.categoryInline) > -1) {
 		categoryPicker.handleInline(bot, msg);
 	} else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {
@@ -77,7 +78,7 @@ function handleKeyboard(msg) {
 	} else if (text == mainMenuOptions.help) {
 		sendHelp(msg.chat.id);
 	}
-	// Chack client menu
+	// Check client menu
 	else if (text == clientOptions.postNewJob) {
 		textInput.askForNewJobCategory(msg, bot);
 	} else if (text == clientOptions.myJobs) {
@@ -130,6 +131,12 @@ function sendClientMenu(chatId) {
  * @param {Number} chatId Chat id of user who should receive keyboard
  */
 function sendFreelanceMenu(chatId) {
+  /** Main freelancer keyboard.
+   * It appears after pressing "Find Work" button
+   * Here freelancer can add his Bio,
+   * Set categories, edit hourly rate,
+   * and set Busy status.
+   */
 	dbmanager.getUser(chatId, (err, user) => {
 		if (err) {
 			// todo: handle error
