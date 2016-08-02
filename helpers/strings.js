@@ -81,6 +81,7 @@ module.exports = {
 	inputCategoryNameState: 'inputCategoryNameState',
 	inputHourlyRateState: 'inputHourlyRateState',
 	inputJobDescriptionState: 'inputJobDescriptionState',
+	inputReportMessage: 'inputReportMessage',
 	jobCreateCancel: '❌ Cancel',
 	selectFreelancerCancel: '❌ Cancel',
 	jobSendAllFreelancers: 'Send to all',

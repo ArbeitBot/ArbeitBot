@@ -3,4 +3,3 @@ node_modules
 *.swp
 *.swo
 npm-debug.log
-.env
