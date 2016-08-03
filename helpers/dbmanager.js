@@ -9,11 +9,14 @@ const User = mongoose.model('user');
 const Category = mongoose.model('category');
 const Job = mongoose.model('job');
 const Review = mongoose.model('review');
-
+//todo: functions to access reports
+const Report = mongoose.model('report');
 // User
 
 /**
- * This method is deprecated due to not handling errors, please use 'findUser'. Used to get a User object for chat id, populates 'categories', 'jobs' and 'job_draft'
+ * This method is deprecated due to not handling errors, please use 'findUser'.
+ * Used to get a User object for chat id,
+ * populates 'categories', 'jobs' and 'job_draft'
  * @param  {Number} chatId User's chat id
  * @param  {Function} callback Callback with (err, user) that is called when user is obtained from the db
  */
