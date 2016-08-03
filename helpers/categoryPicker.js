@@ -201,6 +201,6 @@ function categoriesKeyboard(categories, user, page) {
 // Exports
 
 module.exports = {
-  sendCategories: sendCategories,
-  handleInline: handleInline
+  sendCategories,
+  handleInline
 };
