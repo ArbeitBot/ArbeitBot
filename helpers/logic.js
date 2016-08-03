@@ -2,15 +2,15 @@
  * Main bot logic that handles incoming messages and routes logic to helpers files
  */
 
-let strings = require('./strings');
-let keyboards = require('./keyboards');
-let dbmanager = require('./dbmanager');
-let check = require('./messageParser');
-let bot = require('./telegramBot');
-let categoryPicker = require('./categoryPicker');
-let hourlyRatePicker = require('./hourlyRatePicker');
-let textInput = require('./textInput');
-let jobManager = require('./jobManager');
+const strings = require('./strings');
+const keyboards = require('./keyboards');
+const dbmanager = require('./dbmanager');
+const check = require('./messageParser');
+const bot = require('./telegramBot');
+const categoryPicker = require('./categoryPicker');
+const hourlyRatePicker = require('./hourlyRatePicker');
+const textInput = require('./textInput');
+const jobManager = require('./jobManager');
 
 // Handle messages
 
@@ -19,22 +19,24 @@ let jobManager = require('./jobManager');
  * @param {Telegram:Message} msg Message received by bot
  */
 bot.on('message', msg => {
-  if (msg == null) return;
-	textInput.check(msg, (isTextInput, user) => {
-		if (isTextInput) {
-			textInput.handle(msg, user, bot);
-		} else {
-			if (check.botCommandStart(msg)) {
-				dbmanager.addUser(msg.from, err => {
-					sendMainMenu(msg.chat.id);
-				});
-			} else if (check.replyMarkup(msg)) {
-				handleKeyboard(msg);
-			} else {
-				console.log(msg);
-			}
-		}
-	});
+  if (!msg) return;
+
+  textInput.check(msg, (isTextInput, user) => {
+    if (isTextInput) {
+      textInput.handle(msg, user, bot);
+    } else {
+      if (check.botCommandStart(msg)) {
+        dbmanager.addUser(msg.from, err => {
+          // todo: handle error
+          sendMainMenu(msg.chat.id);
+        });
+      } else if (check.replyMarkup(msg)) {
+        handleKeyboard(msg);
+      } else {
+        console.log(msg);
+      }
+    }
+  });
 });
 
 /**
@@ -42,19 +44,19 @@ bot.on('message', msg => {
  * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
  */
 bot.on('inline.callback.query', msg => {
-	if (msg.data.indexOf(strings.categoryInline) > -1) {
-		categoryPicker.handleInline(bot, msg);
-	} else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {
-		hourlyRatePicker.handleInline(bot, msg);
-	} else if (msg.data.indexOf(strings.freelancerInline) > -1) {
-		jobManager.handleClientInline(bot, msg);
-	} else if (msg.data.indexOf(strings.freelancerJobInline) > -1) {
-		jobManager.handleFreelancerAnswerInline(bot, msg);
-	} else if (msg.data.indexOf(strings.selectFreelancerInline) > -1) {
-		jobManager.handleSelectFreelancerInline(bot, msg);
-	} else {
-		console.log(msg);
-	}
+  if (msg.data.indexOf(strings.categoryInline) > -1) {
+    categoryPicker.handleInline(bot, msg);
+  } else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {
+    hourlyRatePicker.handleInline(bot, msg);
+  } else if (msg.data.indexOf(strings.freelancerInline) > -1) {
+    jobManager.handleClientInline(bot, msg);
+  } else if (msg.data.indexOf(strings.freelancerJobInline) > -1) {
+    jobManager.handleFreelancerAnswerInline(bot, msg);
+  } else if (msg.data.indexOf(strings.selectFreelancerInline) > -1) {
+    jobManager.handleSelectFreelancerInline(bot, msg);
+  } else {
+    console.log(msg);
+  }
 });
 
 // Helpers
@@ -64,39 +66,39 @@ bot.on('inline.callback.query', msg => {
  * @param {Telegram:Message} msg Message that is passed with click and keyboard option
  */
 function handleKeyboard(msg) {
-	let text = msg.text;
-	let mainMenuOptions = strings.mainMenuOptions;
-	let clientOptions = strings.clientMenuOptions;
-	let freelanceMenuOptions = strings.freelanceMenuOptions;
+  const text = msg.text;
+  const mainMenuOptions = strings.mainMenuOptions;
+  const clientOptions = strings.clientMenuOptions;
+  const freelanceMenuOptions = strings.freelanceMenuOptions;
 
-	// Check main menu
-	if (text == mainMenuOptions.findJobs) {
-		sendFreelanceMenu(msg.chat.id);
-	} else if (text == mainMenuOptions.findContractors) {
-		sendClientMenu(msg.chat.id);
-	} else if (text == mainMenuOptions.help) {
-		sendHelp(msg.chat.id);
-	}
-	// Check client menu
-	else if (text == clientOptions.postNewJob) {
-		textInput.askForNewJobCategory(msg, bot);
-	} else if (text == clientOptions.myJobs) {
-		// todo: send all jobs as cards
-	}
-	// Check freelance menu
-	else if (text == freelanceMenuOptions.editBio || text == freelanceMenuOptions.addBio) {
-		textInput.askForBio(msg, bot);
-	} else if (text == freelanceMenuOptions.editCategories || text == freelanceMenuOptions.addCategories) {
-		categoryPicker.sendCategories(bot, msg.chat.id);
-	} else if (text == freelanceMenuOptions.editHourlyRate || text == freelanceMenuOptions.addHourlyRate) {
-		hourlyRatePicker.sendHourlyRate(bot, msg.chat.id);
-	} else if (text == freelanceMenuOptions.busy || text == freelanceMenuOptions.available) {
-		toggleUserAvailability(msg.chat.id);
-	}
-	// Check back button
-	else if (text == freelanceMenuOptions.back) {
-		sendMainMenu(msg.chat.id);
-	}
+  // Check main menu
+  if (text === mainMenuOptions.findJobs) {
+    sendFreelanceMenu(msg.chat.id);
+  } else if (text === mainMenuOptions.findContractors) {
+    sendClientMenu(msg.chat.id);
+  } else if (text === mainMenuOptions.help) {
+    sendHelp(msg.chat.id);
+  }
+  // Check client menu
+  else if (text === clientOptions.postNewJob) {
+    textInput.askForNewJobCategory(msg, bot);
+  } else if (text === clientOptions.myJobs) {
+    // todo: send all jobs as cards
+  }
+  // Check freelance menu
+  else if (text === freelanceMenuOptions.editBio || text === freelanceMenuOptions.addBio) {
+    textInput.askForBio(msg, bot);
+  } else if (text === freelanceMenuOptions.editCategories || text === freelanceMenuOptions.addCategories) {
+    categoryPicker.sendCategories(bot, msg.chat.id);
+  } else if (text === freelanceMenuOptions.editHourlyRate || text === freelanceMenuOptions.addHourlyRate) {
+    hourlyRatePicker.sendHourlyRate(bot, msg.chat.id);
+  } else if (text === freelanceMenuOptions.busy || text === freelanceMenuOptions.available) {
+    toggleUserAvailability(msg.chat.id);
+  }
+  // Check back button
+  else if (text === freelanceMenuOptions.back) {
+    sendMainMenu(msg.chat.id);
+  }
 };
 
 // Sending messages
@@ -106,11 +108,11 @@ function handleKeyboard(msg) {
  * @param {Number} chatId Chat id of user who should receive this keyboard
  */
 function sendMainMenu(chatId) {
-	keyboards.sendKeyboard(
-		bot,
-		chatId, 
-		strings.mainMenuMessage, 
-		keyboards.mainMenuKeyboard);
+  keyboards.sendKeyboard(
+    bot,
+    chatId, 
+    strings.mainMenuMessage, 
+    keyboards.mainMenuKeyboard);
 };
 
 /**
@@ -118,11 +120,11 @@ function sendMainMenu(chatId) {
  * @param {Number} chatId Chat id of user who should receive keyboard
  */
 function sendClientMenu(chatId) {
-	keyboards.sendKeyboard(
-		bot,
-		chatId, 
-		strings.clientMenuMessage, 
-		keyboards.clientKeyboard);
+  keyboards.sendKeyboard(
+    bot,
+    chatId, 
+    strings.clientMenuMessage, 
+    keyboards.clientKeyboard);
 };
 
 /**
@@ -136,27 +138,27 @@ function sendFreelanceMenu(chatId) {
    * Set categories, edit hourly rate,
    * and set Busy status.
    */
-	dbmanager.getUser(chatId, (err, user) => {
-		if (err) {
-			// todo: handle error
-		} else if (user) {
-			var text = user.busy ? 
-				strings.fullFreelancerMessageBusy :
-				strings.fullFreelancerMessageAvailable;
-			if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
-				text = strings.emptyFreelancerMessage;
-			} else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
-				text = strings.missingFreelancerMessage;
-			}
-			keyboards.sendKeyboard(
-				bot,
-				chatId,
-				text,
-				keyboards.freelancerKeyboard(user));
-		} else {
-			// todo: handle case when user doesn't exist – basically impossible one
-		}
-	});
+  dbmanager.getUser(chatId, (err, user) => {
+    if (err) {
+      // todo: handle error
+    } else if (user) {
+      let text = user.busy ? 
+        strings.fullFreelancerMessageBusy :
+        strings.fullFreelancerMessageAvailable;
+      if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
+        text = strings.emptyFreelancerMessage;
+      } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
+        text = strings.missingFreelancerMessage;
+      }
+      keyboards.sendKeyboard(
+        bot,
+        chatId,
+        text,
+        keyboards.freelancerKeyboard(user));
+    } else {
+      // todo: handle case when user doesn't exist – basically impossible one
+    }
+  });
 };
 
 /**
@@ -164,11 +166,11 @@ function sendFreelanceMenu(chatId) {
  * @param {Number} chatId Chat id of user who should receive keyboard
  */
 function sendHelp(chatId) {
-	keyboards.sendInline(
-		bot,
-		chatId,
-		strings.helpMessage,
-		keyboards.helpKeyboard);
+  keyboards.sendInline(
+    bot,
+    chatId,
+    strings.helpMessage,
+    keyboards.helpKeyboard);
 };
 
 // Helpers
@@ -178,25 +180,25 @@ function sendHelp(chatId) {
  * @param {Number} chatId Chat id of user who should have his busy status toggled
  */
 function toggleUserAvailability(chatId) {
-	dbmanager.toggleUserAvailability(chatId, (err, user) => {
-		if (err) {
-			// todo: handle error
-		} else if (user) {
-			var message = user.busy ? 
-				strings.becameBusyMessage : 
-				strings.becameAvailableMessage;
-			if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
-				message = user.busy ? 
-				strings.missingBecameBusyMessage : 
-				strings.missingBecameAvailableMessage;
-			}
-			keyboards.sendKeyboard(
-				bot,
-				chatId,
-				message,
-				keyboards.freelancerKeyboard(user));
-		} else {
-			// todo: handle case when user doesn't exist
-		}
-	});
+  dbmanager.toggleUserAvailability(chatId, (err, user) => {
+    if (err) {
+      // todo: handle error
+    } else if (user) {
+      const message = user.busy ? 
+        strings.becameBusyMessage : 
+        strings.becameAvailableMessage;
+      if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
+        message = user.busy ? 
+        strings.missingBecameBusyMessage : 
+        strings.missingBecameAvailableMessage;
+      }
+      keyboards.sendKeyboard(
+        bot,
+        chatId,
+        message,
+        keyboards.freelancerKeyboard(user));
+    } else {
+      // todo: handle case when user doesn't exist
+    }
+  });
 };
