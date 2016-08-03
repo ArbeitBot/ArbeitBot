@@ -2,13 +2,13 @@
  * Mongo DB manager – used for all the requests to database; ideally mongoose should be required only here
  */
 
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 // Get schemas
-var User = mongoose.model('user');
-var Category = mongoose.model('category');
-var Job = mongoose.model('job');
-var Review = mongoose.model('review');
+const User = mongoose.model('user');
+const Category = mongoose.model('category');
+const Job = mongoose.model('job');
+const Review = mongoose.model('review');
 
 // User
 
@@ -101,9 +101,9 @@ function toggleUserAvailability(chatId, callback) {
  */
 function toggleCategoryForUser(chatId, categoryId, callback) {
   function findCategoryCallback(category, user) {
-    var index = -1;
-    for (var i = 0; i < user.categories.length; i++) {
-      var innerCategory = user.categories[i];
+    let index = -1;
+    for (let i = 0; i < user.categories.length; i++) {
+      const innerCategory = user.categories[i];
       if (''+innerCategory._id == ''+category._id) {
         index = i;
         break;
@@ -115,8 +115,8 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
     } else {
       user.categories.splice(index, 1);
       let ind = -1;//category.freelancers.indexOf(user);
-      for (var i = 0; i < category.freelancers.length; i++) {
-        var innerFreelancer = category.freelancers[i];
+      for (let i = 0; i < category.freelancers.length; i++) {
+        const innerFreelancer = category.freelancers[i];
         if (''+innerFreelancer == ''+user._id) {
           ind = i;
           break;
