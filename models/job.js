@@ -15,7 +15,14 @@ var jobSchema = new Schema({
   freelancer_inline_chat_id: String,
   description: String,
   hourly_rate: String,
-  reports: [{type: Schema.ObjectId, ref: 'report'}],
+  reports: [{
+    type: Schema.ObjectId,
+    ref: 'report'
+  }],
+  reportedBy: [{
+    type: Schema.ObjectId,
+    ref: 'user'
+  }],
   category: {
     type: Schema.ObjectId,
     ref: 'category',

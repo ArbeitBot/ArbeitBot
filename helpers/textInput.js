@@ -89,7 +89,6 @@ function handle(msg, user, bot) {
 	} else if (user.input_state == strings.inputJobDescriptionState) {
 		let description = msg.text.substring(0, 500);
 		addDescriptionToJobDraft(description, msg, user, bot);
-    // TODO: REPORT SYSTEM HERE
 	} else if (user.input_state == strings.inputReportMessage) {
 		let reportMessage = msg.text.substring(0, 200);
     completeReport(reportMessage, msg, user, bot);
@@ -97,8 +96,6 @@ function handle(msg, user, bot) {
 		console.log(msg);
 	}
 };
-
-
 
 /**
  * Sends message to user asking for bio and adds relevant flags to user's object
@@ -364,8 +361,10 @@ function completeReport(reportMessage, msg, user, bot) {
    * от пользователя, если он был в состоянии написания репорта
    * @type {undefined|*}
    */
+	let reportsLimit = 3;
   // Записываем jobId
-  let jobId = user.report_draft;
+	let jobId = user.report_draft;
+	
   // Обнуляем состояние драфта, т.к. у нас есть вся необходимая информация:
   // Юзер, который репортит, id работы, которую репортят и сообщение.
   user.report_draft = undefined;
@@ -381,7 +380,7 @@ function completeReport(reportMessage, msg, user, bot) {
   dbmanager.findJobById(jobId, job => {
     // Обновить обьект job добавив туда новый Report
     job.reports.push(report);
-    if (job.reports.length >= 2) {
+    if (job.reports.length >= reportsLimit) {
       job.state = strings.jobStates.frozen;
     }
     job.reportedBy.push(user._id);
@@ -399,7 +398,6 @@ function completeReport(reportMessage, msg, user, bot) {
       chat_id: msg.from.id,
       text: strings.report.thanks
     });
-    console.log('New report here!')
   })
 }
 

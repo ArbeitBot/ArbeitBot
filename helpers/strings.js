@@ -96,7 +96,17 @@ module.exports = {
 	jobStates: {
 		searchingForFreelancer: 'searchingForFreelancer',
 		freelancerChosen: 'freelancerChosen',
-		finished: 'finished'
+		finished: 'finished',
+		frozen: 'frozen',
+		banned: 'banned'
+	},
+	reviewStates: {
+		rate: 'rate',
+		review: 'review'
+	},
+	reviewTypes: {
+		byClient: 'byClient',
+		byFreelancer: 'byFreelancer'
 	},
 	reviewStates: {
 		rate: 'rate',
@@ -113,12 +123,15 @@ module.exports = {
 	},
 	freelancerAcceptOptions: {
 		accept: 'Accept',
-		refuse: 'Refuse',
-		report: 'Report'
+		refuse: 'Refuse'
 	},
 	jobFinishedOptions: {
 		rate: 'Rate',
 		report: 'Report'
+	},
+	report: {
+		thanks: 'Спасибо за вашу бдительность!',
+		reason: 'В чем причина репорта?'
 	},
 	rateOptions: {
 		back: '🔙 Back',
@@ -126,7 +139,7 @@ module.exports = {
 		twoStars: '⭐️⭐️',
 		threeStars: '⭐️⭐️⭐️',
 		fourStars: '⭐️⭐️⭐️⭐️',
-		fiveStars: '⭐️⭐️⭐️⭐️⭐️',
+		fiveStars: '⭐️⭐️⭐️⭐️⭐️'
 	},
 	reviewOptions: {
 		review: 'Review',
