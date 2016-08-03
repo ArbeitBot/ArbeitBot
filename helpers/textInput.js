@@ -17,17 +17,17 @@ let Report = mongoose.model('report');
  * @param  {Function} callback Callback(input_state, user) that is called when check is done
  */
 function check(msg, callback) {
-	dbmanager.getUser(msg.chat.id, (err, user) => {
-		if (err) {
-			// todo: handle error
-			callback(false);
-		} else if (user) {
-			callback(user.input_state, user);
-		} else {
-			// todo: handle if no user
-			callback(false);
-		}
-	});
+  dbmanager.getUser(msg.chat.id, (err, user) => {
+    if (err) {
+      // todo: handle error
+      callback(false);
+    } else if (user) {
+      callback(user.input_state, user);
+    } else {
+      // todo: handle if no user
+      callback(false);
+    }
+  });
 };
 
 /**
@@ -37,64 +37,64 @@ function check(msg, callback) {
  * @param  {Telegram:Bot} bot  Bot that should respond
  */
 function handle(msg, user, bot) {
-	if (user.input_state == strings.inputBioState) {
-		let newBio = msg.text.substring(0, 150);
-		
-		let needsCongrats = !user.bio;
-
-		user.bio = newBio;
-		user.input_state = undefined;
-		user.save((err, user) => {
-			bot.sendMessage({
-					chat_id: msg.chat.id,
-					text: strings.changedBioMessage+user.bio,
-					reply_markup: JSON.stringify({
-						keyboard: keyboards.freelancerKeyboard(user),
-						resize_keyboard: true
-				})})
-				.then(function() 
-				{
-					if (needsCongrats &&user.hourly_rate && user.categories.length > 0) {
-						keyboards.sendKeyboard(
-							bot,
-							user.id, 
-							strings.filledEverythingMessage, 
-							keyboards.freelancerKeyboard(user));
-					}
-				})
-				.catch(function(err)
-				{
-					console.log(err);
-				});
-		});
-	} else if (user.input_state == strings.inputCategoryNameState) {
-		if (msg.text == strings.jobCreateCancel) {
-			cancelJobCreation(msg, user, bot);
-		} else if (msg.text.indexOf(' [') > -1) {
-			let categoryTitle = msg.text.split(' [')[0];
-			startJobDraft(categoryTitle, msg, user, bot);
-		} else {
-			console.log(msg);
-		}
+  if (user.input_state == strings.inputBioState) {
+    let newBio = msg.text.substring(0, 150);
     
-	} else if (user.input_state == strings.inputHourlyRateState) {
-		if (msg.text == strings.jobCreateCancel) {
-			cancelJobCreation(msg, user, bot);
-		} else if (msg.text.indexOf(' [') > -1) {
-			let hourlyRate = msg.text.split(' [')[0];
-			addHourlyRateToJobDraft(hourlyRate, msg, user, bot);
-		} else {
-			console.log(msg);
-		}
-	} else if (user.input_state == strings.inputJobDescriptionState) {
-		let description = msg.text.substring(0, 500);
-		addDescriptionToJobDraft(description, msg, user, bot);
-	} else if (user.input_state == strings.inputReportMessage) {
-		let reportMessage = msg.text.substring(0, 200);
+    let needsCongrats = !user.bio;
+
+    user.bio = newBio;
+    user.input_state = undefined;
+    user.save((err, user) => {
+      bot.sendMessage({
+          chat_id: msg.chat.id,
+          text: strings.changedBioMessage+user.bio,
+          reply_markup: JSON.stringify({
+            keyboard: keyboards.freelancerKeyboard(user),
+            resize_keyboard: true
+        })})
+        .then(function() 
+        {
+          if (needsCongrats &&user.hourly_rate && user.categories.length > 0) {
+            keyboards.sendKeyboard(
+              bot,
+              user.id, 
+              strings.filledEverythingMessage, 
+              keyboards.freelancerKeyboard(user));
+          }
+        })
+        .catch(function(err)
+        {
+          console.log(err);
+        });
+    });
+  } else if (user.input_state == strings.inputCategoryNameState) {
+    if (msg.text == strings.jobCreateCancel) {
+      cancelJobCreation(msg, user, bot);
+    } else if (msg.text.indexOf(' [') > -1) {
+      let categoryTitle = msg.text.split(' [')[0];
+      startJobDraft(categoryTitle, msg, user, bot);
+    } else {
+      console.log(msg);
+    }
+    
+  } else if (user.input_state == strings.inputHourlyRateState) {
+    if (msg.text == strings.jobCreateCancel) {
+      cancelJobCreation(msg, user, bot);
+    } else if (msg.text.indexOf(' [') > -1) {
+      let hourlyRate = msg.text.split(' [')[0];
+      addHourlyRateToJobDraft(hourlyRate, msg, user, bot);
+    } else {
+      console.log(msg);
+    }
+  } else if (user.input_state == strings.inputJobDescriptionState) {
+    let description = msg.text.substring(0, 500);
+    addDescriptionToJobDraft(description, msg, user, bot);
+  } else if (user.input_state == strings.inputReportMessage) {
+    let reportMessage = msg.text.substring(0, 200);
     completeReport(reportMessage, msg, user, bot);
-	} else {
-		console.log(msg);
-	}
+  } else {
+    console.log(msg);
+  }
 };
 
 /**
@@ -103,35 +103,35 @@ function handle(msg, user, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function askForBio(msg, bot) {
-	dbmanager.getUser(msg.chat.id, (err, user) => {
-		if (err) {
-			// todo: handle error
-		} else if (user) {
-			user.input_state = strings.inputBioState;
-			user.save((err, user) => {
-				if (err) {
-					// todo: handle error
-				} else {
-					let message = user.bio ?
-						strings.editBioMessage+'\n'+strings.yourCurrentBio+'\n\n'+user.bio :
-						strings.editBioMessage;
-					bot.sendMessage({
-						chat_id: msg.chat.id,
-						text: message,
-						reply_markup: JSON.stringify({
-							hide_keyboard: true
-						})
-					})
-					.catch(function(err)
-					{
-						console.log(err);
-					});
-				}
-			});
-		} else {
-			// todo: handle if no user
-		}
-	});
+  dbmanager.getUser(msg.chat.id, (err, user) => {
+    if (err) {
+      // todo: handle error
+    } else if (user) {
+      user.input_state = strings.inputBioState;
+      user.save((err, user) => {
+        if (err) {
+          // todo: handle error
+        } else {
+          let message = user.bio ?
+            strings.editBioMessage+'\n'+strings.yourCurrentBio+'\n\n'+user.bio :
+            strings.editBioMessage;
+          bot.sendMessage({
+            chat_id: msg.chat.id,
+            text: message,
+            reply_markup: JSON.stringify({
+              hide_keyboard: true
+            })
+          })
+          .catch(function(err)
+          {
+            console.log(err);
+          });
+        }
+      });
+    } else {
+      // todo: handle if no user
+    }
+  });
 }
 
 /**
@@ -141,46 +141,46 @@ function askForBio(msg, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function askForNewJobCategory(msg, bot) {
-	function saveUserCallback(user) {
-		dbmanager.getCategories((err, categories) => {
-			if (err) {
-				// todo: handle error
-			} else if (categories) {
-				let categoryButtons = categories
-				.filter(category => category.freelancers.length > 0)
-				.map(category =>
-				{
-					return [{
-						text: category.title + ' [' + category.freelancers.length + ']'
-					}];
-				});
-				categoryButtons.unshift([{text:strings.jobCreateCancel}]);
-				keyboards.sendKeyboard(
-					bot,
-					msg.chat.id,
-					strings.selectCategoryMessage,
-					categoryButtons);
-			} else {
-				// todo: handle if there are no categories
-			}
-		});
-	};
-	dbmanager.getUser(msg.chat.id, (err, user) => {
-		if (err) {
-			// todo: handle error
-		} else if (user) {
-			user.input_state = strings.inputCategoryNameState;
-			user.save((err, user) => {
-				if (err) {
-					// todo: handle error
-				} else {
-					saveUserCallback(saveUserCallback);
-				}
-			});
-		} else {
-			// todo: handle if no user
-		}
-	});
+  function saveUserCallback(user) {
+    dbmanager.getCategories((err, categories) => {
+      if (err) {
+        // todo: handle error
+      } else if (categories) {
+        let categoryButtons = categories
+        .filter(category => category.freelancers.length > 0)
+        .map(category =>
+        {
+          return [{
+            text: category.title + ' [' + category.freelancers.length + ']'
+          }];
+        });
+        categoryButtons.unshift([{text:strings.jobCreateCancel}]);
+        keyboards.sendKeyboard(
+          bot,
+          msg.chat.id,
+          strings.selectCategoryMessage,
+          categoryButtons);
+      } else {
+        // todo: handle if there are no categories
+      }
+    });
+  };
+  dbmanager.getUser(msg.chat.id, (err, user) => {
+    if (err) {
+      // todo: handle error
+    } else if (user) {
+      user.input_state = strings.inputCategoryNameState;
+      user.save((err, user) => {
+        if (err) {
+          // todo: handle error
+        } else {
+          saveUserCallback(saveUserCallback);
+        }
+      });
+    } else {
+      // todo: handle if no user
+    }
+  });
 };
 
 /**
@@ -193,34 +193,34 @@ function askForNewJobCategory(msg, bot) {
  * @param  {Mongoose:Category} category Job's current category
  */
 function askForNewJobPriceRange(msg, user, bot, job, category) {
-	user.input_state = strings.inputHourlyRateState;
-	user.save((err, user) => {
-		var keyboard = [];
-		let options = strings.hourlyRateOptions;
-		for (var i in options) {
-			let option = options[i];
+  user.input_state = strings.inputHourlyRateState;
+  user.save((err, user) => {
+    var keyboard = [];
+    let options = strings.hourlyRateOptions;
+    for (var i in options) {
+      let option = options[i];
 
-			var count = 0;
-			for (var j in category.freelancers) {
-				let freelancer = category.freelancers[j];
-				if (freelancer.hourly_rate == option) {
-					count = count + 1;
-				}
-			}
+      var count = 0;
+      for (var j in category.freelancers) {
+        let freelancer = category.freelancers[j];
+        if (freelancer.hourly_rate == option) {
+          count = count + 1;
+        }
+      }
 
-			if (count > 0) {
-				keyboard.push([{
-					text: option + ' [' + count + ']'
-				}])
-			}
-		}
-		keyboard.unshift([{text:strings.jobCreateCancel}]);
-		keyboards.sendKeyboard(
-				bot,
-				msg.chat.id,
-				strings.selectJobHourlyRateMessage,
-				keyboard);
-	});
+      if (count > 0) {
+        keyboard.push([{
+          text: option + ' [' + count + ']'
+        }])
+      }
+    }
+    keyboard.unshift([{text:strings.jobCreateCancel}]);
+    keyboards.sendKeyboard(
+        bot,
+        msg.chat.id,
+        strings.selectJobHourlyRateMessage,
+        keyboard);
+  });
 };
 
 /**
@@ -230,24 +230,24 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
  * * @param  {Mongoose:User} user Owner of job
  */
 function askForNewJobDescription(msg, bot, user) {
-	user.input_state = strings.inputJobDescriptionState;
-	user.save((err, user) => {
-		if (err) {
-			// todo: handle error
-		} else {
-			bot.sendMessage({
-				chat_id: msg.chat.id,
-				text: strings.addJobDescriptionMessage,
-				reply_markup: JSON.stringify({
-					hide_keyboard: true
-				})
-			})
-			.catch(function(err)
-			{
-				console.log(err);
-			});
-		}
-	});
+  user.input_state = strings.inputJobDescriptionState;
+  user.save((err, user) => {
+    if (err) {
+      // todo: handle error
+    } else {
+      bot.sendMessage({
+        chat_id: msg.chat.id,
+        text: strings.addJobDescriptionMessage,
+        reply_markup: JSON.stringify({
+          hide_keyboard: true
+        })
+      })
+      .catch(function(err)
+      {
+        console.log(err);
+      });
+    }
+  });
 };
 
 /**
@@ -257,19 +257,19 @@ function askForNewJobDescription(msg, bot, user) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function cancelJobCreation(msg, user, bot) {
-	user.input_state = undefined;
-	user.job_draft = undefined;
-	user.save((err, user) => {
-		if (err) {
-			// todo: handle error
-		} else {
-			keyboards.sendKeyboard(
-				bot,
-				msg.chat.id, 
-				strings.clientMenuMessage, 
-				keyboards.clientKeyboard);
-		}
-	});
+  user.input_state = undefined;
+  user.job_draft = undefined;
+  user.save((err, user) => {
+    if (err) {
+      // todo: handle error
+    } else {
+      keyboards.sendKeyboard(
+        bot,
+        msg.chat.id, 
+        strings.clientMenuMessage, 
+        keyboards.clientKeyboard);
+    }
+  });
 };
 
 /**
@@ -280,33 +280,33 @@ function cancelJobCreation(msg, user, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function startJobDraft(categoryTitle, msg, user, bot) {
-	dbmanager.getCategory(categoryTitle, (err, category) => {
-		if (err) {
-			// todo: handle error
-		} else if (category) {
-			let draft = new Job({
-				category: category,
-				client: user
-			});
-			draft.save((err, draft) => {
-				if (err) {
-					// todo: handle error
-				} else {
-					user.job_draft = draft;
-					draft.save((err, job) => {
-						if (err) {
-							// todo: handle error
-						} else {
-							askForNewJobPriceRange(msg, user, bot, job, category);
-						}
-					});
-				}
-			});
-		} else {
-			// todo: handle no category
-			console.log(msg);
-		}
-	});
+  dbmanager.getCategory(categoryTitle, (err, category) => {
+    if (err) {
+      // todo: handle error
+    } else if (category) {
+      let draft = new Job({
+        category: category,
+        client: user
+      });
+      draft.save((err, draft) => {
+        if (err) {
+          // todo: handle error
+        } else {
+          user.job_draft = draft;
+          draft.save((err, job) => {
+            if (err) {
+              // todo: handle error
+            } else {
+              askForNewJobPriceRange(msg, user, bot, job, category);
+            }
+          });
+        }
+      });
+    } else {
+      // todo: handle no category
+      console.log(msg);
+    }
+  });
 };
 
 /**
@@ -317,14 +317,14 @@ function startJobDraft(categoryTitle, msg, user, bot) {
  * @param {Telegram:Bot} bot        Bot that should respond
  */
 function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
-	user.job_draft.hourly_rate = hourlyRate;
-	user.job_draft.save((err, draft) => {
-		if (err) {
-			// todo: handle error
-		} else {
-			askForNewJobDescription(msg, bot, user);
-		}
-	})
+  user.job_draft.hourly_rate = hourlyRate;
+  user.job_draft.save((err, draft) => {
+    if (err) {
+      // todo: handle error
+    } else {
+      askForNewJobDescription(msg, bot, user);
+    }
+  })
 };
 
 /**
@@ -336,20 +336,20 @@ function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
  */
 function addDescriptionToJobDraft(description, msg, user, bot) {
   let jobDraft = user.job_draft;
-	jobDraft.description = description;
-	
-	user.job_draft = undefined;
-	user.jobs.push(jobDraft);
-	user.input_state = undefined;
-	jobDraft.save((err, draft) => {
-		if (err) {
-			// todo: handle error
-		} else {
-			user.save((err, user) => {
-				jobManager.sendJobCreatedMessage(user, bot, draft);
-			});
-		}
-	})
+  jobDraft.description = description;
+  
+  user.job_draft = undefined;
+  user.jobs.push(jobDraft);
+  user.input_state = undefined;
+  jobDraft.save((err, draft) => {
+    if (err) {
+      // todo: handle error
+    } else {
+      user.save((err, user) => {
+        jobManager.sendJobCreatedMessage(user, bot, draft);
+      });
+    }
+  })
 };
 
 //
@@ -361,10 +361,10 @@ function completeReport(reportMessage, msg, user, bot) {
    * от пользователя, если он был в состоянии написания репорта
    * @type {undefined|*}
    */
-	let reportsLimit = 3;
+  let reportsLimit = 3;
   // Записываем jobId
-	let jobId = user.report_draft;
-	
+  let jobId = user.report_draft;
+  
   // Обнуляем состояние драфта, т.к. у нас есть вся необходимая информация:
   // Юзер, который репортит, id работы, которую репортят и сообщение.
   user.report_draft = undefined;
@@ -403,8 +403,8 @@ function completeReport(reportMessage, msg, user, bot) {
 
 // Exports
 module.exports = {
-	check: check,
-	handle: handle,
-	askForBio: askForBio,
-	askForNewJobCategory: askForNewJobCategory
+  check: check,
+  handle: handle,
+  askForBio: askForBio,
+  askForNewJobCategory: askForNewJobCategory
 };

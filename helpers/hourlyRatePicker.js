@@ -12,7 +12,7 @@ let strings = require('./strings');
  * @param  {Telegram:Message} msg Message that came along with inline button click
  */
 function handleInline(bot, msg) {
-	editHourlyRate(bot, msg);
+  editHourlyRate(bot, msg);
 };
 
 /**
@@ -21,21 +21,21 @@ function handleInline(bot, msg) {
  * @param  {Number} chatId Chat id of user who should receive inline
  */
 function sendHourlyRate(bot, chatId) {
-	dbmanager.getUser(chatId, (err, user) => {
-		if (err) {
-			// todo: handle error
-		} else if (user) {
-			let hourlyRates = strings.hourlyRateOptions;
-			let keyboard = hourlyRateKeyboard(user, hourlyRates);
-			keyboards.sendInline(
-				bot, 
-				user.id,
-				strings.editHourlyRateMessage,
-				keyboard);
-		} else {
-			// todo: handle if user isn't there
-		}
-	});
+  dbmanager.getUser(chatId, (err, user) => {
+    if (err) {
+      // todo: handle error
+    } else if (user) {
+      let hourlyRates = strings.hourlyRateOptions;
+      let keyboard = hourlyRateKeyboard(user, hourlyRates);
+      keyboards.sendInline(
+        bot, 
+        user.id,
+        strings.editHourlyRateMessage,
+        keyboard);
+    } else {
+      // todo: handle if user isn't there
+    }
+  });
 };
 
 /**
@@ -44,47 +44,47 @@ function sendHourlyRate(bot, chatId) {
  * @param  {Telegram:Message} msg Message that came along with inline button click
  */
 function editHourlyRate(bot, msg) {
-	let command = msg.data.split(strings.inlineSeparator)[1];
+  let command = msg.data.split(strings.inlineSeparator)[1];
 
-	function getUserCallback(user) {
-		var send = {
-			chat_id: msg.message.chat.id,
-			message_id: msg.message.message_id,
-			reply_markup: {
-				inline_keyboard: hourlyRateKeyboard(user, strings.hourlyRateOptions)
-			}
-		};
-		send.reply_markup = JSON.stringify(send.reply_markup);
-		bot.editMessageReplyMarkup(send)
-		.catch(err => console.log(err));
-	};
+  function getUserCallback(user) {
+    var send = {
+      chat_id: msg.message.chat.id,
+      message_id: msg.message.message_id,
+      reply_markup: {
+        inline_keyboard: hourlyRateKeyboard(user, strings.hourlyRateOptions)
+      }
+    };
+    send.reply_markup = JSON.stringify(send.reply_markup);
+    bot.editMessageReplyMarkup(send)
+    .catch(err => console.log(err));
+  };
 
-	dbmanager.getUser(msg.message.chat.id, (err, user) => {
-		if (err) {
-			// todo: handle error
-		} else if (user) {
-			let needCongrats = !user.hourly_rate;
-			user.hourly_rate = command;
-			user.save((err, user) => {
-				if (err) {
-					// todo: handle error
-				} else if (user) {
-					getUserCallback(user);
-					if (needCongrats && user.bio && user.categories.length > 0) {
-						keyboards.sendKeyboard(
-							bot,
-							user.id, 
-							strings.filledEverythingMessage, 
-							keyboards.freelancerKeyboard(user));
-					}
-				} else {
-					// todo: handle if user wasn't returned
-				}
-			});
-		} else {
-			// todo: handle if user wasn't found
-		}
-	});
+  dbmanager.getUser(msg.message.chat.id, (err, user) => {
+    if (err) {
+      // todo: handle error
+    } else if (user) {
+      let needCongrats = !user.hourly_rate;
+      user.hourly_rate = command;
+      user.save((err, user) => {
+        if (err) {
+          // todo: handle error
+        } else if (user) {
+          getUserCallback(user);
+          if (needCongrats && user.bio && user.categories.length > 0) {
+            keyboards.sendKeyboard(
+              bot,
+              user.id, 
+              strings.filledEverythingMessage, 
+              keyboards.freelancerKeyboard(user));
+          }
+        } else {
+          // todo: handle if user wasn't returned
+        }
+      });
+    } else {
+      // todo: handle if user wasn't found
+    }
+  });
 };
 
 /**
@@ -94,33 +94,33 @@ function editHourlyRate(bot, msg) {
  * @return {Telegram:Inline} Inline keyboard that gets created depending on user's picked hourly rate
  */
 function hourlyRateKeyboard(user, hourlyRates) {
-	let hourlyRate = user.hourly_rate;
+  let hourlyRate = user.hourly_rate;
 
-	var keyboard = [];
-	var tempRow = [];
-	for (var i in hourlyRates) {
-		let isOdd = i % 2 == 1;
-		let currentHR = hourlyRates[i];
+  var keyboard = [];
+  var tempRow = [];
+  for (var i in hourlyRates) {
+    let isOdd = i % 2 == 1;
+    let currentHR = hourlyRates[i];
 
-		let text = hourlyRate == currentHR ?
-			strings.selectedHourlyRate+currentHR :
-			currentHR
+    let text = hourlyRate == currentHR ?
+      strings.selectedHourlyRate+currentHR :
+      currentHR
 
-		tempRow.push({
-			text: text,
-			callback_data: strings.hourlyRateInline+strings.inlineSeparator+currentHR
-		});
-		if (isOdd) {
-			keyboard.push(tempRow);
-			tempRow = [];
-		}
-	}
-	return keyboard;
+    tempRow.push({
+      text: text,
+      callback_data: strings.hourlyRateInline+strings.inlineSeparator+currentHR
+    });
+    if (isOdd) {
+      keyboard.push(tempRow);
+      tempRow = [];
+    }
+  }
+  return keyboard;
 };
 
 // Exports
 
 module.exports = {
-	sendHourlyRate: sendHourlyRate,
-	handleInline: handleInline
+  sendHourlyRate: sendHourlyRate,
+  handleInline: handleInline
 };
