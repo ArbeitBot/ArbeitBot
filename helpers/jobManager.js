@@ -37,6 +37,90 @@ function sendJobCreatedMessage(user, bot, job) {
 	});
 }
 
+function writeReview(bot, msg, job, user, data, reviewTypes) {
+	let byClient = (reviewTypes === strings.reviewTypes.byClient);
+	let chat_id = (byClient) ? job.current_inline_chat_id : job.freelancer_inline_chat_id;
+	let message_id = (byClient) ? job.current_inline_message_id : job.freelancer_inline_message_id;
+
+	if (data[4] === undefined) {
+		let keyboard = (byClient) ? clientRateInlineKeyboard(job._id) : freelancerRateInlineKeyboard(job._id);
+
+		let send = {
+			chat_id: chat_id,
+			message_id: message_id,
+			text: (byClient) ? strings.rateFreelancerMessage : strings.rateClientMessage,
+			reply_markup: {
+				inline_keyboard: keyboard
+			}
+		};
+		send.reply_markup = JSON.stringify(send.reply_markup);
+
+		bot.editMessageText(send)
+		.catch(err => {
+			if (err.error.description !== 'Bad Request: message is not modified') {
+				console.log(err);
+			}
+		});
+	} else if (data[4] === strings.rateOptions.back) {
+		if (byClient) {
+			updateJobMessage(job, bot);
+		} else {
+			updateFreelancerMessage(bot, msg, user, job);
+		}
+	} else {
+		let rate = data[4].length;
+		/*if (data[4] === strings.rateOptions.oneStar) rate = 1;
+		 else if (data[4] === strings.rateOptions.twoStars) rate = 2;
+		 else if (data[4] === strings.rateOptions.threeStars) rate = 3;
+		 else if (data[4] === strings.rateOptions.fourStars) rate = 4;
+		 else if (data[4] === strings.rateOptions.fiveStars) rate = 5;*/
+		let toUser = (byClient) ? job.selectedCandidate : job.client;
+
+		dbmanager.addReview({
+			byUser: user._id,
+			toUser: toUser,
+			job: job._id,
+			rate: rate,
+			review: '',
+			reviewType: reviewTypes
+		}, dbReviewObject => {
+			dbmanager.findUserById(toUser, toUser => {
+				toUser.reviews.push(dbReviewObject._id);
+				toUser.save((err, toUser) => {
+					if (err) {
+						// todo: handle error
+					} else {
+						//todo: Send a message stating that you have received a review
+					}
+				});
+			});
+
+			user.writeReview.push(dbReviewObject._id);
+			user.save((err, user) => {
+				if (err) {
+					// todo: handle error
+				} else {
+					let send = {
+						chat_id: chat_id,
+						message_id: message_id,
+						text: strings.thanksReviewMessage,
+						reply_markup: {
+							inline_keyboard: []
+						}
+					};
+					send.reply_markup = JSON.stringify(send.reply_markup);
+					bot.editMessageText(send)
+					.catch(err => {
+						if (err.error.description !== 'Bad Request: message is not modified') {
+							console.log(err);
+						}
+					});
+				}
+			});
+		});
+	}
+}
+
 /** Handles */
 
 /**
@@ -62,6 +146,12 @@ function handleClientInline(bot, msg) {
 		dbmanager.findJobById(jobId, job => {
 			dbmanager.findUserById(options[3], user => {
 				reportFreelancer(bot, msg, job, user);
+			});
+		});
+	} else if (freelancerId === strings.jobFinishedOptions.rate) {
+		dbmanager.findJobById(jobId, job => {
+			dbmanager.findUserById(job.client, user => {
+				writeReview(bot, msg, job, user, options, strings.reviewTypes.byClient);
 			});
 		});
 	} else {
@@ -103,11 +193,9 @@ function handleFreelancerAnswerInline(bot, msg) {
 	let answer = options[2];
 
 	if (answer === strings.jobFinishedOptions.rate) {
-		let data = options[3];
-
 		dbmanager.findJobById(jobId, job => {
 			dbmanager.findUserById(job.selectedCandidate, user => {
-				reviewClient(data, bot, msg, job, user);
+				writeReview(bot, msg, job, user, options, strings.reviewTypes.byFreelancer);
 			});
 		});
 	} else {
@@ -444,7 +532,7 @@ function updateJobMessageForFinished(job, bot) {
 	dbmanager.findUserById(job.selectedCandidate, user => {
 		let keyboard = [[{
 				text: strings.jobFinishedOptions.rate,
-				callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + job._id + strings.inlineSeparator + user._id
+				callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + job._id
 			},
 			{
 				text: strings.jobFinishedOptions.report,
@@ -549,6 +637,28 @@ function jobSelectCandidateKeyboard(job) {
 			job._id
 		}]);
 	});
+	return keyboard;
+}
+
+function clientRateInlineKeyboard(jobId) {
+	let keyboard = [];
+	let keys = Object.keys(strings.rateOptions);
+	for (let j in keys) {
+		let option = strings.rateOptions[keys[j]];
+		keyboard.push([{
+			text: option,
+			callback_data: strings.freelancerInline +
+			strings.inlineSeparator +
+			strings.jobFinishedOptions.rate +
+			strings.inlineSeparator +
+			jobId +
+			strings.inlineSeparator +
+			strings.reviewTypes.byFreelancer +
+			strings.inlineSeparator +
+			option
+		}]);
+	}
+
 	return keyboard;
 }
 
@@ -657,6 +767,7 @@ function makeAccepted(accept, bot, msg, job, user) {
 
 		job.save((err, newJob) => {
 			updateFreelancerMessage(bot, msg, user, newJob);
+			updateJobMessage(job, bot);
 		});
 	} else {
 		var send = {
@@ -670,163 +781,6 @@ function makeAccepted(accept, bot, msg, job, user) {
 		send.reply_markup = JSON.stringify(send.reply_markup);
 		bot.editMessageText(send)
 		.catch(err => console.log(err));
-	}
-}
-
-/**
- * Reviewing client
- * @param  {Strings:RateOption} data Review option (1-5 stars usually) 
- * @param  {Telegram:Bot} bot Bot that should respond
- * @param  {Telegram:Message} msg Message came along with inline action
- * @param  {Mongoose:Job} job Relevant job
- * @param  {Mongoose:User} user Client to rate
- */
-function reviewClient(data, bot, msg, job, user) {
-	if (user.input_state === strings.reviewStates.rate) {
-		if (data === strings.rateOptions.back) {
-			user.input_state = null;
-			user.save((err, user) => {
-				if (err) {
-					// todo: handle error
-				} else {
-					updateFreelancerMessage(bot, msg, user, job);
-				}
-			});
-		} else if (data === strings.reviewOptions.review) {
-			//todo
-			//user.input_state === strings.reviewStates.review;
-		} else if (data === strings.reviewOptions.no || data === strings.saveReviewOption) {
-			let reviewObject = {
-				byUser: user._id,
-				job: job._id,
-				rate: user.input_state_data,
-				review: '',
-				reviewType: strings.reviewTypes.byFreelancer
-			};
-			dbmanager.addReview(reviewObject, dbReviewObject => {
-				dbmanager.findUserById(job.client, client => {
-					client.reviews.push(dbReviewObject._id);
-					client.save((err, client) => {
-						if (err) {
-							// todo: handle error
-						} else {
-							user.input_state = null;
-							user.input_state_data = null;
-							user.save((err, user) => {
-								if (err) {
-									// todo: handle error
-								} else {
-									let send = {
-										chat_id: job.freelancer_inline_chat_id,
-										message_id: job.freelancer_inline_message_id,
-										text: strings.thanksReviewMessage,
-										reply_markup: {
-											inline_keyboard: []
-										}
-									};
-									send.reply_markup = JSON.stringify(send.reply_markup);
-									bot.editMessageText(send)
-									.catch(err => {
-										if (err.error.description !== 'Bad Request: message is not modified') {
-											console.log(err);
-										}
-									});
-								}
-							});
-						}
-					});
-				});
-			});
-		} else {
-			let rate = 0;
-			if (data === strings.rateOptions.oneStar) rate = 1;
-			else if (data === strings.rateOptions.twoStars) rate = 2;
-			else if (data === strings.rateOptions.threeStars) rate = 3;
-			else if (data === strings.rateOptions.fourStars) rate = 4;
-			else if (data === strings.rateOptions.fiveStars) rate = 5;
-
-			user.input_state_data = rate;
-			user.save((err, user) => {
-				if (err) {
-					// todo: handle error
-				} else {
-					let keyboard = [];
-					let keys = Object.keys(strings.reviewOptions);
-					for (let j in keys) {
-						let option = strings.reviewOptions[keys[j]];
-						keyboard.push([{
-							text: option,
-							callback_data: strings.freelancerJobInline +
-							strings.inlineSeparator +
-							job._id +
-							strings.inlineSeparator +
-							strings.jobFinishedOptions.rate +
-							strings.inlineSeparator +
-							option
-						}]);
-					}
-
-					let send = {
-						chat_id: job.freelancer_inline_chat_id,
-						message_id: job.freelancer_inline_message_id,
-						text: strings.reviewClientMessage,
-						reply_markup: {
-							inline_keyboard: keyboard
-						}
-					};
-					send.reply_markup = JSON.stringify(send.reply_markup);
-					bot.editMessageText(send)
-					.catch(err => {
-						if (err.error.description !== 'Bad Request: message is not modified') {
-							console.log(err);
-						}
-					});
-				}
-			});
-		}
-	} else if (user.input_state === strings.reviewStates.review) {
-
-	} else {
-		let keyboard = [];
-		let keys = Object.keys(strings.rateOptions);
-		for (let j in keys) {
-			let option = strings.rateOptions[keys[j]];
-			keyboard.push([{
-				text: option,
-				callback_data: strings.freelancerJobInline +
-				strings.inlineSeparator +
-				job._id +
-				strings.inlineSeparator +
-				strings.jobFinishedOptions.rate +
-				strings.inlineSeparator +
-				option
-			}]);
-		}
-
-		let send = {
-			chat_id: job.freelancer_inline_chat_id,
-			message_id: job.freelancer_inline_message_id,
-			text: strings.rateClientMessage,
-			reply_markup: {
-				inline_keyboard: keyboard
-			}
-		};
-		send.reply_markup = JSON.stringify(send.reply_markup);
-
-
-		user.input_state = strings.reviewStates.rate;
-		user.save((err, user) => {
-			if (err) {
-				// todo: handle error
-			} else {
-				bot.editMessageText(send)
-				.catch(err => {
-					if (err.error.description !== 'Bad Request: message is not modified') {
-						console.log(err);
-					}
-				});
-			}
-		});
 	}
 }
 
@@ -932,7 +886,7 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
 
 		job.state = strings.jobStates.searchingForFreelancer;
 		job.save((err, newJob) => {
-			updateJobMessage(newJob, bot);
+			//updateJobMessage(newJob, bot);
 		});
 	}
 }
@@ -949,11 +903,11 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
 
 	let keyboard = [[{
 			text: strings.jobFinishedOptions.rate,
-			callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + user.username
+			callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + user._id
 		},
 		{
 			text: strings.jobFinishedOptions.report,
-			callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + user.username
+			callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + user._id
 		}
 	]];
 
@@ -973,13 +927,37 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
 			console.log(err);
 		}
 	});
+}
 
-	updateJobMessage(job, bot);
+// Keyboards
+
+function freelancerRateInlineKeyboard(jobId) {
+	let keyboard = [];
+	let keys = Object.keys(strings.rateOptions);
+	for (let j in keys) {
+		let option = strings.rateOptions[keys[j]];
+		keyboard.push([{
+			text: option,
+			callback_data: strings.freelancerJobInline +
+			strings.inlineSeparator +
+			jobId +
+			strings.inlineSeparator +
+			strings.jobFinishedOptions.rate +
+			strings.inlineSeparator +
+			strings.reviewTypes.byFreelancer +
+			strings.inlineSeparator +
+			option
+		}]);
+	}
+
+	return keyboard;
 }
 
 /**
 //// End Freelancers side
 */
+
+
 
 // Exports
 module.exports = {
