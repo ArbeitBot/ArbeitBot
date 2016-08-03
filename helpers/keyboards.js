@@ -2,25 +2,24 @@
  * File that should handle all keyboards creations and functions (ideally)
  */
 
-let strings = require('./strings');
+const strings = require('./strings');
 
 // Keyboards
 
-let mainMenuKeyboard = [
+const mainMenuKeyboard = [
   [{ text: strings.mainMenuOptions.findJobs },
   { text: strings.mainMenuOptions.findContractors }],
   [{ text: strings.mainMenuOptions.help }]
 ];
 
-let clientKeyboard = [
+const clientKeyboard = [
   [{ text: strings.clientMenuOptions.postNewJob }],
   [{ text: strings.clientMenuOptions.back },
   { text: strings.clientMenuOptions.myJobs }]
 ];
 
-let helpKeyboard = [
-  [{  text: '@borodutch',
-    url: 'http://telegram.me/borodutch'}]
+const helpKeyboard = [
+  [{ text: '@borodutch', url: 'http://telegram.me/borodutch' }]
 ];
 
 // Functions
@@ -31,16 +30,16 @@ let helpKeyboard = [
  * @return {Telegram:Keyboard} Keyboard ready to be shown to user
  */
 function freelancerKeyboard(user) {
-  let bioText = (user.bio) ? 
+  const bioText = (user.bio) ? 
     strings.freelanceMenuOptions.editBio :
     strings.freelanceMenuOptions.addBio;
-  let categoriesText = (user.categories.length > 0) ?
+  const categoriesText = (user.categories.length > 0) ?
     strings.freelanceMenuOptions.editCategories :
     strings.freelanceMenuOptions.addCategories;
-  let hourlyRateText = (user.hourly_rate) ?
+  const hourlyRateText = (user.hourly_rate) ?
     strings.freelanceMenuOptions.editHourlyRate :
     strings.freelanceMenuOptions.addHourlyRate;
-  let availableText = user.busy ?
+  const availableText = user.busy ?
     strings.freelanceMenuOptions.available :
     strings.freelanceMenuOptions.busy;
   return [
@@ -60,7 +59,7 @@ function freelancerKeyboard(user) {
  * @param  {Function} then     Function that should be executed when message is delivered
  */
 function sendKeyboard(bot, chatId, text, keyboard, then) {
-  var message = {
+  let message = {
     chat_id: chatId,
     text: text,
     reply_markup: {
@@ -82,7 +81,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
  * @param  {Telegram:Inline} keyboard Inline keyboard to send
  */
 function sendInline(bot, chatId, text, keyboard) {
-  var message = {
+  let message = {
     chat_id: chatId,
     text: text,
     reply_markup: {
@@ -98,11 +97,11 @@ function sendInline(bot, chatId, text, keyboard) {
 
 module.exports = {
   // Keyboards
-  mainMenuKeyboard: mainMenuKeyboard,
-  clientKeyboard: clientKeyboard,
-  helpKeyboard: helpKeyboard,
+  mainMenuKeyboard,
+  clientKeyboard,
+  helpKeyboard,
   // Functions
-  freelancerKeyboard: freelancerKeyboard,
-  sendKeyboard: sendKeyboard,
-  sendInline: sendInline
+  freelancerKeyboard,
+  sendKeyboard,
+  sendInline
 };
