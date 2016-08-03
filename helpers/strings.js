@@ -108,14 +108,6 @@ module.exports = {
     byClient: 'byClient',
     byFreelancer: 'byFreelancer'
   },
-  reviewStates: {
-    rate: 'rate',
-    review: 'review'
-  },
-  reviewTypes: {
-    byClient: 'byClient',
-    byFreelancer: 'byFreelancer'
-  },
   freelancerOptions: {
     interested: 'Interested',
     notInterested: 'Not interested',
@@ -135,11 +127,11 @@ module.exports = {
   },
   rateOptions: {
     back: '🔙 Back',
-    oneStar: '⭐️',
-    twoStars: '⭐️⭐️',
-    threeStars: '⭐️⭐️⭐️',
-    fourStars: '⭐️⭐️⭐️⭐️',
-    fiveStars: '⭐️⭐️⭐️⭐️⭐️'
+    oneStar: '⭐',
+    twoStars: '⭐⭐',
+    threeStars: '⭐⭐⭐',
+    fourStars: '⭐⭐⭐⭐',
+    fiveStars: '⭐⭐⭐⭐⭐'
   },
   reviewOptions: {
     review: 'Review',

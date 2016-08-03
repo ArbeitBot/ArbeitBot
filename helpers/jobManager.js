@@ -337,29 +337,6 @@ function reportFreelancer(bot, msg, job, user) {
   //  todo: handle report
 }
 
-/**
- * Initializes job report
- * @param  {Telegram:Bot} bot  Bot that should respond
- * @param  {Telegram:Message} msg  Message passed with action
- * @param  {Mongoose:Job} job  Job object to report
- * @param  {Mongoose:User} user User who reports
- */
-function reportJob(bot, msg, job, user) {
-  // user.input_state = strings.inputReportMessage;
-  // user.report_draft = job._id;
-  // user.save(err => {
-  //   if (!err) {
-  //     bot.sendMessage({
-  //       chat_id: msg.from.id,
-  //       text: strings.report.reason
-  //     });
-  //     makeInterested(false, bot, msg, job, user);
-  //     updateJobMessage(job, bot);
-  //     updateFreelancerMessage(bot, msg, user, job);
-  //   }
-  // });  
-}
-
 // Management freelancers
 
 /**
@@ -785,14 +762,26 @@ function makeAccepted(accept, bot, msg, job, user) {
 }
 
 /**
- * Report client
- * @param  {Telegram:Bot} bot Bot that should respond
- * @param  {Telegram:Message} msg Message came along with inline action
- * @param  {Mongoose:Job} job Relevant job
- * @param  {Mongoose:User} user Client to report
+ * Initializes job report
+ * @param  {Telegram:Bot} bot  Bot that should respond
+ * @param  {Telegram:Message} msg  Message passed with action
+ * @param  {Mongoose:Job} job  Job object to report
+ * @param  {Mongoose:User} user User who reports
  */
-function reportClient(bot, msg, job, user) {
-  //  todo: handle report
+function reportJob(bot, msg, job, user) {
+  // user.input_state = strings.inputReportMessage;
+  // user.report_draft = job._id;
+  // user.save(err => {
+  //   if (!err) {
+  //     bot.sendMessage({
+  //       chat_id: msg.from.id,
+  //       text: strings.report.reason
+  //     });
+  //     makeInterested(false, bot, msg, job, user);
+  //     updateJobMessage(job, bot);
+  //     updateFreelancerMessage(bot, msg, user, job);
+  //   }
+  // });
 }
 
 // Update message
