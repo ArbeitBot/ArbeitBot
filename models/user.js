@@ -10,6 +10,14 @@ var userSchema = new Schema({
   hourly_rate: String,
   input_state: String,
   input_state_data: String,
+  reports: [{
+    type: Schema.ObjectId,
+    ref: 'report'
+  }],
+  reportedBy: [{
+    type: Schema.ObjectId,
+    ref: 'user'
+  }],
   reviews: [{
     type: Schema.ObjectId,
     ref: 'review',
@@ -40,6 +48,10 @@ var userSchema = new Schema({
     default: []
   }],
   job_draft: {
+    type: Schema.ObjectId,
+    ref: 'job'
+  },
+  report_draft: {
     type: Schema.ObjectId,
     ref: 'job'
   }

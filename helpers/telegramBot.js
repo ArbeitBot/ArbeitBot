@@ -2,12 +2,12 @@
  * Used to initialize Telegam bot
  */
 
-let telegram = require('telegram-bot-api');
-let config = require('../config');
+const telegram = require('telegram-bot-api');
+const config = require('../config');
 
 module.exports = new telegram({
-	token: config.telegram_api_key,
-	updates: {
-		enabled: true
+  token: config.telegram_api_key,
+  updates: {
+      enabled: true
     }
 });
