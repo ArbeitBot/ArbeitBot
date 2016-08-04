@@ -267,33 +267,21 @@ function cancelJobCreation(msg, user, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function startJobDraft(categoryTitle, msg, user, bot) {
-  dbmanager.getCategory(categoryTitle, (err, category) => {
-    if (err) {
-      // todo: handle error
-    } else if (category) {
+  dbmanager.getCategory(categoryTitle)
+    .then(category => {
       let draft = new Job({
         category: category,
         client: user
       });
-      draft.save((err, draft) => {
-        if (err) {
-          // todo: handle error
-        } else {
+      draft.save()
+        .then(draft => {
           user.job_draft = draft;
-          draft.save((err, job) => {
-            if (err) {
-              // todo: handle error
-            } else {
+          draft.save()
+            .then(job => {
               askForNewJobPriceRange(msg, user, bot, job, category);
-            }
-          });
-        }
-      });
-    } else {
-      // todo: handle no category
-      console.log(msg);
-    }
-  });
+            });
+        });
+    });
 };
 
 /**

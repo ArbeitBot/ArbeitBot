@@ -120,24 +120,33 @@ function toggleCategoryForUser(chatId, categoryId) {
 /**
  * Get category by it's title; populates 'freelancers', returns only freelancers available for work and with full profile, sorts them by name for now
  * @param  {String}   categoryTitle Category title
- * @param  {Function} callback      Callback (err, category) that is called upon obtaining category from db
  */
-function getCategory(categoryTitle, callback) {
-  Category.findOne({ title: categoryTitle })
-  .populate({
-    path: 'freelancers',
-    match: {
-      $and: [
-        { busy: false },
-        { bio: { $exists: true } },
-        { hourly_rate: { $exists: true } }
-      ]
-    },
-    options: {
-      sort: { 'name': -1 } 
-    }
-  })
-  .exec(callback);
+function getCategory(categoryTitle) {
+  return new Promise(fullfill => {
+    Category.findOne({ title: categoryTitle })
+      .populate({
+        path: 'freelancers',
+        match: {
+          $and: [
+            { busy: false },
+            { bio: { $exists: true } },
+            { hourly_rate: { $exists: true } }
+          ]
+        },
+        options: {
+          sort: { 'name': -1 } 
+        }
+      })
+      .exec((err, category) => {
+        if (err) {
+          throw err;
+        } else if (!category) {
+          throw new Error('No category found');
+        } else {
+          fullfill(category);
+        }
+      });
+  });
 }
 
 /**
