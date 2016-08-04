@@ -53,20 +53,25 @@ function findUserById(id) {
 /**
  * Add user object to mongo db; returns existing user if user with the same 'id' field exists or creates a new one from user parameter
  * @param {Object} user Javascript object with fields for new user
- * @param {Function} callback Callback (user) that is called when user is added to db or retrieved from db
  */
-function addUser(user, callback) {
-  console.log(user);
-  findUser({ id: user.id })
-    .then(dbuserObject => {
-      if (dbuserObject) {
-        callback(null, dbuserObject);
-      } else {
-        let userObject = new User(user);
-        userObject.save(callback);
-      }
-    })
-    .catch(err => console.log(err));
+function addUser(user) {
+  return new Promise(fullfill => {
+    findUser({ id: user.id })
+      .then(dbuserObject => {
+        if (dbuserObject) {
+          fullfill(dbuserObject);
+        } else {
+          let userObject = new User(user);
+          userObject.save((err, newUser) => {
+            if (err) {
+              throw err;
+            } else {
+              fullfill(newUser);
+            }
+          });
+        }
+      });
+  });
 }
 
 /**

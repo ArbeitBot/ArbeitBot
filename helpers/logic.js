@@ -26,8 +26,8 @@ bot.on('message', msg => {
       textInput.handle(msg, user, bot);
     } else {
       if (check.botCommandStart(msg)) {
-        dbmanager.addUser(msg.from, err => {
-          // todo: handle error
+        dbmanager.addUser(msg.from)
+        .then(user => {
           sendMainMenu(msg.chat.id);
         });
       } else if (check.replyMarkup(msg)) {
