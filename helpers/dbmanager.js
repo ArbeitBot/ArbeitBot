@@ -184,19 +184,20 @@ function getCategories() {
 /**
  * Getting job from db by it's id
  * @param  {Mongo:ObjectId} id Id of job to get
- * @param  {Function} callback Callback (job) that is called when job is obtained from db
  * @param  {JS Object} populate Can be String or usual JS object, this is passed to .populate()
  */
-function findJobById(id, callback, populate) {
-  Job.findById(id)
-  .populate(populate || '')
-  .exec((err, job) => {
-    if (err) {
-      // todo: handle error
-    } else {
-      callback(job);
-    }
-  })
+function findJobById(id, populate) {
+  return new Promise(fullfill => {
+    Job.findById(id)
+      .populate(populate || '')
+      .exec((err, job) => {
+        if (err) {
+          throw error;
+        } else {
+          fullfill(job);
+        }
+      });
+  });
 }
 
 /**
