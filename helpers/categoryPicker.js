@@ -21,21 +21,18 @@ function handleInline(bot, msg) {
   } else if (command === strings.categoryRight) {
     editPage(bot, msg, page+1);
   } else {
-    dbmanager.toggleCategoryForUser(msg.message.chat.id, command, (err, user, isAdded) => {
-      if (err) {
-        // todo: handle error
-      } else {
-        if (isAdded) {
-          if (user.bio && user.hourly_rate && user.categories.length === 1) {
-            keyboards.sendKeyboard(
-              bot,
-              user.id, 
-              strings.filledEverythingMessage, 
-              keyboards.freelancerKeyboard(user));
-          }
+    dbmanager.toggleCategoryForUser(msg.message.chat.id, command)
+    .then(({ user, isAdded }) => {
+      if (isAdded) {
+        if (user.bio && user.hourly_rate && user.categories.length === 1) {
+          keyboards.sendKeyboard(
+            bot,
+            user.id, 
+            strings.filledEverythingMessage, 
+            keyboards.freelancerKeyboard(user));
         }
-        editPage(bot, msg, page);
       }
+      editPage(bot, msg, page);
     });
   }
 };

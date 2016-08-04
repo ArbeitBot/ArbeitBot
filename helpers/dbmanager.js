@@ -62,13 +62,8 @@ function addUser(user) {
           fullfill(dbuserObject);
         } else {
           let userObject = new User(user);
-          userObject.save((err, newUser) => {
-            if (err) {
-              throw err;
-            } else {
-              fullfill(newUser);
-            }
-          });
+          userObject.save()
+            .then(fullfill);
         }
       });
   });
@@ -78,78 +73,46 @@ function addUser(user) {
  * Changes user's busy field to true or false
  * @param  {Number} chatId Chat id of user that should have busy status toggled
  */
-function toggleUserAvailability(chatId, callback) {
+function toggleUserAvailability(chatId) {
   return new Promise(fullfill => {
     findUser({ id: chatId })
       .then(user => {
         user.busy = !user.busy;
-        user.save((err, newUser) => {
-          if (err) {
-            throw err;
-          } else {
-            fullfill(newUser);
-          }
-        });
+        user.save()
+          .then(fullfill);
       });
   });
 }
 
 /**
- * Adds or removes user to or from the specified category
+ * Adds or removes user to or from the specified category; promise returns { user: user object, isAdded: true/false if category was added ot removed}
  * @param  {Number}   chatId     Chat id of user that should have category added\removed
  * @param  {Mongo:ObjectId}   categoryId Id of category that should be added\removed to\from user
- * @param  {Function} callback   Callback (err, user, addedCategory) that is called when category is added or removed; addedCategory specifies if category was added or removed (boolean), can't remember if it returns true or false when category is added
  */
-function toggleCategoryForUser(chatId, categoryId, callback) {
-  function findCategoryCallback(category, user) {
-    let index = -1;
-    for (let i = 0; i < user.categories.length; i++) {
-      const innerCategory = user.categories[i];
-      if (''+innerCategory._id == ''+category._id) {
-        index = i;
-        break;
-      }
-    }
-    if (index < 0) {
-      user.categories.push(category);
-      category.freelancers.push(user);
-    } else {
-      user.categories.splice(index, 1);
-      let ind = -1;//category.freelancers.indexOf(user);
-      for (let i = 0; i < category.freelancers.length; i++) {
-        const innerFreelancer = category.freelancers[i];
-        if (''+innerFreelancer == ''+user._id) {
-          ind = i;
-          break;
-        }
-      }
-      if (ind > -1) {
-        category.freelancers.splice(ind, 1);
-      }
-    }
-    user.save((err, user) => {
-      category.save((err, category) => {
-        if (err) {
-          // todo: handle error
-        } else {
-          callback(err, user, index < 0);
-        }
+function toggleCategoryForUser(chatId, categoryId) {
+  return new Promise(fullfill => {
+    findUser({ id: chatId })
+      .then(user => {
+        Category.findById(categoryId)
+          .then(category => {
+            let index = user.categories.map(category => String(category._id)).indexOf(String(category.id));
+            if (index < 0) {
+              user.categories.push(category);
+              category.freelancers.push(user);
+            } else {
+              user.categories.splice(index, 1);
+              category.freelancers.splice(category.freelancers.map(id => String(id)).indexOf(String(user._id)), 1);
+            }
+            user.save()
+              .then(user => {
+                category.save()
+                  .then(category => {
+                    fullfill({ user: user, isAdded: index < 0 });
+                  });
+              });
+            });
       });
-    });
-  };
-
-  findUser({ id: chatId })
-    .then(user => {
-      Category.findById(categoryId, (err, category) => {
-        if (err) {
-          // todo: handle error
-        } else if (category) {
-          findCategoryCallback(category, user);
-        } else {
-          // todo: handle if category isn't there
-        }
-      });
-    });
+  });
 }
 
 // Categories
