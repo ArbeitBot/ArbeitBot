@@ -25,6 +25,7 @@ var Review = mongoose.model('review');
 
 
 describe("JobManager ", function() {
+
 	/**
 	 * Sending a message to client after job has been created; message includes inline with freelancers available and suitalbe for this job
 	 * @param  {Mongoose:User} user Owner of this job
@@ -67,4 +68,5 @@ describe("JobManager ", function() {
 		})
 
 	});*/
+
 });
