@@ -77,14 +77,21 @@ function addUser(user) {
 /**
  * Changes user's busy field to true or false
  * @param  {Number} chatId Chat id of user that should have busy status toggled
- * @param  {Function} callback Callback (err, user) that is called when user's busy status is toggled
  */
 function toggleUserAvailability(chatId, callback) {
-  findUser({ id: chatId })
-    .then(user => {
-      user.busy = !user.busy;
-      user.save(callback);
-    });
+  return new Promise(fullfill => {
+    findUser({ id: chatId })
+      .then(user => {
+        user.busy = !user.busy;
+        user.save((err, newUser) => {
+          if (err) {
+            throw err;
+          } else {
+            fullfill(newUser);
+          }
+        });
+      });
+  });
 }
 
 /**

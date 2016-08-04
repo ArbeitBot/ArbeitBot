@@ -175,10 +175,8 @@ function sendHelp(chatId) {
  * @param {Number} chatId Chat id of user who should have his busy status toggled
  */
 function toggleUserAvailability(chatId) {
-  dbmanager.toggleUserAvailability(chatId, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
+  dbmanager.toggleUserAvailability(chatId)
+    .then(user => {
       const message = user.busy ? 
         strings.becameBusyMessage : 
         strings.becameAvailableMessage;
@@ -192,8 +190,5 @@ function toggleUserAvailability(chatId) {
         chatId,
         message,
         keyboards.freelancerKeyboard(user));
-    } else {
-      // todo: handle case when user doesn't exist
-    }
-  });
+    });
 };
