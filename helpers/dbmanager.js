@@ -226,20 +226,15 @@ function freelancersForJob(job) {
 /**
  * Gets a list of available freelancers for job
  * @param  {Mongo:Object id} jobId Job id object for which freelancers are returned
- * @param  {Function} callback Callback (freelancers) that is called when users are obtained from db
  */
-function freelancersForJobId(jobId, callback) {
-  findJobById(jobId)
-    .then(job => {
-      if (job) {
+function freelancersForJobId(jobId) {
+  return new Promise(fullfill => {
+    findJobById(jobId)
+      .then(job => {
         freelancersForJob(job)
-          .then(users => {
-            callback(users);
-          });
-      } else {
-        callback(null);
-      }
-    });
+          .then(fullfill);
+      });
+  });
 }
 
 // Review
@@ -247,34 +242,31 @@ function freelancersForJobId(jobId, callback) {
 /**
  * Get review by id
  * @param  {Mongo:ObjectId}   id       Id of review to retrieve
- * @param  {Function} callback Callback (review) that is called upon obtaining of the review from db
  * @param  {JS Object or String}   populate Option to populate fields in query result
  */
-function findReviewById(id, callback, populate) {
-  Review.findById(id)
-  .populate(populate || '')
-  .exec((err, review) => {
-    if (err) {
-      // todo: handle error
-    } else {
-      callback(review);
-    }
-  })
+function findReviewById(id, populate) {
+  return new Promise(fullfill => {
+    Review.findById(id)
+      .populate(populate || '')
+      .exec((err, review) => {
+        if (err) {
+          throw err;
+        } else {
+          fullfill(review);
+        }
+      })
+  });
 }
 
 /**
  * Add review object
  * @param {JS Object}   review   Review template to add to db
- * @param {Function} callback Callback (review) that's called when review is added to db
  */
-function addReview(review, callback) {
-  const reviewObject = new Review(review);
-  reviewObject.save((err, newReviewObject) => {
-    if (err) {
-      // todo: handle error
-    } else {
-      callback(newReviewObject);
-    }
+function addReview(review) {
+  return new Promise(fullfill => {
+    const reviewObject = new Review(review);
+    reviewObject.save()
+      .then(fullfill);
   });
 }
 

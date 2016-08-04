@@ -84,42 +84,37 @@ function writeReview(bot, msg, job, user, data, reviewTypes) {
       rate: rate,
       review: '',
       reviewType: reviewTypes
-    }, dbReviewObject => {
-      dbmanager.findUserById(toUser)
-        .then(toUser => {
-          toUser.reviews.push(dbReviewObject._id);
-          toUser.save((err, toUser) => {
-            if (err) {
-              // todo: handle error
-            } else {
-              //todo: Send a message stating that you have received a review
-            }
+    })
+      .then(dbReviewObject => {
+        dbmanager.findUserById(toUser)
+          .then(toUser => {
+            toUser.reviews.push(dbReviewObject._id);
+            toUser.save()
+              .then(toUser => {
+                //todo: Send a message stating that you have received a review
+              });
           });
-        });
 
-      user.writeReview.push(dbReviewObject._id);
-      user.save((err, user) => {
-        if (err) {
-          // todo: handle error
-        } else {
-          let send = {
-            chat_id: chat_id,
-            message_id: message_id,
-            text: strings.thanksReviewMessage,
-            reply_markup: {
-              inline_keyboard: []
-            }
-          };
-          send.reply_markup = JSON.stringify(send.reply_markup);
-          bot.editMessageText(send)
-          .catch(err => {
-            if (err.error.description !== 'Bad Request: message is not modified') {
-              console.log(err);
-            }
+        user.writeReview.push(dbReviewObject._id);
+        user.save()
+          .then(user => {
+            let send = {
+              chat_id: chat_id,
+              message_id: message_id,
+              text: strings.thanksReviewMessage,
+              reply_markup: {
+                inline_keyboard: []
+              }
+            };
+            send.reply_markup = JSON.stringify(send.reply_markup);
+            bot.editMessageText(send)
+            .catch(err => {
+              if (err.error.description !== 'Bad Request: message is not modified') {
+                console.log(err);
+              }
+            });
           });
-        }
       });
-    });
   }
 }
 
@@ -137,9 +132,10 @@ function handleClientInline(bot, msg) {
   let jobId = options[2];
   // Check if select all touched
   if (freelancerId === strings.jobSendAllFreelancers) {
-    dbmanager.freelancersForJobId(jobId, users => {
-      addFreelancersToCandidates(jobId, users, msg, bot);
-    });
+    dbmanager.freelancersForJobId(jobId)
+      .then(users => {
+        addFreelancersToCandidates(jobId, users, msg, bot);
+      });
   } else if (freelancerId === strings.jobSelectFreelancer) {
     dbmanager.findJobById(jobId, 'interestedCandidates')
       .then(job => {
