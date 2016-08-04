@@ -17,16 +17,8 @@ let Report = mongoose.model('report');
  * @param  {Function} callback Callback(input_state, user) that is called when check is done
  */
 function check(msg, callback) {
-  dbmanager.getUser(msg.chat.id, (err, user) => {
-    if (err) {
-      // todo: handle error
-      callback(false);
-    } else if (user) {
-      callback(user.input_state, user);
-    } else {
-      // todo: handle if no user
-      callback(false);
-    }
+  dbmanager.findUser(msg.chat.id, user => {
+    callback(user.input_state, user);
   });
 };
 
@@ -103,34 +95,28 @@ function handle(msg, user, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function askForBio(msg, bot) {
-  dbmanager.getUser(msg.chat.id, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
-      user.input_state = strings.inputBioState;
-      user.save((err, user) => {
-        if (err) {
-          // todo: handle error
-        } else {
-          let message = user.bio ?
-            strings.editBioMessage+'\n'+strings.yourCurrentBio+'\n\n'+user.bio :
-            strings.editBioMessage;
-          bot.sendMessage({
-            chat_id: msg.chat.id,
-            text: message,
-            reply_markup: JSON.stringify({
-              hide_keyboard: true
-            })
+  dbmanager.findUser(msg.chat.id, user => {
+    user.input_state = strings.inputBioState;
+    user.save((err, user) => {
+      if (err) {
+        // todo: handle error
+      } else {
+        let message = user.bio ?
+          strings.editBioMessage+'\n'+strings.yourCurrentBio+'\n\n'+user.bio :
+          strings.editBioMessage;
+        bot.sendMessage({
+          chat_id: msg.chat.id,
+          text: message,
+          reply_markup: JSON.stringify({
+            hide_keyboard: true
           })
-          .catch(function(err)
-          {
-            console.log(err);
-          });
-        }
-      });
-    } else {
-      // todo: handle if no user
-    }
+        })
+        .catch(function(err)
+        {
+          console.log(err);
+        });
+      }
+    });
   });
 }
 
@@ -165,21 +151,15 @@ function askForNewJobCategory(msg, bot) {
       }
     });
   };
-  dbmanager.getUser(msg.chat.id, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
-      user.input_state = strings.inputCategoryNameState;
-      user.save((err, user) => {
-        if (err) {
-          // todo: handle error
-        } else {
-          saveUserCallback(saveUserCallback);
-        }
-      });
-    } else {
-      // todo: handle if no user
-    }
+  dbmanager.findUser(msg.chat.id, user => {
+    user.input_state = strings.inputCategoryNameState;
+    user.save((err, user) => {
+      if (err) {
+        // todo: handle error
+      } else {
+        saveUserCallback(saveUserCallback);
+      }
+    });
   });
 };
 

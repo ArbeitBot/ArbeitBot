@@ -13,17 +13,6 @@ const Review = mongoose.model('review');
 // User
 
 /**
- * This method is deprecated due to not handling errors, please use 'findUser'. Used to get a User object for chat id, populates 'categories', 'jobs' and 'job_draft'
- * @param  {Number} chatId User's chat id
- * @param  {Function} callback Callback with (err, user) that is called when user is obtained from the db
- */
-function getUser(chatId, callback) {
-  User.findOne({ id: chatId })
-  .populate(['categories', 'jobs', 'job_draft'])
-  .exec(callback);
-}
-
-/**
  * Getting a user with search querry from mongo db, populates 'categories', 'jobs' and 'job_draft'
  * @param  {Mongo:SearchQuery} query Search query to find user
  * @param  {Function} callback Function (user) that is called when user is obtained from db
@@ -63,10 +52,8 @@ function findUserById(id, callback) {
  * @param {Function} callback Callback (user) that is called when user is added to db or retrieved from db
  */
 function addUser(user, callback) {
-  getUser(user.id, (err, dbuserObject) => {
-    if (err) {
-      callback(err);
-    } else if (dbuserObject) {
+  findUser(user.id, dbuserObject => {
+    if (dbuserObject) {
       callback(null, dbuserObject);
     } else {
       let userObject = new User(user);
@@ -81,15 +68,9 @@ function addUser(user, callback) {
  * @param  {Function} callback Callback (err, user) that is called when user's busy status is toggled
  */
 function toggleUserAvailability(chatId, callback) {
-  getUser(chatId, (err, user) => {
-    if (err) {
-      callback(err);
-    } else if (user) {
-      user.busy = !user.busy;
-      user.save(callback);
-    } else {
-      // todo: handle if user isn't there
-    }
+  findUser(chatId, user => {
+    user.busy = !user.busy;
+    user.save(callback);
   });
 }
 
@@ -137,7 +118,7 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
     });
   };
 
-  function findUserCallback(user) {
+  findUser(chatId, user => {
     Category.findById(categoryId, (err, category) => {
       if (err) {
         // todo: handle error
@@ -147,16 +128,6 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
         // todo: handle if category isn't there
       }
     });
-  };
-
-  getUser(chatId, (err, user) => {
-    if (err) {
-      callback(err);
-    } else if (user) {
-      findUserCallback(user);
-    } else {
-      // todo: handle is user isn't there
-    }
   });
 }
 
@@ -308,7 +279,6 @@ function addReview(review, callback) {
 
 module.exports = {
   // User
-  getUser,
   findUser,
   findUserById,
   addUser,
