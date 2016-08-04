@@ -138,21 +138,22 @@ function sendFreelanceMenu(chatId) {
    * Set categories, edit hourly rate,
    * and set Busy status.
    */
-  dbmanager.findUser(chatId, user => {
-    let text = user.busy ? 
-      strings.fullFreelancerMessageBusy :
-      strings.fullFreelancerMessageAvailable;
-    if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
-      text = strings.emptyFreelancerMessage;
-    } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
-      text = strings.missingFreelancerMessage;
-    }
-    keyboards.sendKeyboard(
-      bot,
-      chatId,
-      text,
-      keyboards.freelancerKeyboard(user));
-  });
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
+      let text = user.busy ? 
+        strings.fullFreelancerMessageBusy :
+        strings.fullFreelancerMessageAvailable;
+      if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
+        text = strings.emptyFreelancerMessage;
+      } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
+        text = strings.missingFreelancerMessage;
+      }
+      keyboards.sendKeyboard(
+        bot,
+        chatId,
+        text,
+        keyboards.freelancerKeyboard(user));
+    });
 };
 
 /**

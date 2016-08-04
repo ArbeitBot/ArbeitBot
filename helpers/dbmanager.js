@@ -18,14 +18,16 @@ const Review = mongoose.model('review');
  * @param  {Function} callback Function (user) that is called when user is obtained from db
  */
 function findUser(query, callback) {
-  User.findOne(query)
-  .populate(['categories', 'jobs', 'job_draft'])
-  .exec((err, user) => {
-    if (err) {
-      // todo: handle error
-    } else {
-      callback(user);
-    }
+  return new Promise(fullfill => {
+    User.findOne(query)
+      .populate(['categories', 'jobs', 'job_draft'])
+      .exec((err, user) => {
+        if (err) {
+          throw err;
+        } else {
+          fullfill(user);
+        }
+      });
   });
 }
 
@@ -52,14 +54,17 @@ function findUserById(id, callback) {
  * @param {Function} callback Callback (user) that is called when user is added to db or retrieved from db
  */
 function addUser(user, callback) {
-  findUser(user.id, dbuserObject => {
-    if (dbuserObject) {
-      callback(null, dbuserObject);
-    } else {
-      let userObject = new User(user);
-      userObject.save(callback);
-    }
-  });
+  console.log(user);
+  findUser({ id: user.id })
+    .then(dbuserObject => {
+      if (dbuserObject) {
+        callback(null, dbuserObject);
+      } else {
+        let userObject = new User(user);
+        userObject.save(callback);
+      }
+    })
+    .catch(err => console.log(err));
 }
 
 /**
@@ -68,10 +73,11 @@ function addUser(user, callback) {
  * @param  {Function} callback Callback (err, user) that is called when user's busy status is toggled
  */
 function toggleUserAvailability(chatId, callback) {
-  findUser(chatId, user => {
-    user.busy = !user.busy;
-    user.save(callback);
-  });
+  findUser({ id: chatId })
+    .then(user => {
+      user.busy = !user.busy;
+      user.save(callback);
+    });
 }
 
 /**
@@ -118,17 +124,18 @@ function toggleCategoryForUser(chatId, categoryId, callback) {
     });
   };
 
-  findUser(chatId, user => {
-    Category.findById(categoryId, (err, category) => {
-      if (err) {
-        // todo: handle error
-      } else if (category) {
-        findCategoryCallback(category, user);
-      } else {
-        // todo: handle if category isn't there
-      }
+  findUser({ id: chatId })
+    .then(user => {
+      Category.findById(categoryId, (err, category) => {
+        if (err) {
+          // todo: handle error
+        } else if (category) {
+          findCategoryCallback(category, user);
+        } else {
+          // todo: handle if category isn't there
+        }
+      });
     });
-  });
 }
 
 // Categories

@@ -46,17 +46,18 @@ function handleInline(bot, msg) {
  * @param  {Number} chatId Chat id of user that should receive keyboard
  */
 function sendCategories(bot, chatId) {
-  dbmanager.findUser(chatId, user => {
-    dbmanager.getCategories((err, categories) => {
-      if (err) {
-        // todo: handle error
-      } else if (categories) {
-        getCategoriesCallback(categories, user, bot);
-      } else {
-        // todo: handle if categories are empty
-      }
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
+      dbmanager.getCategories((err, categories) => {
+        if (err) {
+          // todo: handle error
+        } else if (categories) {
+          getCategoriesCallback(categories, user, bot);
+        } else {
+          // todo: handle if categories are empty
+        }
+      });
     });
-  });
 };
 
 /**
@@ -95,17 +96,18 @@ function editPage(bot, msg, page) {
     .catch(err => console.log(err));
   };
 
-  dbmanager.findUser(msg.message.chat.id, user => {
-    dbmanager.getCategories((err, categories) => {
-      if (err) {
-        // todo: handle error
-      } else if (categories) {
-        getCategoriesCallback(categories, user);
-      } else {
-        // todo: handle if categories are empty
-      }
+  dbmanager.findUser({ id: msg.message.chat.id })
+    .then(user => {
+      dbmanager.getCategories((err, categories) => {
+        if (err) {
+          // todo: handle error
+        } else if (categories) {
+          getCategoriesCallback(categories, user);
+        } else {
+          // todo: handle if categories are empty
+        }
+      });
     });
-  });
 };
 
 /**

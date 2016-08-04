@@ -202,19 +202,20 @@ function handleFreelancerAnswerInline(bot, msg) {
     let freelancerUsername = options[3];
 
     dbmanager.findJobById(jobId, job => {
-      dbmanager.findUser({username: freelancerUsername}, user => {
-        if (answer === strings.freelancerOptions.interested) {
-          makeInterested(true, bot, msg, job, user);
-        } else if (answer === strings.freelancerOptions.notInterested) {
-          makeInterested(false, bot, msg, job, user);
-        } else if (answer === strings.freelancerOptions.report) {
-          reportJob(bot, msg, job, user);
-        } else if (answer === strings.freelancerAcceptOptions.accept) {
-          makeAccepted(true, bot, msg, job, user);
-        } else if (answer === strings.freelancerAcceptOptions.refuse) {
-          makeAccepted(false, bot, msg, job, user);
-        }
-      });
+      dbmanager.findUser({ username: freelancerUsername })
+        .then(user => {
+          if (answer === strings.freelancerOptions.interested) {
+            makeInterested(true, bot, msg, job, user);
+          } else if (answer === strings.freelancerOptions.notInterested) {
+            makeInterested(false, bot, msg, job, user);
+          } else if (answer === strings.freelancerOptions.report) {
+            reportJob(bot, msg, job, user);
+          } else if (answer === strings.freelancerAcceptOptions.accept) {
+            makeAccepted(true, bot, msg, job, user);
+          } else if (answer === strings.freelancerAcceptOptions.refuse) {
+            makeAccepted(false, bot, msg, job, user);
+          }
+        });
     });
   }
 }

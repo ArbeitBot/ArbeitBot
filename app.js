@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const config = require('./config');
 
 // setup mongoose and load all models
+mongoose.Promise = global.Promise;
 mongoose.connect(config.database);
 fs.readdirSync(path.join(__dirname, '/models')).forEach(filename => {
   if (~filename.indexOf('.js')) {

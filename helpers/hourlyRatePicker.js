@@ -21,15 +21,16 @@ function handleInline(bot, msg) {
  * @param  {Number} chatId Chat id of user who should receive inline
  */
 function sendHourlyRate(bot, chatId) {
-  dbmanager.findUser(chatId, user => {
-    let hourlyRates = strings.hourlyRateOptions;
-    let keyboard = hourlyRateKeyboard(user, hourlyRates);
-    keyboards.sendInline(
-      bot, 
-      user.id,
-      strings.editHourlyRateMessage,
-      keyboard);
-  });
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
+      let hourlyRates = strings.hourlyRateOptions;
+      let keyboard = hourlyRateKeyboard(user, hourlyRates);
+      keyboards.sendInline(
+        bot, 
+        user.id,
+        strings.editHourlyRateMessage,
+        keyboard);
+    });
 };
 
 /**
@@ -53,26 +54,27 @@ function editHourlyRate(bot, msg) {
     .catch(err => console.log(err));
   };
 
-  dbmanager.findUser(msg.message.chat.id, user => {
-    let needCongrats = !user.hourly_rate;
-    user.hourly_rate = command;
-    user.save((err, user) => {
-      if (err) {
-        // todo: handle error
-      } else if (user) {
-        getUserCallback(user);
-        if (needCongrats && user.bio && user.categories.length > 0) {
-          keyboards.sendKeyboard(
-            bot,
-            user.id, 
-            strings.filledEverythingMessage, 
-            keyboards.freelancerKeyboard(user));
+  dbmanager.findUser({ id: msg.message.chat.id })
+    .then(user => {
+      let needCongrats = !user.hourly_rate;
+      user.hourly_rate = command;
+      user.save((err, user) => {
+        if (err) {
+          // todo: handle error
+        } else if (user) {
+          getUserCallback(user);
+          if (needCongrats && user.bio && user.categories.length > 0) {
+            keyboards.sendKeyboard(
+              bot,
+              user.id, 
+              strings.filledEverythingMessage, 
+              keyboards.freelancerKeyboard(user));
+          }
+        } else {
+          // todo: handle if user wasn't returned
         }
-      } else {
-        // todo: handle if user wasn't returned
-      }
+      });
     });
-  });
 };
 
 /**
