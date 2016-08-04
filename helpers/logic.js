@@ -83,7 +83,7 @@ function handleKeyboard(msg) {
   else if (text === clientOptions.postNewJob) {
     textInput.askForNewJobCategory(msg, bot);
   } else if (text === clientOptions.myJobs) {
-    // todo: send all jobs as cards
+    sendAllJobsList(msg.from.id, msg.chat.id);
   }
   // Check freelance menu
   else if (text === freelanceMenuOptions.editBio || text === freelanceMenuOptions.addBio) {
@@ -102,6 +102,45 @@ function handleKeyboard(msg) {
 };
 
 // Sending messages
+
+/**
+ * Sends all job's that are created by user and are currently not finished yet.
+ * @param {Number} userId: id of user, to search through database
+ * @param {Number} chatId: id of chat, where to respond with message
+ *searchingForFreelancer: 'searchingForFreelancer',
+  freelancerChosen: 'freelancerChosen',
+  finished: 'finished',
+  frozen: 'frozen',
+  banned: 'banned'
+ */
+function sendAllJobsList(userId, chatId) {
+  dbmanager.findUser(userId, user => {
+    if (user) {
+      let unfinishedJobs = user.jobs.find((job) => {
+        return job.state != strings.jobStates.finished;
+      });
+
+      for (var job of unfinishedJobs) {
+        //delete old message
+        deleteMessage(
+          job.current_inline_message_id,
+          job.current_inline_chat_id);
+        //send new one
+        reassignJobMessage(chatId, job);
+      }
+    } else {
+      // todo: user not found
+    }
+  })
+}
+
+function deleteMessage(msgId, chatId) {
+
+}
+
+function reassignJobMessage(chatId, job) {
+
+}
 
 /**
  * Sends main menu keyboard to user with chat id
@@ -184,7 +223,7 @@ function toggleUserAvailability(chatId) {
     if (err) {
       // todo: handle error
     } else if (user) {
-      const message = user.busy ? 
+      let message = user.busy ?
         strings.becameBusyMessage : 
         strings.becameAvailableMessage;
       if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {

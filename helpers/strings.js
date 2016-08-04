@@ -108,14 +108,6 @@ module.exports = {
     byClient: 'byClient',
     byFreelancer: 'byFreelancer'
   },
-  reviewStates: {
-    rate: 'rate',
-    review: 'review'
-  },
-  reviewTypes: {
-    byClient: 'byClient',
-    byFreelancer: 'byFreelancer'
-  },
   freelancerOptions: {
     interested: 'Interested',
     notInterested: 'Not interested',
@@ -130,8 +122,8 @@ module.exports = {
     report: 'Report'
   },
   report: {
-    thanks: 'Спасибо за вашу бдительность!',
-    reason: 'В чем причина репорта?'
+    thanks: 'Thanks you for your alertness!',
+    reason: 'What is the report reason?'
   },
   rateOptions: {
     back: '🔙 Back',
