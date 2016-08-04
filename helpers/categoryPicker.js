@@ -45,15 +45,10 @@ function handleInline(bot, msg) {
 function sendCategories(bot, chatId) {
   dbmanager.findUser({ id: chatId })
     .then(user => {
-      dbmanager.getCategories((err, categories) => {
-        if (err) {
-          // todo: handle error
-        } else if (categories) {
+      dbmanager.getCategories()
+        .then(categories => {
           getCategoriesCallback(categories, user, bot);
-        } else {
-          // todo: handle if categories are empty
-        }
-      });
+        });
     });
 };
 
@@ -90,20 +85,15 @@ function editPage(bot, msg, page) {
     };
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageReplyMarkup(send)
-    .catch(err => console.log(err));
+      .catch(err => console.log(err));
   };
 
   dbmanager.findUser({ id: msg.message.chat.id })
     .then(user => {
-      dbmanager.getCategories((err, categories) => {
-        if (err) {
-          // todo: handle error
-        } else if (categories) {
+      dbmanager.getCategories()
+        .then(categories => {
           getCategoriesCallback(categories, user);
-        } else {
-          // todo: handle if categories are empty
-        }
-      });
+        });
     });
 };
 

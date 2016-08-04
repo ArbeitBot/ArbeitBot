@@ -151,25 +151,32 @@ function getCategory(categoryTitle) {
 
 /**
  * Get all categories from db; populates 'freelancers', returns only freelancers available for work and with full profile, sorts them by name for now
- * @param {Function} callback Callback (err, categories) that is called upon obtaining categories from db
  */
-function getCategories(callback) {
-  Category.find({})
-  .sort('title')
-  .populate({
-    path: 'freelancers',
-    match: {
-      $and: [
-        { busy: false },
-        { bio: { $exists: true } },
-        { hourly_rate: { $exists: true } }
-      ]
-    },
-    options: {
-      sort: { 'name': -1 } 
-    }
-  })
-  .exec(callback);
+function getCategories() {
+  return new Promise(fullfill => {
+    Category.find({})
+      .sort('title')
+      .populate({
+        path: 'freelancers',
+        match: {
+          $and: [
+            { busy: false },
+            { bio: { $exists: true } },
+            { hourly_rate: { $exists: true } }
+          ]
+        },
+        options: {
+          sort: { 'name': -1 } 
+        }
+      })
+      .exec((err, categories) => {
+        if (err) {
+          throw err;
+        } else {
+          fullfill(categories);
+        }
+      });
+  });
 }
 
 // Jobs

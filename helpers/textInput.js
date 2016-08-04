@@ -134,14 +134,11 @@ function askForBio(msg, bot) {
  */
 function askForNewJobCategory(msg, bot) {
   function saveUserCallback(user) {
-    dbmanager.getCategories((err, categories) => {
-      if (err) {
-        // todo: handle error
-      } else if (categories) {
+    dbmanager.getCategories()
+      .then(categories => {
         let categoryButtons = categories
         .filter(category => category.freelancers.length > 0)
-        .map(category =>
-        {
+        .map(category => {
           return [{
             text: category.title + ' [' + category.freelancers.length + ']'
           }];
@@ -152,21 +149,15 @@ function askForNewJobCategory(msg, bot) {
           msg.chat.id,
           strings.selectCategoryMessage,
           categoryButtons);
-      } else {
-        // todo: handle if there are no categories
-      }
-    });
+      });
   };
   dbmanager.findUser({ id: msg.chat.id })
     .then(user => {
       user.input_state = strings.inputCategoryNameState;
-      user.save((err, user) => {
-        if (err) {
-          // todo: handle error
-        } else {
-          saveUserCallback(saveUserCallback);
-        }
-      });
+      user.save()
+        .then(user => {
+            saveUserCallback(saveUserCallback);
+        });
     });
 };
 
