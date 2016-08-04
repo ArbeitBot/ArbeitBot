@@ -15,9 +15,8 @@ const Review = mongoose.model('review');
 /**
  * Getting a user with search querry from mongo db, populates 'categories', 'jobs' and 'job_draft'
  * @param  {Mongo:SearchQuery} query Search query to find user
- * @param  {Function} callback Function (user) that is called when user is obtained from db
  */
-function findUser(query, callback) {
+function findUser(query) {
   return new Promise(fullfill => {
     User.findOne(query)
       .populate(['categories', 'jobs', 'job_draft'])
