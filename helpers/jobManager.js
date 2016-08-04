@@ -140,23 +140,26 @@ function handleClientInline(bot, msg) {
       addFreelancersToCandidates(jobId, users, msg, bot);
     });
   } else if (freelancerId === strings.jobSelectFreelancer) {
-    dbmanager.findJobById(jobId, job => {
-      showSelectFreelancers(msg, job, bot);
-    }, 'interestedCandidates');
+    dbmanager.findJobById(jobId, 'interestedCandidates')
+      .then(job => {
+        showSelectFreelancers(msg, job, bot);
+      });
   } else if (freelancerId === strings.jobFinishedOptions.report) {
-    dbmanager.findJobById(jobId, job => {
-      dbmanager.findUserById(options[3])
-        .then(user => {
-          reportFreelancer(bot, msg, job, user);
-        });
-    });
+    dbmanager.findJobById(jobId)
+      .then(job => {
+        dbmanager.findUserById(options[3])
+          .then(user => {
+            reportFreelancer(bot, msg, job, user);
+          });
+      });
   } else if (freelancerId === strings.jobFinishedOptions.rate) {
-    dbmanager.findJobById(jobId, job => {
-      dbmanager.findUserById(job.client)
-        .then(user => {
-          writeReview(bot, msg, job, user, options, strings.reviewTypes.byClient);
-        });
-    });
+    dbmanager.findJobById(jobId)
+      .then(job => {
+        dbmanager.findUserById(job.client)
+          .then(user => {
+            writeReview(bot, msg, job, user, options, strings.reviewTypes.byClient);
+          });
+      });
   } else {
     dbmanager.findUserById(freelancerId)
       .then(user => {
@@ -176,9 +179,10 @@ function handleSelectFreelancerInline(bot, msg) {
   let jobId = msg.data.split(strings.inlineSeparator)[2];
 
   if (freelancerId === strings.selectFreelancerCancel) {
-    dbmanager.findJobById(jobId, job => {
-      updateJobMessage(job, bot);
-    });
+    dbmanager.findJobById(jobId)
+      .then(job => {
+        updateJobMessage(job, bot);
+      });
   } else if (freelancerId === strings.selectAnotherFreelancerInline) {
     selectAnotherFreelancerForJob(bot, jobId);
   } else {
@@ -197,31 +201,33 @@ function handleFreelancerAnswerInline(bot, msg) {
   let answer = options[2];
 
   if (answer === strings.jobFinishedOptions.rate) {
-    dbmanager.findJobById(jobId, job => {
-      dbmanager.findUserById(job.selectedCandidate)
-        .then(user => {
-          writeReview(bot, msg, job, user, options, strings.reviewTypes.byFreelancer);
-        });
-    });
+    dbmanager.findJobById(jobId)
+      .then(job => {
+        dbmanager.findUserById(job.selectedCandidate)
+          .then(user => {
+            writeReview(bot, msg, job, user, options, strings.reviewTypes.byFreelancer);
+          });
+      });
   } else {
     let freelancerUsername = options[3];
 
-    dbmanager.findJobById(jobId, job => {
-      dbmanager.findUser({ username: freelancerUsername })
-        .then(user => {
-          if (answer === strings.freelancerOptions.interested) {
-            makeInterested(true, bot, msg, job, user);
-          } else if (answer === strings.freelancerOptions.notInterested) {
-            makeInterested(false, bot, msg, job, user);
-          } else if (answer === strings.freelancerOptions.report) {
-            reportJob(bot, msg, job, user);
-          } else if (answer === strings.freelancerAcceptOptions.accept) {
-            makeAccepted(true, bot, msg, job, user);
-          } else if (answer === strings.freelancerAcceptOptions.refuse) {
-            makeAccepted(false, bot, msg, job, user);
-          }
-        });
-    });
+    dbmanager.findJobById(jobId)
+      .then(job => {
+        dbmanager.findUser({ username: freelancerUsername })
+          .then(user => {
+            if (answer === strings.freelancerOptions.interested) {
+              makeInterested(true, bot, msg, job, user);
+            } else if (answer === strings.freelancerOptions.notInterested) {
+              makeInterested(false, bot, msg, job, user);
+            } else if (answer === strings.freelancerOptions.report) {
+              reportJob(bot, msg, job, user);
+            } else if (answer === strings.freelancerAcceptOptions.accept) {
+              makeAccepted(true, bot, msg, job, user);
+            } else if (answer === strings.freelancerAcceptOptions.refuse) {
+              makeAccepted(false, bot, msg, job, user);
+            }
+          });
+      });
   }
 }
 
@@ -377,9 +383,10 @@ function addFreelancersToCandidates(jobId, users, msg, bot, job) {
   if (job) {
     jobCallback(job);
   } else {
-    dbmanager.findJobById(jobId, newJob => {
-      jobCallback(newJob);
-    });
+    dbmanager.findJobById(jobId)
+      .then(newJob => {
+        jobCallback(newJob);
+      });
   }
 }
 
@@ -391,21 +398,19 @@ function addFreelancersToCandidates(jobId, users, msg, bot, job) {
  * @param  {Mongo:ObjectId} jobId  Job id of job wherre freelancer is selected
  */
 function selectFreelancerForJob(bot, msg, userId, jobId) {
-  dbmanager.findJobById(jobId, job => {
-    dbmanager.findUserById(userId)
-      .then(user => {
-        job.selectedCandidate = user._id;
-        job.state = strings.jobStates.freelancerChosen;
-        job.save((err, newJob) => {
-          if (err) {
-            // todo: handle error
-          } else {
-            updateJobMessage(newJob, bot);
-            sendUsersJobOffer(bot, [user], newJob);
-          }
-        })
-      });
-  });
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUserById(userId)
+        .then(user => {
+          job.selectedCandidate = user._id;
+          job.state = strings.jobStates.freelancerChosen;
+          job.save()
+            .then(newJob => {
+                updateJobMessage(newJob, bot);
+                sendUsersJobOffer(bot, [user], newJob);
+            })
+        });
+    });
 }
 
 /**
@@ -414,21 +419,19 @@ function selectFreelancerForJob(bot, msg, userId, jobId) {
  * @param  {Mongo:ObjectId} jobId Id of relevant job
  */
 function selectAnotherFreelancerForJob(bot, jobId) {
-  dbmanager.findJobById(jobId, job => {
-    dbmanager.findUserById(job.selectedCandidate)
-      .then(user => {
-        job.selectedCandidate = null;
-        job.state = strings.jobStates.searchingForFreelancer;
-        job.save((err, newJob) => {
-          if (err) {
-            // todo: handle error
-          } else {
-            updateJobMessage(newJob, bot);
-            sendUsersJobOffer(bot, strings.selectAnotherFreelancerInline, newJob);
-          }
-        })
-      });
-  });
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUserById(job.selectedCandidate)
+        .then(user => {
+          job.selectedCandidate = null;
+          job.state = strings.jobStates.searchingForFreelancer;
+          job.save()
+            .then(newJob => {
+              updateJobMessage(newJob, bot);
+              sendUsersJobOffer(bot, strings.selectAnotherFreelancerInline, newJob);
+            })
+        });
+    });
 }
 
 // Update message

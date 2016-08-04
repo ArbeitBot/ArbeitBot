@@ -229,15 +229,16 @@ function freelancersForJob(job, callback) {
  * @param  {Function} callback Callback (freelancers) that is called when users are obtained from db
  */
 function freelancersForJobId(jobId, callback) {
-  findJobById(jobId, job => {
-    if (job) {
-      freelancersForJob(job, users => {
-        callback(users);
-      });
-    } else {
-      callback(null);
-    }
-  });
+  findJobById(jobId)
+    .then(job => {
+      if (job) {
+        freelancersForJob(job, users => {
+          callback(users);
+        });
+      } else {
+        callback(null);
+      }
+    });
 }
 
 // Review

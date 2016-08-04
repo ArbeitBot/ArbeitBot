@@ -343,29 +343,30 @@ function completeReport(reportMessage, msg, user, bot) {
   });
   report.save();
 
-  dbmanager.findJobById(jobId, job => {
-    // Обновить обьект job добавив туда новый Report
-    job.reports.push(report);
-    if (job.reports.length >= reportsLimit) {
-      job.state = strings.jobStates.frozen;
-    }
-    job.reportedBy.push(user._id);
-    job.save();
-    
-    //Получаем обьект работодателя
-    let clientId = job.client;
-    dbmanager.findUserById(clientId)
-      .then(client => {
-        //Добавляем Report в обьект работодателя
-        client.reports.push(report);
-        client.reportedBy.push(user._id);
-        client.save();
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      // Обновить обьект job добавив туда новый Report
+      job.reports.push(report);
+      if (job.reports.length >= reportsLimit) {
+        job.state = strings.jobStates.frozen;
+      }
+      job.reportedBy.push(user._id);
+      job.save();
+      
+      //Получаем обьект работодателя
+      let clientId = job.client;
+      dbmanager.findUserById(clientId)
+        .then(client => {
+          //Добавляем Report в обьект работодателя
+          client.reports.push(report);
+          client.reportedBy.push(user._id);
+          client.save();
+        });
+      bot.sendMessage({
+        chat_id: msg.from.id,
+        text: strings.report.thanks
       });
-    bot.sendMessage({
-      chat_id: msg.from.id,
-      text: strings.report.thanks
     });
-  })
 }
 
 // Exports
