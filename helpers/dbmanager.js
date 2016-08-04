@@ -203,23 +203,23 @@ function findJobById(id, populate) {
 /**
  * Gets a list of available freelancers for job
  * @param  {Mongo:Job} job Job object for which freelancers are returned
- * @param  {Function} callback Callback (freelancers) that is called when users are obtained from db
  */
-function freelancersForJob(job, callback) {
-  User.find({ $and: [
-        { categories: job.category },
-        { busy: false },
-        { bio: { $exists: true } },
-        { hourly_rate: { $exists: true } },
-        { _id: { $nin: job.notInterestedCandidates } }
-      ]})
-  .exec(function(err, users) {
-    if (err) {
-      // todo: handle error
-      console.log(err);
-    } else {
-      callback(users);
-    }
+function freelancersForJob(job) {
+  return new Promise(fullfill => {
+    User.find({ $and: [
+      { categories: job.category },
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+      { _id: { $nin: job.notInterestedCandidates } }
+    ]})
+      .exec((err, users) => {
+        if (err) {
+          throw err;
+        } else {
+          fullfill(users);
+        }
+      });
   });
 }
 
@@ -232,9 +232,10 @@ function freelancersForJobId(jobId, callback) {
   findJobById(jobId)
     .then(job => {
       if (job) {
-        freelancersForJob(job, users => {
-          callback(users);
-        });
+        freelancersForJob(job)
+          .then(users => {
+            callback(users);
+          });
       } else {
         callback(null);
       }

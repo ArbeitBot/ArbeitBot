@@ -32,9 +32,10 @@ function sendJobCreatedMessage(user, bot, job) {
       }));
   };
 
-  dbmanager.freelancersForJob(job, users => {
-    sendKeyboard(users);
-  });
+  dbmanager.freelancersForJob(job)
+    .then(users => {
+      sendKeyboard(users);
+    });
 }
 
 function writeReview(bot, msg, job, user, data, reviewTypes) {
@@ -475,9 +476,10 @@ function updateJobMessageForSearch(job, bot) {
     });
   }
 
-  dbmanager.freelancersForJob(job, users => {
-    updateKeyboard(users);
-  });
+  dbmanager.freelancersForJob(job)
+    .then(users => {
+      updateKeyboard(users);
+    });
 }
 
 /**
