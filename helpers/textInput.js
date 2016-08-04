@@ -17,17 +17,14 @@ let Report = mongoose.model('report');
  * @param  {Function} callback Callback(input_state, user) that is called when check is done
  */
 function check(msg, callback) {
-  dbmanager.getUser(msg.chat.id, (err, user) => {
-    if (err) {
-      // todo: handle error
-      callback(false);
-    } else if (user) {
-      callback(user.input_state, user);
-    } else {
-      // todo: handle if no user
-      callback(false);
-    }
-  });
+  dbmanager.findUser({ id: msg.chat.id })
+    .then(user => {
+      if (user) {
+        callback(user.input_state, user);
+      } else {
+        callback();
+      }
+    })
 };
 
 /**
@@ -103,10 +100,8 @@ function handle(msg, user, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function askForBio(msg, bot) {
-  dbmanager.getUser(msg.chat.id, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
+  dbmanager.findUser({ id: msg.chat.id })
+    .then(user => {
       user.input_state = strings.inputBioState;
       user.save((err, user) => {
         if (err) {
@@ -128,10 +123,7 @@ function askForBio(msg, bot) {
           });
         }
       });
-    } else {
-      // todo: handle if no user
-    }
-  });
+    });
 }
 
 /**
@@ -142,14 +134,11 @@ function askForBio(msg, bot) {
  */
 function askForNewJobCategory(msg, bot) {
   function saveUserCallback(user) {
-    dbmanager.getCategories((err, categories) => {
-      if (err) {
-        // todo: handle error
-      } else if (categories) {
+    dbmanager.getCategories()
+      .then(categories => {
         let categoryButtons = categories
         .filter(category => category.freelancers.length > 0)
-        .map(category =>
-        {
+        .map(category => {
           return [{
             text: category.title + ' [' + category.freelancers.length + ']'
           }];
@@ -160,27 +149,16 @@ function askForNewJobCategory(msg, bot) {
           msg.chat.id,
           strings.selectCategoryMessage,
           categoryButtons);
-      } else {
-        // todo: handle if there are no categories
-      }
-    });
-  };
-  dbmanager.getUser(msg.chat.id, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
-      user.input_state = strings.inputCategoryNameState;
-      user.save((err, user) => {
-        if (err) {
-          // todo: handle error
-        } else {
-          saveUserCallback(saveUserCallback);
-        }
       });
-    } else {
-      // todo: handle if no user
-    }
-  });
+  };
+  dbmanager.findUser({ id: msg.chat.id })
+    .then(user => {
+      user.input_state = strings.inputCategoryNameState;
+      user.save()
+        .then(user => {
+            saveUserCallback(saveUserCallback);
+        });
+    });
 };
 
 /**
@@ -280,33 +258,21 @@ function cancelJobCreation(msg, user, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function startJobDraft(categoryTitle, msg, user, bot) {
-  dbmanager.getCategory(categoryTitle, (err, category) => {
-    if (err) {
-      // todo: handle error
-    } else if (category) {
+  dbmanager.getCategory(categoryTitle)
+    .then(category => {
       let draft = new Job({
         category: category,
         client: user
       });
-      draft.save((err, draft) => {
-        if (err) {
-          // todo: handle error
-        } else {
+      draft.save()
+        .then(draft => {
           user.job_draft = draft;
-          draft.save((err, job) => {
-            if (err) {
-              // todo: handle error
-            } else {
+          draft.save()
+            .then(job => {
               askForNewJobPriceRange(msg, user, bot, job, category);
-            }
-          });
-        }
-      });
-    } else {
-      // todo: handle no category
-      console.log(msg);
-    }
-  });
+            });
+        });
+    });
 };
 
 /**
@@ -377,28 +343,30 @@ function completeReport(reportMessage, msg, user, bot) {
   });
   report.save();
 
-  dbmanager.findJobById(jobId, job => {
-    // Обновить обьект job добавив туда новый Report
-    job.reports.push(report);
-    if (job.reports.length >= reportsLimit) {
-      job.state = strings.jobStates.frozen;
-    }
-    job.reportedBy.push(user._id);
-    job.save();
-    
-    //Получаем обьект работодателя
-    let clientId = job.client;
-    dbmanager.findUserById(clientId, client => {
-      //Добавляем Report в обьект работодателя
-      client.reports.push(report);
-      client.reportedBy.push(user._id);
-      client.save();
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      // Обновить обьект job добавив туда новый Report
+      job.reports.push(report);
+      if (job.reports.length >= reportsLimit) {
+        job.state = strings.jobStates.frozen;
+      }
+      job.reportedBy.push(user._id);
+      job.save();
+      
+      //Получаем обьект работодателя
+      let clientId = job.client;
+      dbmanager.findUserById(clientId)
+        .then(client => {
+          //Добавляем Report в обьект работодателя
+          client.reports.push(report);
+          client.reportedBy.push(user._id);
+          client.save();
+        });
+      bot.sendMessage({
+        chat_id: msg.from.id,
+        text: strings.report.thanks
+      });
     });
-    bot.sendMessage({
-      chat_id: msg.from.id,
-      text: strings.report.thanks
-    });
-  })
 }
 
 // Exports

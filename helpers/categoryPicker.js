@@ -6,7 +6,7 @@ const keyboards = require('./keyboards');
 const dbmanager = require('./dbmanager');
 const strings = require('./strings');
 
-const pageSize = 8;
+const pageSize = 10;
 
 /**
  * Handles incoming message that's send when user selects an inline button
@@ -21,21 +21,18 @@ function handleInline(bot, msg) {
   } else if (command === strings.categoryRight) {
     editPage(bot, msg, page+1);
   } else {
-    dbmanager.toggleCategoryForUser(msg.message.chat.id, command, (err, user, isAdded) => {
-      if (err) {
-        // todo: handle error
-      } else {
-        if (isAdded) {
-          if (user.bio && user.hourly_rate && user.categories.length === 1) {
-            keyboards.sendKeyboard(
-              bot,
-              user.id, 
-              strings.filledEverythingMessage, 
-              keyboards.freelancerKeyboard(user));
-          }
+    dbmanager.toggleCategoryForUser(msg.message.chat.id, command)
+    .then(({ user, isAdded }) => {
+      if (isAdded) {
+        if (user.bio && user.hourly_rate && user.categories.length === 1) {
+          keyboards.sendKeyboard(
+            bot,
+            user.id, 
+            strings.filledEverythingMessage, 
+            keyboards.freelancerKeyboard(user));
         }
-        editPage(bot, msg, page);
       }
+      editPage(bot, msg, page);
     });
   }
 };
@@ -46,23 +43,13 @@ function handleInline(bot, msg) {
  * @param  {Number} chatId Chat id of user that should receive keyboard
  */
 function sendCategories(bot, chatId) {
-  dbmanager.getUser(chatId, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
-      dbmanager.getCategories((err, categories) => {
-        if (err) {
-          // todo: handle error
-        } else if (categories) {
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
+      dbmanager.getCategories()
+        .then(categories => {
           getCategoriesCallback(categories, user, bot);
-        } else {
-          // todo: handle if categories are empty
-        }
-      });
-    } else {
-      // todo: handle if user isn't there
-    }
-  });
+        });
+    });
 };
 
 /**
@@ -98,30 +85,16 @@ function editPage(bot, msg, page) {
     };
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageReplyMarkup(send)
-    .catch(err => console.log(err));
+      .catch(err => console.log(err));
   };
 
-  function getUserCallback(user) {
-    dbmanager.getCategories((err, categories) => {
-      if (err) {
-        // todo: handle error
-      } else if (categories) {
-        getCategoriesCallback(categories, user);
-      } else {
-        // todo: handle if categories are empty
-      }
+  dbmanager.findUser({ id: msg.message.chat.id })
+    .then(user => {
+      dbmanager.getCategories()
+        .then(categories => {
+          getCategoriesCallback(categories, user);
+        });
     });
-  };
-
-  dbmanager.getUser(msg.message.chat.id, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
-      getUserCallback(user);
-    } else {
-      // todo: handle if user wasn't found
-    }
-  });
 };
 
 /**
@@ -146,7 +119,7 @@ function categoriesKeyboard(categories, user, page) {
       categoriesLeft.push(cat);
     }
   }
-  const allCategories = user.categories.concat(categoriesLeft);
+  let allCategories = user.categories.concat(categoriesLeft);
   allCategories = allCategories.slice(page*pageSize,page*pageSize+pageSize);
 
   let keyboard = [];
@@ -178,7 +151,7 @@ function categoriesKeyboard(categories, user, page) {
     });
   }
   const remainder = categories.length % pageSize;
-  const lastPage = (categories.length - remainder) / pageSize;
+  let lastPage = (categories.length - remainder) / pageSize;
   if (remainder > 0) {
     lastPage = lastPage + 1;
   }

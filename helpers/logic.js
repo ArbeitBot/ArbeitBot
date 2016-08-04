@@ -26,8 +26,8 @@ bot.on('message', msg => {
       textInput.handle(msg, user, bot);
     } else {
       if (check.botCommandStart(msg)) {
-        dbmanager.addUser(msg.from, err => {
-          // todo: handle error
+        dbmanager.addUser(msg.from)
+        .then(user => {
           sendMainMenu(msg.chat.id);
         });
       } else if (check.replyMarkup(msg)) {
@@ -177,10 +177,8 @@ function sendFreelanceMenu(chatId) {
    * Set categories, edit hourly rate,
    * and set Busy status.
    */
-  dbmanager.getUser(chatId, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
       let text = user.busy ? 
         strings.fullFreelancerMessageBusy :
         strings.fullFreelancerMessageAvailable;
@@ -194,10 +192,7 @@ function sendFreelanceMenu(chatId) {
         chatId,
         text,
         keyboards.freelancerKeyboard(user));
-    } else {
-      // todo: handle case when user doesn't exist – basically impossible one
-    }
-  });
+    });
 };
 
 /**
@@ -219,11 +214,9 @@ function sendHelp(chatId) {
  * @param {Number} chatId Chat id of user who should have his busy status toggled
  */
 function toggleUserAvailability(chatId) {
-  dbmanager.toggleUserAvailability(chatId, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
-      let message = user.busy ?
+  dbmanager.toggleUserAvailability(chatId)
+    .then(user => {
+      const message = user.busy ? 
         strings.becameBusyMessage : 
         strings.becameAvailableMessage;
       if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
@@ -236,8 +229,5 @@ function toggleUserAvailability(chatId) {
         chatId,
         message,
         keyboards.freelancerKeyboard(user));
-    } else {
-      // todo: handle case when user doesn't exist
-    }
-  });
+    });
 };

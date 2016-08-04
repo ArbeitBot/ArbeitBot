@@ -21,10 +21,8 @@ function handleInline(bot, msg) {
  * @param  {Number} chatId Chat id of user who should receive inline
  */
 function sendHourlyRate(bot, chatId) {
-  dbmanager.getUser(chatId, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
       let hourlyRates = strings.hourlyRateOptions;
       let keyboard = hourlyRateKeyboard(user, hourlyRates);
       keyboards.sendInline(
@@ -32,10 +30,7 @@ function sendHourlyRate(bot, chatId) {
         user.id,
         strings.editHourlyRateMessage,
         keyboard);
-    } else {
-      // todo: handle if user isn't there
-    }
-  });
+    });
 };
 
 /**
@@ -59,10 +54,8 @@ function editHourlyRate(bot, msg) {
     .catch(err => console.log(err));
   };
 
-  dbmanager.getUser(msg.message.chat.id, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
+  dbmanager.findUser({ id: msg.message.chat.id })
+    .then(user => {
       let needCongrats = !user.hourly_rate;
       user.hourly_rate = command;
       user.save((err, user) => {
@@ -81,10 +74,7 @@ function editHourlyRate(bot, msg) {
           // todo: handle if user wasn't returned
         }
       });
-    } else {
-      // todo: handle if user wasn't found
-    }
-  });
+    });
 };
 
 /**
