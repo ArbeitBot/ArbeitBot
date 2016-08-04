@@ -33,17 +33,20 @@ function findUser(query) {
 /**
  * Get user from mongo by id, populates 'categories', 'jobs' and 'job_draft'
  * @param  {Mongo:ObjectId} id User id from mongo db
- * @param  {Function} callback Callback function (user) that is called when user is obtained from db
  */
-function findUserById(id, callback) {
-  User.findById(id)
-  .populate(['categories', 'jobs', 'job_draft'])
-  .exec((err, user) => {
-    if (err) {
-      // todo: handle error
-    } else {
-      callback(user);
-    }
+function findUserById(id) {
+  return new Promise(fullfill => {
+    User.findById(id)
+      .populate(['categories', 'jobs', 'job_draft'])
+      .exec((err, user) => {
+        if (err) {
+          throw err;
+        } else if (!user) {
+          throw new Error('No user found');
+        } else {
+          fullfill(user);
+        }
+      });
   });
 }
 

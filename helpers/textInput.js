@@ -375,12 +375,13 @@ function completeReport(reportMessage, msg, user, bot) {
     
     //Получаем обьект работодателя
     let clientId = job.client;
-    dbmanager.findUserById(clientId, client => {
-      //Добавляем Report в обьект работодателя
-      client.reports.push(report);
-      client.reportedBy.push(user._id);
-      client.save();
-    });
+    dbmanager.findUserById(clientId)
+      .then(client => {
+        //Добавляем Report в обьект работодателя
+        client.reports.push(report);
+        client.reportedBy.push(user._id);
+        client.save();
+      });
     bot.sendMessage({
       chat_id: msg.from.id,
       text: strings.report.thanks
