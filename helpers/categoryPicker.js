@@ -13,6 +13,9 @@ const pageSize = 10;
  * @param  {Telegram:Bot} bot Bot that should send a response to this action
  * @param  {Telegram:Message} msg Message that was received upon clicking an inline button
  */
+eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
+  handleInline(bot, msg);
+});
 function handleInline(bot, msg) {
   const command = msg.data.split(strings.inlineSeparator)[1];
   const page = parseInt(msg.data.split(strings.inlineSeparator)[2]);

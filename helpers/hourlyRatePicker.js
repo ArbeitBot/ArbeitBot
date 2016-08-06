@@ -11,6 +11,9 @@ let strings = require('./strings');
  * @param  {Telegram:Bot} bot Bot that should edit or send hourly rate keyboard
  * @param  {Telegram:Message} msg Message that came along with inline button click
  */
+eventEmitter.on(strings.hourlyRateInline, ({ msg, bot }) => {
+  handleInline(bot, msg);
+});
 function handleInline(bot, msg) {
   editHourlyRate(bot, msg);
 };

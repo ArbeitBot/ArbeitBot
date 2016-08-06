@@ -11,7 +11,6 @@ const categoryPicker = require('./categoryPicker');
 const hourlyRatePicker = require('./hourlyRatePicker');
 const textInput = require('./textInput');
 const jobManager = require('./jobManager');
-
 // Handle messages
 
 /**
@@ -44,19 +43,10 @@ bot.on('message', msg => {
  * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
  */
 bot.on('inline.callback.query', msg => {
-  if (msg.data.indexOf(strings.categoryInline) > -1) {
-    categoryPicker.handleInline(bot, msg);
-  } else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {
-    hourlyRatePicker.handleInline(bot, msg);
-  } else if (msg.data.indexOf(strings.freelancerInline) > -1) {
-    jobManager.handleClientInline(bot, msg);
-  } else if (msg.data.indexOf(strings.freelancerJobInline) > -1) {
-    jobManager.handleFreelancerAnswerInline(bot, msg);
-  } else if (msg.data.indexOf(strings.selectFreelancerInline) > -1) {
-    jobManager.handleSelectFreelancerInline(bot, msg);
-  } else {
-    console.log(msg);
-  }
+  let options = msg.data.split(strings.inlineSeparator);
+  let inlineQuerry = options[0];
+
+  eventEmitter.emit(inlineQuerry, { msg, bot })
 });
 
 // Helpers

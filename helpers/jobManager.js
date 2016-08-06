@@ -4,9 +4,9 @@
  * Please see docs/job_process.txt to get better idea on job life cycle
  */
 
-let keyboards = require('./keyboards');
-let dbmanager = require('./dbmanager');
-let strings = require('./strings');
+const keyboards = require('./keyboards');
+const dbmanager = require('./dbmanager');
+const strings = require('./strings');
 
 /** Main functions */
 
@@ -28,8 +28,8 @@ function sendJobCreatedMessage(user, bot, job) {
           keyboards.sendInline(
             bot,
             user.id,
-            messageFromFreelancers(freelancers),
-            jobInlineKeyboard(freelancers, job));
+            messageFromFreelancers(users),
+            jobInlineKeyboard(users, job));
         });
     });
 }
@@ -121,6 +121,9 @@ function writeReview(bot, msg, job, user, data, reviewTypes) {
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Messager} msg Message received
  */
+eventEmitter.on(strings.freelancerInline, ({ msg, bot }) => {
+  handleClientInline(bot, msg);
+});
 function handleClientInline(bot, msg) {
   // Get essential info
   let options = msg.data.split(strings.inlineSeparator);
@@ -166,6 +169,9 @@ function handleClientInline(bot, msg) {
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Messager} msg Message received
  */
+eventEmitter.on(strings.selectFreelancerInline, ({ msg, bot }) => {
+  handleSelectFreelancerInline(bot, msg);
+});
 function handleSelectFreelancerInline(bot, msg) {
   // Get essential info
   let freelancerId = msg.data.split(strings.inlineSeparator)[1];
@@ -188,6 +194,9 @@ function handleSelectFreelancerInline(bot, msg) {
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Message} msg Message that was sent with this inline
  */
+eventEmitter.on(strings.freelancerJobInline, ({ msg, bot }) => {
+  handleFreelancerAnswerInline(bot, msg);
+});
 function handleFreelancerAnswerInline(bot, msg) {
   let options = msg.data.split(strings.inlineSeparator);
   let jobId = options[1];
@@ -349,26 +358,28 @@ function reportFreelancer(bot, msg, job, user) {
  * @param {Mongoose:Job} job   (Optional) pass a job if you have any so that bot doesn't have to fetch job by Job id from db
  */
 function addFreelancersToCandidates(jobId, users, msg, bot, job) {
+  const jobCallback = job => {
+    users = users.filter(user => {
+      return !job.candidates || 
+        (job.candidates.indexOf(user._id) === -1 && 
+        job.interestedCandidates.indexOf(user._id) === 
+        -1 && job.notInterestedCandidates.indexOf(user._id) === -1);
+    });
+    job.current_inline_chat_id = msg.message.chat.id;
+    job.current_inline_message_id = msg.message.message_id;
+    users.forEach(user => job.candidates.push(user));
+    job.save()
+      .then(newJob => {
+        sendUsersJobOffer(bot, users, newJob);
+        updateJobMessage(newJob, bot);
+      });
+  };
+
   if (job) {
     jobCallback(job);
   } else {
     dbmanager.findJobById(jobId)
-      .then(newJob => {
-        users = users.filter(user => {
-          return !job.candidates || 
-            (job.candidates.indexOf(user._id) === -1 && 
-            job.interestedCandidates.indexOf(user._id) === 
-            -1 && job.notInterestedCandidates.indexOf(user._id) === -1);
-        });
-        job.current_inline_chat_id = msg.message.chat.id;
-        job.current_inline_message_id = msg.message.message_id;
-        users.forEach(user => job.candidates.push(user));
-        job.save()
-          .then(newJob => {
-            sendUsersJobOffer(bot, users, newJob);
-            updateJobMessage(newJob, bot);
-          });
-      });
+      .then(jobCallback);
   }
 }
 
