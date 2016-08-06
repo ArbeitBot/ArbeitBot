@@ -122,9 +122,6 @@ function writeReview(bot, msg, job, user, data, reviewTypes) {
  * @param  {Telegram:Messager} msg Message received
  */
 eventEmitter.on(strings.freelancerInline, ({ msg, bot }) => {
-  handleClientInline(bot, msg);
-});
-function handleClientInline(bot, msg) {
   // Get essential info
   let options = msg.data.split(strings.inlineSeparator);
   let freelancerId = options[1];
@@ -162,7 +159,7 @@ function handleClientInline(bot, msg) {
         addFreelancersToCandidates(jobId, [user], msg, bot);
       });
   }
-}
+});
 
 /**
  * Handles case when freelancer should be selected for job from client
@@ -170,9 +167,6 @@ function handleClientInline(bot, msg) {
  * @param  {Telegram:Messager} msg Message received
  */
 eventEmitter.on(strings.selectFreelancerInline, ({ msg, bot }) => {
-  handleSelectFreelancerInline(bot, msg);
-});
-function handleSelectFreelancerInline(bot, msg) {
   // Get essential info
   let freelancerId = msg.data.split(strings.inlineSeparator)[1];
   let jobId = msg.data.split(strings.inlineSeparator)[2];
@@ -187,7 +181,7 @@ function handleSelectFreelancerInline(bot, msg) {
   } else {
     selectFreelancerForJob(bot, msg, freelancerId, jobId);
   }
-}
+});
 
 /**
  * Handles freelancer inline answer whether he is interested ot not or wanr to report
@@ -195,9 +189,6 @@ function handleSelectFreelancerInline(bot, msg) {
  * @param  {Telegram:Message} msg Message that was sent with this inline
  */
 eventEmitter.on(strings.freelancerJobInline, ({ msg, bot }) => {
-  handleFreelancerAnswerInline(bot, msg);
-});
-function handleFreelancerAnswerInline(bot, msg) {
   let options = msg.data.split(strings.inlineSeparator);
   let jobId = options[1];
   let answer = options[2];
@@ -231,7 +222,7 @@ function handleFreelancerAnswerInline(bot, msg) {
           });
       });
   }
-}
+});
 
 /**
 //// Client side
@@ -948,8 +939,5 @@ function freelancerRateInlineKeyboard(jobId) {
 
 // Exports
 module.exports = {
-  sendJobCreatedMessage,
-  handleClientInline,
-  handleSelectFreelancerInline,
-  handleFreelancerAnswerInline
+  sendJobCreatedMessage
 };

@@ -14,9 +14,6 @@ const pageSize = 10;
  * @param  {Telegram:Message} msg Message that was received upon clicking an inline button
  */
 eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
-  handleInline(bot, msg);
-});
-function handleInline(bot, msg) {
   const command = msg.data.split(strings.inlineSeparator)[1];
   const page = parseInt(msg.data.split(strings.inlineSeparator)[2]);
   if (command === strings.categoryLeft) {
@@ -38,7 +35,7 @@ function handleInline(bot, msg) {
       editPage(bot, msg, page);
     });
   }
-};
+});
 
 /**
  * Sends freelancer list of categories with inline buttons to pick categories
@@ -177,6 +174,5 @@ function categoriesKeyboard(categories, user, page) {
 // Exports
 
 module.exports = {
-  sendCategories,
-  handleInline
+  sendCategories
 };

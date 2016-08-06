@@ -12,11 +12,8 @@ let strings = require('./strings');
  * @param  {Telegram:Message} msg Message that came along with inline button click
  */
 eventEmitter.on(strings.hourlyRateInline, ({ msg, bot }) => {
-  handleInline(bot, msg);
-});
-function handleInline(bot, msg) {
   editHourlyRate(bot, msg);
-};
+});
 
 /**
  * Sends initial message with hourly rate picker inline
@@ -114,6 +111,5 @@ function hourlyRateKeyboard(user, hourlyRates) {
 // Exports
 
 module.exports = {
-  sendHourlyRate: sendHourlyRate,
-  handleInline: handleInline
+  sendHourlyRate: sendHourlyRate
 };
