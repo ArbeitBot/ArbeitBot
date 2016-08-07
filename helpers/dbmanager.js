@@ -237,6 +237,14 @@ function freelancersForJobId(jobId) {
   });
 }
 
+function saveFreelancerMessageToJob(msg, job) {
+  return new Promise(fullfill => {
+    job.freelancer_inline_message_id = msg.message.message_id;
+    job.freelancer_inline_chat_id = msg.message.chat.id;
+    job.save().then(fullfill);
+  });
+}
+
 // Review
 
 /**
@@ -286,6 +294,7 @@ module.exports = {
   findJobById,
   freelancersForJob,
   freelancersForJobId,
+  saveFreelancerMessageToJob,
   //Review
   findReviewById,
   addReview

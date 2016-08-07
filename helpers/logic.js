@@ -11,6 +11,7 @@ const categoryPicker = require('./categoryPicker');
 const hourlyRatePicker = require('./hourlyRatePicker');
 const textInput = require('./textInput');
 const jobManager = require('./jobManager');
+
 // Handle messages
 
 /**
@@ -27,7 +28,7 @@ bot.on('message', msg => {
       if (check.botCommandStart(msg)) {
         dbmanager.addUser(msg.from)
           .then(user => {
-            sendMainMenu(msg.chat.id);
+            keyboards.sendMainMenu(bot, msg.chat.id);
           });
       } else if (check.replyMarkup(msg)) {
         handleKeyboard(msg);

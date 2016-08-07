@@ -33,20 +33,16 @@ var jobSchema = new Schema({
     ref: 'client',
     required: true
   },
-  selectedCandidate: {
-    type: Schema.ObjectId,
-    ref: 'user'
-  }, 
   candidates: [{
     type: Schema.ObjectId,
     ref: 'user',
-    required: false,
+    required: true,
     default: []
   }],
   interestedCandidates: [{
     type: Schema.ObjectId,
     ref: 'user',
-    required: false,
+    required: true,
     default: []
   }],
   notInterestedCandidates: [{
@@ -54,7 +50,11 @@ var jobSchema = new Schema({
     ref: 'user',
     required: false,
     default: []
-  }]
+  }],
+  selectedCandidate: {
+    type: Schema.ObjectId,
+    ref: 'user'
+  }, 
 });
 
 mongoose.model('job', jobSchema);

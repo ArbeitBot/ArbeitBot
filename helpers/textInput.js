@@ -37,33 +37,31 @@ function handle(msg, user, bot) {
   if (user.input_state == strings.inputBioState) {
     let newBio = msg.text.substring(0, 150);
     
-    let needsCongrats = !user.bio;
+    let needsCongrats = !user.bio && !!user.hourly_rate && user.categories.length > 0;
 
     user.bio = newBio;
     user.input_state = undefined;
-    user.save((err, user) => {
-      bot.sendMessage({
+    user.save()
+      .then(user => {
+        bot.sendMessage({
           chat_id: msg.chat.id,
           text: strings.changedBioMessage+user.bio,
           reply_markup: JSON.stringify({
             keyboard: keyboards.freelancerKeyboard(user),
-            resize_keyboard: true
-        })})
-        .then(function() 
-        {
-          if (needsCongrats &&user.hourly_rate && user.categories.length > 0) {
-            keyboards.sendKeyboard(
-              bot,
-              user.id, 
-              strings.filledEverythingMessage, 
-              keyboards.freelancerKeyboard(user));
-          }
+            resize_keyboard: true 
+          })
         })
-        .catch(function(err)
-        {
-          console.log(err);
-        });
-    });
+          .then(data => {
+            if (needsCongrats) {
+              keyboards.sendKeyboard(
+                bot,
+                user.id, 
+                strings.filledEverythingMessage, 
+                keyboards.freelancerKeyboard(user));
+            }
+          })
+          .catch(err => console.log(err));
+      });
   } else if (user.input_state == strings.inputCategoryNameState) {
     if (msg.text == strings.jobCreateCancel) {
       cancelJobCreation(msg, user, bot);

@@ -166,6 +166,10 @@ function sendInline(bot, chatId, text, keyboard) {
 // Exports
 
 module.exports = {
+  freelancerKeyboard,
+  mainMenuKeyboard,
+  clientKeyboard,
+  helpKeyboard,
   sendMainMenu,
   sendClientMenu,
   sendFreelanceMenu,
