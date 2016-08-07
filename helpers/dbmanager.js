@@ -9,6 +9,7 @@ const User = mongoose.model('user');
 const Category = mongoose.model('category');
 const Job = mongoose.model('job');
 const Review = mongoose.model('review');
+const UserChatInline = mongoose.model('userChatInline');
 
 // User
 
@@ -237,11 +238,24 @@ function freelancersForJobId(jobId) {
   });
 }
 
-function saveFreelancerMessageToJob(msg, job) {
+/**
+ * Saves freelancer's message id and chat id to job in order to reuse later (i.e. edit job message)
+ * @param  {Telegram:Message} msg  Message came with inline
+ * @param  {Mongoose:Job} job  Job to which we should add freelancer's inline
+ * @param  {Mongoose:User} user Freelancer whos inline should be added
+ */
+function saveFreelancerMessageToJob(msg, job, user) {
   return new Promise(fullfill => {
-    job.freelancer_inline_message_id = msg.message.message_id;
-    job.freelancer_inline_chat_id = msg.message.chat.id;
-    job.save().then(fullfill);
+    const chatInline = new UserChatInline({
+      user,
+      message_id: msg.message.message_id,
+      chat_id: msg.message.chat.id
+    });
+    chatInline.save()
+      .then(chatInline => {
+        job.freelancer_chat_inlines.push(chatInline);
+        job.save().then(fullfill);
+      });
   });
 }
 
@@ -278,6 +292,24 @@ function addReview(review) {
   });
 }
 
+// Helpers
+
+/**
+ * Returns the right chat inline from job for freelancer
+ * @param {Mongoose:Job} job  Job where to search
+ * @param {Mongoose:User} user User for shom to search
+ * @returns {Mongoose:UserChatInline} Chat inline object
+ */
+function chatInline(job, user) {
+  let chatInline;
+  job.freelancer_chat_inlines.forEach(ci => {
+    if (ci.chat_id == user.id) {
+      chatInline = ci;
+    }
+  });
+  return chatInline;
+};
+
 // Export
 
 module.exports = {
@@ -295,7 +327,9 @@ module.exports = {
   freelancersForJob,
   freelancersForJobId,
   saveFreelancerMessageToJob,
-  //Review
+  // Review
   findReviewById,
-  addReview
+  addReview,
+  // Helpers
+  chatInline
 };

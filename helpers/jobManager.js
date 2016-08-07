@@ -54,7 +54,7 @@ function writeReview(bot, msg, job, user, data, reviewTypes) {
     bot.editMessageText(send)
       .catch(err => {
         if (err.error.description !== 'Bad Request: message is not modified') {
-          console.log(err);
+          console.log(err.error.description);
         }
       });
   } else if (data[4] === strings.rateOptions.back) {
@@ -105,7 +105,7 @@ function writeReview(bot, msg, job, user, data, reviewTypes) {
             bot.editMessageText(send)
             .catch(err => {
               if (err.error.description !== 'Bad Request: message is not modified') {
-                console.log(err);
+                console.log(err.error.description);
               }
             });
           });
@@ -136,22 +136,6 @@ eventEmitter.on(strings.freelancerInline, ({ msg, bot }) => {
       .then(job => {
         showSelectFreelancers(msg, job, bot);
       });
-  } else if (freelancerId === strings.jobFinishedOptions.report) {
-    dbmanager.findJobById(jobId)
-      .then(job => {
-        dbmanager.findUserById(options[3])
-          .then(user => {
-            reportFreelancer(bot, msg, job, user);
-          });
-      });
-  } else if (freelancerId === strings.jobFinishedOptions.rate) {
-    dbmanager.findJobById(jobId)
-      .then(job => {
-        dbmanager.findUserById(job.client)
-          .then(user => {
-            writeReview(bot, msg, job, user, options, strings.reviewTypes.byClient);
-          });
-      });
   } else {
     dbmanager.findUserById(freelancerId)
       .then(user => {
@@ -161,7 +145,7 @@ eventEmitter.on(strings.freelancerInline, ({ msg, bot }) => {
 });
 
 /**
- * Handles freelancer inline answer whether he is interested ot not or wanr to report
+ * Handles freelancer inline answer whether he is interested ot not or want to report
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Message} msg Message that was sent with this inline
  */
@@ -175,13 +159,16 @@ eventEmitter.on(strings.freelancerJobInline, ({ msg, bot }) => {
     .then(job => {
       dbmanager.findUser({ username: freelancerUsername })
         .then(user => {
-          if (answer === strings.freelancerOptions.interested) {
-            makeInterested(true, bot, msg, job, user);
-          } else if (answer === strings.freelancerOptions.notInterested) {
-            makeInterested(false, bot, msg, job, user);
-          } else if (answer === strings.freelancerOptions.report) {
-            reportJob(bot, msg, job, user);
-          }
+          dbmanager.saveFreelancerMessageToJob(msg, job, user)
+            .then(job => {
+              if (answer === strings.freelancerOptions.interested) {
+                makeInterested(true, bot, msg, job, user);
+              } else if (answer === strings.freelancerOptions.notInterested) {
+                makeInterested(false, bot, msg, job, user);
+              } else if (answer === strings.freelancerOptions.report) {
+                reportJob(bot, msg, job, user);
+              }
+            });
         });
     });
 });
@@ -193,19 +180,33 @@ eventEmitter.on(strings.freelancerJobInline, ({ msg, bot }) => {
  */
 eventEmitter.on(strings.selectFreelancerInline, ({ msg, bot }) => {
   // Get essential info
-  let freelancerId = msg.data.split(strings.inlineSeparator)[1];
-  let jobId = msg.data.split(strings.inlineSeparator)[2];
+  const freelancerId = msg.data.split(strings.inlineSeparator)[1];
+  const jobId = msg.data.split(strings.inlineSeparator)[2];
 
   if (freelancerId === strings.selectFreelancerCancel) {
     dbmanager.findJobById(jobId)
       .then(job => {
         updateJobMessage(job, bot);
       });
-  } else if (freelancerId === strings.selectAnotherFreelancerInline) {
-    selectAnotherFreelancerForJob(bot, jobId);
   } else {
     selectFreelancerForJob(bot, msg, freelancerId, jobId);
   }
+});
+
+/**
+ * Handles case when freelancer didn't respond yet and client would like to select another freelancer
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.selectAnotherFreelancerInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  selectAnotherFreelancerForJob(bot, jobId);
+});
+
+eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const option = msg.data.split(strings.inlineSeparator)[2];
+  const freelancerUsername = msg.data.split(strings.inlineSeparator)[3];
 });
 
 /**
@@ -258,7 +259,7 @@ function showSelectFreelancers(msg, job, bot) {
       inline_keyboard: jobSelectCandidateKeyboard(job)
     }),
     text: strings.selectCandidateMessage
-  }).catch(err => console.log(err));
+  }).catch(err => console.log(err.error.description));
 }
 
 /**
@@ -285,9 +286,9 @@ function reportFreelancer(bot, msg, job, user) {
 function addFreelancersToCandidates(jobId, users, msg, bot, job) {
   const jobCallback = job => {
     users = users.filter(user => {
-      return !job.candidates.includes(user._id) && 
-        !job.interestedCandidates.includes(user._id) &&
-        !job.notInterestedCandidates.includes(user._id);
+      return !job.candidates.map(o => String(o)).includes(String(user._id)) && 
+        !job.interestedCandidates.map(o => String(o)).includes(String(user._id)) &&
+        !job.notInterestedCandidates.map(o => String(o)).includes(String(user._id));
     });
     job.current_inline_chat_id = msg.message.chat.id;
     job.current_inline_message_id = msg.message.message_id;
@@ -324,7 +325,7 @@ function selectFreelancerForJob(bot, msg, userId, jobId) {
           job.save()
             .then(newJob => {
                 updateJobMessage(newJob, bot);
-                sendUsersJobOffer(bot, [user], newJob);
+                updateFreelancerMessage(bot, msg, user, job);
             });
         });
     });
@@ -336,16 +337,18 @@ function selectFreelancerForJob(bot, msg, userId, jobId) {
  * @param  {Mongo:ObjectId} jobId Id of relevant job
  */
 function selectAnotherFreelancerForJob(bot, jobId) {
-  dbmanager.findJobById(jobId)
+  dbmanager.findJobById(jobId, 'freelancer_chat_inlines')
     .then(job => {
       dbmanager.findUserById(job.selectedCandidate)
         .then(user => {
+          const chatInline = dbmanager.chatInline(job, user);
           job.selectedCandidate = null;
           job.state = strings.jobStates.searchingForFreelancer;
+          // job.interestedCandidates.push(user);
           job.save()
             .then(newJob => {
               updateJobMessage(newJob, bot);
-              sendUsersJobOffer(bot, strings.selectAnotherFreelancerInline, newJob);
+              updateFreelancerMessage(bot, null, user, job, chatInline);
             })
         });
     });
@@ -386,7 +389,7 @@ function updateJobMessageForSearch(job, bot) {
       };
       send.reply_markup = JSON.stringify(send.reply_markup);
       bot.editMessageText(send)
-        .catch(err => console.log(err));
+        .catch(err => console.log(err.error.description));
     });
 }
 
@@ -404,21 +407,15 @@ function updateJobMessageForSelected(job, bot) {
       inline_keyboard: [[{
         text: strings.jobSelectAnotherFreelancer,
         callback_data:
-        strings.selectFreelancerInline +
-        strings.inlineSeparator +
-        strings.selectAnotherFreelancerInline +
-        strings.inlineSeparator +
-        job._id
+          strings.selectAnotherFreelancerInline +
+          strings.inlineSeparator +
+          job._id
       }]]
     }
   };
   send.reply_markup = JSON.stringify(send.reply_markup);
   bot.editMessageText(send)
-  .catch(err => {
-    if (err.error.description !== 'Bad Request: message is not modified') {
-      console.log(err);
-    }
-  });
+    .catch(err => console.log(err.error.description));
 }
 
 /**
@@ -451,7 +448,7 @@ function updateJobMessageForFinished(job, bot) {
       bot.editMessageText(send)
       .catch(err => {
         if (err.error.description !== 'Bad Request: message is not modified') {
-          console.log(err);
+          console.log(err.error.description);
         }
       });
     });
@@ -523,7 +520,7 @@ function jobSelectCandidateKeyboard(job) {
     strings.inlineSeparator +
     strings.selectFreelancerCancel +
     strings.inlineSeparator +
-    job._id
+    job._id 
   }]);
   job.interestedCandidates.forEach(freelancer => {
     keyboard.push([{
@@ -608,7 +605,7 @@ function makeInterested(interested, bot, msg, job, user) {
     };
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageText(send)
-      .catch(err => console.log(err));
+      .catch(err => console.log(err.error.description));
   } else {
     // Remove user from candidates
     var candIndex = job.candidates.indexOf(user._id);
@@ -677,7 +674,7 @@ function makeAccepted(accept, bot, msg, job, user) {
     };
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageText(send)
-      .catch(err => console.log(err));
+      .catch(err => console.log(err.error.description));
   }
 }
 
@@ -709,13 +706,14 @@ function reportJob(bot, msg, job, user) {
 /**
  * Used to update job messahe from freelancer side; uses updateFreelancerMessageForSearch, updateFreelancerMessageForSelected and updateFreelancerMessageForFinished respectively
  * @param  {Telegram:Bot} bot  Bot that should edit message
- * @param  {Telegram:Message} msg  Message that came along with action
+ * @param  {Telegram:Message} msg  (Optional) Message that came along with action, can use chatInline instead
  * @param  {Mongoose:User} user Freelancer whos message should be editted
  * @param  {Mongoose:Job} job  Relevant job
+ * @param {Mongoose:UserChatInline} chatInline (Optional) Chat inline to use instead of msg
  */
-function updateFreelancerMessage(bot, msg, user, job) {
+function updateFreelancerMessage(bot, msg, user, job, chatInline) {
   if (job.state === strings.jobStates.searchingForFreelancer) {
-    updateFreelancerMessageForSearch(bot, msg, user, job);
+    updateFreelancerMessageForSearch(bot, msg, user, job, chatInline);
   } else if (job.state === strings.jobStates.freelancerChosen) {
     updateFreelancerMessageForSelected(bot, msg, user, job);
   } else if (job.state === strings.jobStates.finished) {
@@ -730,17 +728,20 @@ function updateFreelancerMessage(bot, msg, user, job) {
  * @param  {Mongoose:User} user Freelancer whos message should be editted
  * @param  {Mongoose:Job} job  Relevant job
  */
-function updateFreelancerMessageForSearch(bot, msg, user, job) {
+function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
   let prefix = '';
-  if (job.interestedCandidates.includes(user._id)) {
+  if (job.interestedCandidates.map(o => String(o)).includes(String(user._id))) {
     prefix = `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n`;
-  } else if (job.notInterestedCandidates.includes(user._id)) {
+  } else if (job.notInterestedCandidates.map(o => String(o)).includes(String(user._id))) {
     prefix = `${ strings.notInterestedOption } ${ strings.freelancerOptions.notInterested }\n\n`;
   }
 
+  let chatId = (!!msg) ? msg.message.chat.id : chatInline.chat_id;
+  let messageId = (!!msg) ? msg.message.message_id : chatInline.message_id;
+
   let send = {
-    chat_id: msg.message.chat.id,
-    message_id: msg.message.message_id,
+    chat_id: chatId,
+    message_id: messageId,
     text: `${ prefix }${ job.description }`,
     reply_markup: {
       inline_keyboard: []
@@ -749,7 +750,7 @@ function updateFreelancerMessageForSearch(bot, msg, user, job) {
   send.reply_markup = JSON.stringify(send.reply_markup);
 
   bot.editMessageText(send)
-    .catch(err => console.log(err));
+    .catch(err => console.log(err.error.description));
 }
 
 /**
@@ -760,34 +761,39 @@ function updateFreelancerMessageForSearch(bot, msg, user, job) {
  * @param  {Mongoose:Job} job  Relevant job
  */
 function updateFreelancerMessageForSelected(bot, msg, user, job) {
-  if (job.state == strings.jobStates.freelancerChosen) {
-    let prefix = `${strings.refuseOption} ${strings.freelancerAcceptOptions.refuse}`;
+  let prefix = `${strings.refuseOption} ${strings.freelancerAcceptOptions.refuse}`;
 
-    let send = {
-      chat_id: msg.message.chat.id,
-      message_id: msg.message.message_id,
-      text: `${prefix}\n\n${job.description}`,
+  job.populate('freelancer_chat_inlines', (err, job) => {
+    let chatInline = dbmanager.chatInline(job, user);
+
+    let keyboard = [];
+    Object.keys(strings.freelancerAcceptOptions).forEach(key => {
+      const option = strings.freelancerAcceptOptions[key];
+      keyboard.push([{
+        text: option,
+        callback_data:
+        strings.freelancerAcceptInline +
+        strings.inlineSeparator +
+        job._id +
+        strings.inlineSeparator +
+        option +
+        strings.inlineSeparator +
+        user.username
+      }]);
+    });
+
+    let message = {
+      chat_id: chatInline.chat_id,
+      message_id: chatInline.message_id,
+      text: `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n${ job.description }\n\n${ strings.acceptOrRejectMessage }`,
       reply_markup: {
-        inline_keyboard: []
+        inline_keyboard: keyboard
       }
     };
-
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageText(send)
-      .catch(err => {
-        if (err.error.description !== 'Bad Request: message is not modified') {
-          console.log(err);
-        }
-      })
-      .then(data => {
-        job.freelancer_inline_chat_id = data.chat.id;
-        job.freelancer_inline_message_id = data.message_id;
-        job.save();
-      });
-
-    job.state = strings.jobStates.searchingForFreelancer;
-    job.save();
-  }
+    message.reply_markup = JSON.stringify(message.reply_markup);
+    bot.editMessageText(message)
+      .catch(err => console.log(err.error.description))
+  });
 }
 
 /**
@@ -823,7 +829,7 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
   bot.editMessageText(send)
     .catch(err => {
       if (err.error.description !== 'Bad Request: message is not modified') {
-        console.log(err);
+        console.log(err.error.description);
       }
     });
 }

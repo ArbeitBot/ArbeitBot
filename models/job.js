@@ -11,8 +11,12 @@ var jobSchema = new Schema({
   },
   current_inline_message_id: String,
   current_inline_chat_id: String,
-  freelancer_inline_message_id: String,
-  freelancer_inline_chat_id: String,
+  freelancer_chat_inlines: [{
+    type: Schema.ObjectId,
+    ref: 'userChatInline',
+    required: true,
+    default: []
+  }],
   description: String,
   hourly_rate: String,
   reports: [{
