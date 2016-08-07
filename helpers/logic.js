@@ -26,9 +26,9 @@ bot.on('message', msg => {
     } else {
       if (check.botCommandStart(msg)) {
         dbmanager.addUser(msg.from)
-        .then(user => {
-          sendMainMenu(msg.chat.id);
-        });
+          .then(user => {
+            sendMainMenu(msg.chat.id);
+          });
       } else if (check.replyMarkup(msg)) {
         handleKeyboard(msg);
       } else {
@@ -63,11 +63,11 @@ function handleKeyboard(msg) {
 
   // Check main menu
   if (text === mainMenuOptions.findJobs) {
-    sendFreelanceMenu(msg.chat.id);
+    keyboards.sendFreelanceMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.findContractors) {
-    sendClientMenu(msg.chat.id);
+    keyboards.sendClientMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.help) {
-    sendHelp(msg.chat.id);
+    keyboards.sendHelp(bot, sg.chat.id);
   }
   // Check client menu
   else if (text === clientOptions.postNewJob) {
@@ -87,75 +87,8 @@ function handleKeyboard(msg) {
   }
   // Check back button
   else if (text === freelanceMenuOptions.back) {
-    sendMainMenu(msg.chat.id);
+    keyboards.sendMainMenu(bot, msg.chat.id);
   }
-};
-
-// Sending messages
-
-/**
- * Sends main menu keyboard to user with chat id
- * @param {Number} chatId Chat id of user who should receive this keyboard
- */
-function sendMainMenu(chatId) {
-  keyboards.sendKeyboard(
-    bot,
-    chatId, 
-    strings.mainMenuMessage, 
-    keyboards.mainMenuKeyboard);
-};
-
-/**
- * Sends client menu to user with chat id
- * @param {Number} chatId Chat id of user who should receive keyboard
- */
-function sendClientMenu(chatId) {
-  keyboards.sendKeyboard(
-    bot,
-    chatId, 
-    strings.clientMenuMessage, 
-    keyboards.clientKeyboard);
-};
-
-/**
- * Sends freelancer menu to user with chat id; checks if user is busy or not, filled bio, hourly rate, categories or not; and sends relevant menu buttons
- * @param {Number} chatId Chat id of user who should receive keyboard
- */
-function sendFreelanceMenu(chatId) {
-  /** Main freelancer keyboard.
-   * It appears after pressing "Find Work" button
-   * Here freelancer can add his Bio,
-   * Set categories, edit hourly rate,
-   * and set Busy status.
-   */
-  dbmanager.findUser({ id: chatId })
-    .then(user => {
-      let text = user.busy ? 
-        strings.fullFreelancerMessageBusy :
-        strings.fullFreelancerMessageAvailable;
-      if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
-        text = strings.emptyFreelancerMessage;
-      } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
-        text = strings.missingFreelancerMessage;
-      }
-      keyboards.sendKeyboard(
-        bot,
-        chatId,
-        text,
-        keyboards.freelancerKeyboard(user));
-    });
-};
-
-/**
- * Sends menu with help to user chat id
- * @param {Number} chatId Chat id of user who should receive keyboard
- */
-function sendHelp(chatId) {
-  keyboards.sendInline(
-    bot,
-    chatId,
-    strings.helpMessage,
-    keyboards.helpKeyboard);
 };
 
 // Helpers
