@@ -68,7 +68,7 @@ function handleKeyboard(msg) {
   } else if (text === mainMenuOptions.findContractors) {
     keyboards.sendClientMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.help) {
-    keyboards.sendHelp(bot, sg.chat.id);
+    keyboards.sendHelp(bot, msg.chat.id);
   }
   // Check client menu
   else if (text === clientOptions.postNewJob) {
@@ -90,7 +90,7 @@ function handleKeyboard(msg) {
   else if (text === freelanceMenuOptions.back) {
     keyboards.sendMainMenu(bot, msg.chat.id);
   }
-};
+}
 
 // Helpers
 
@@ -101,11 +101,11 @@ function handleKeyboard(msg) {
 function toggleUserAvailability(chatId) {
   dbmanager.toggleUserAvailability(chatId)
     .then(user => {
-      const message = user.busy ? 
+      let message = user.busy ?
         strings.becameBusyMessage : 
         strings.becameAvailableMessage;
       if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
-        message = user.busy ? 
+        message = user.busy ?
         strings.missingBecameBusyMessage : 
         strings.missingBecameAvailableMessage;
       }
@@ -115,4 +115,4 @@ function toggleUserAvailability(chatId) {
         message,
         keyboards.freelancerKeyboard(user));
     });
-};
+}

@@ -308,7 +308,7 @@ function chatInline(job, user) {
     }
   });
   return chatInline;
-};
+}
 
 // Export
 

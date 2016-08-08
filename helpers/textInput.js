@@ -25,7 +25,7 @@ function check(msg, callback) {
         callback();
       }
     })
-};
+}
 
 /**
  * Handler for user inputs, ran after check for input state was positive; depending on user's input state saves right values to db
@@ -90,7 +90,7 @@ function handle(msg, user, bot) {
   } else {
     console.log(msg);
   }
-};
+}
 
 /**
  * Sends message to user asking for bio and adds relevant flags to user's object
@@ -157,7 +157,7 @@ function askForNewJobCategory(msg, bot) {
             saveUserCallback(saveUserCallback);
         });
     });
-};
+}
 
 /**
  * Sends message asking for job hourly rate of job that is being created, saves relevant flag to db for user
@@ -197,7 +197,7 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
         strings.selectJobHourlyRateMessage,
         keyboard);
   });
-};
+}
 
 /**
  * Sends message asking for job description of job that is being created, saves relevant flag to db for user
@@ -224,7 +224,7 @@ function askForNewJobDescription(msg, bot, user) {
       });
     }
   });
-};
+}
 
 /**
  * Cancels job creation, removes job draft and resets user's input state
@@ -246,7 +246,7 @@ function cancelJobCreation(msg, user, bot) {
         keyboards.clientKeyboard);
     }
   });
-};
+}
 
 /**
  * Creates job draft for user
@@ -271,7 +271,7 @@ function startJobDraft(categoryTitle, msg, user, bot) {
             });
         });
     });
-};
+}
 
 /**
  * Adds hourly rate to job draft and sends next step
@@ -289,7 +289,7 @@ function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
       askForNewJobDescription(msg, bot, user);
     }
   })
-};
+}
 
 /**
  * Adds desctiption to job draft and sends next step
@@ -314,7 +314,7 @@ function addDescriptionToJobDraft(description, msg, user, bot) {
       });
     }
   })
-};
+}
 
 //
 function completeReport(reportMessage, msg, user, bot) {

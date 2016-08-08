@@ -50,7 +50,7 @@ function sendCategories(bot, chatId) {
           getCategoriesCallback(categories, user, bot);
         });
     });
-};
+}
 
 /**
  * Callback function that is used when user and categories are obtained from Mongo DB – triggers sending of categories picker to user
@@ -66,7 +66,7 @@ function getCategoriesCallback(categories, user, bot) {
     user.id,
     strings.pickCategoriesMessage,
     keyboard);
-};
+}
 
 /**
  * Edits message and it's inline buttons for category picker message – mainly used for paging and if we need to update message with category picker
@@ -86,7 +86,7 @@ function editPage(bot, msg, page) {
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageReplyMarkup(send)
       .catch(err => console.log(err));
-  };
+  }
 
   dbmanager.findUser({ id: msg.message.chat.id })
     .then(user => {
@@ -95,7 +95,7 @@ function editPage(bot, msg, page) {
           getCategoriesCallback(categories, user);
         });
     });
-};
+}
 
 /**
  * Returns inline keyboard for freelancer; decorates it with checkmark if category is picked, supports multiple categories to be picked; shows picked categories on top of the list; supports paging
@@ -126,12 +126,12 @@ function categoriesKeyboard(categories, user, page) {
   let tempRow = [];
   for (let i in allCategories) {
     const isOdd = i % 2 === 1;
-    const isLast = i === allCategories.length - 1
+    const isLast = i === allCategories.length - 1;
     const currentCategory = allCategories[i];
 
     const text = user.categories.indexOf(currentCategory) > -1 ?
       currentCategory.title+strings.selectedCategory :
-      currentCategory.title
+      currentCategory.title;
 
     tempRow.push({
       text: text,
@@ -169,7 +169,7 @@ function categoriesKeyboard(categories, user, page) {
     }]);
   }
   return keyboard;
-};
+}
 
 // Exports
 

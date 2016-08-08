@@ -31,7 +31,7 @@ function sendHourlyRate(bot, chatId) {
         strings.editHourlyRateMessage,
         keyboard);
     });
-};
+}
 
 /**
  * Used to edit existing message with inline of user who has changed his hourly rate
@@ -75,7 +75,7 @@ function editHourlyRate(bot, msg) {
         }
       });
     });
-};
+}
 
 /**
  * Gets hourly rate inline keyboard for freelancer; highlights hourly rate that is currently selected
@@ -106,7 +106,7 @@ function hourlyRateKeyboard(user, hourlyRates) {
     }
   }
   return keyboard;
-};
+}
 
 // Exports
 

@@ -49,7 +49,7 @@ function freelancerKeyboard(user) {
     [{ text: strings.freelanceMenuOptions.back },
      { text: availableText }]
   ];
-};
+}
 
 /**
  * Constructs rate keyboard with particular inline prefix in button data
@@ -80,7 +80,7 @@ function rateKeyboard(inline, jobId) {
       callback_data: inline + strings.inlineSeparator + '5' + strings.inlineSeparator + jobId
     }]
   ];
-};
+}
 
 /**
  * Sends main menu keyboard to user with chat id
@@ -93,7 +93,7 @@ function sendMainMenu(bot, chatId) {
     chatId, 
     strings.mainMenuMessage, 
     mainMenuKeyboard);
-};
+}
 
 /**
  * Sends client menu to user with chat id
@@ -106,7 +106,7 @@ function sendClientMenu(bot, chatId) {
     chatId, 
     strings.clientMenuMessage, 
     clientKeyboard);
-};
+}
 
 /**
  * Sends freelancer menu to user with chat id; checks if user is busy or not, filled bio, hourly rate, categories or not; and sends relevant menu buttons
@@ -136,20 +136,20 @@ function sendFreelanceMenu(bot, chatId) {
         text,
         freelancerKeyboard(user));
     });
-};
+}
 
 /**
  * Sends menu with help to user chat id
  * @param {Telegram:Bot} bot Bot that should send keyboard
  * @param {Number} chatId Chat id of user who should receive keyboard
  */
-function sendHelp(chatId) {
+function sendHelp(bot, chatId) {
   sendInline(
     bot,
     chatId,
     strings.helpMessage,
     helpKeyboard);
-};
+}
 
 /**
  * Sends keyboard to user
@@ -172,7 +172,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
   bot.sendMessage(message)
   .then(then)
   .catch(err => console.log(err));
-};
+}
 
 /**
  * Sends inline to user
@@ -192,7 +192,7 @@ function sendInline(bot, chatId, text, keyboard) {
   message.reply_markup = JSON.stringify(message.reply_markup);
   bot.sendMessage(message)
   .catch(err => console.log(err));
-};
+}
 
 // Exports
 

@@ -21,7 +21,7 @@ function botCommandStart(message) {
   } else {
     return false;
   }
-};
+}
 
 /**
  * Checks if message is answer to any keyboard buttons
@@ -34,7 +34,7 @@ function replyMarkup(message) {
   let clientMenuOptions = Object.keys(strings.clientMenuOptions).map(key => strings.clientMenuOptions[key]);
   let allOptions = mainMenuOptions.concat(freelanceMenuOptions, clientMenuOptions);
   return allOptions.indexOf(message.text) > -1;
-};
+}
 
 // Export
 
