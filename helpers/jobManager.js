@@ -115,6 +115,8 @@ function writeReview(bot, msg, job, user, data, reviewTypes) {
 
 /** Handles */
 
+// Job process
+
 /**
  * Handles inline when client selects a freelancer (that should receive a job offer from client later on) from the list of available freelancers; also handles option when sending to all freelancers
  * @param  {Telegram:Bot} bot Bot that should respond
@@ -203,6 +205,11 @@ eventEmitter.on(strings.selectAnotherFreelancerInline, ({ msg, bot }) => {
   selectAnotherFreelancerForJob(bot, jobId);
 });
 
+/**
+ * Handles case when freelancer accepts or rejects job offer
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
 eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const option = msg.data.split(strings.inlineSeparator)[2];
@@ -231,6 +238,131 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
     });
 });
 
+// Rating
+
+/**
+ * Handles case when client clicks rate option after job is finished
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.askRateFreelancerInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+
+  dbmanager.findJobById(jobId, 'selectedCandidate client')
+    .then(job => {
+      const freelancer = job.selectedCandidate;
+
+      let keyboard = keyboards.rateKeyboard(strings.rateClientInline, job.client._id, freelancer._id);
+      let send = {
+        chat_id: job.current_inline_chat_id,
+        message_id: job.current_inline_message_id,
+        text: strings.rateClientMessage,
+        reply_markup: {
+          inline_keyboard: keyboard
+        }
+      };
+      send.reply_markup = JSON.stringify(send.reply_markup);
+      bot.editMessageText(send)
+        .catch(err => console.log(err.error.description));
+    });
+});
+
+/**
+ * Handles case when freelancer clicks rate option after job is finished
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.askRateClientInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerId = msg.data.split(strings.inlineSeparator)[2];
+
+  dbmanager.findJobById(jobId, 'client freelancer_chat_inlines')
+    .then(job => {
+      dbmanager.findUserById(freelancerId)
+        .then(freelancer => {
+          let keyboard = keyboards.rateKeyboard(strings.rateClientInline, freelancer._id, job.client._id);
+          const chatInline = dbmanager.chatInline(job, freelancer);
+          let send = {
+            chat_id: chatInline.chat_id,
+            message_id: chatInline.message_id,
+            text: strings.rateClientMessage,
+            reply_markup: {
+              inline_keyboard: keyboard
+            }
+          };
+          send.reply_markup = JSON.stringify(send.reply_markup);
+          bot.editMessageText(send)
+            .catch(err => console.log(err.error.description));
+        });
+    });
+});
+
+/**
+ * Handles case when client rates freelancer after job is done
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.rateFreelancerInline, ({ msg, bot }) => {
+  const rating = msg.data.split(strings.inlineSeparator)[1];
+  const raterId = msg.data.split(strings.inlineSeparator)[2];
+  const rateeId = msg.data.split(strings.inlineSeparator)[3];
+  
+  // todo: handle rating
+  console.log(rating, raterId, rateeId);
+});
+
+/**
+ * Handles case when freelancer rates client after job is done
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.rateClientInline, ({ msg, bot }) => {
+  const rating = msg.data.split(strings.inlineSeparator)[1];
+  const raterId = msg.data.split(strings.inlineSeparator)[2];
+  const rateeId = msg.data.split(strings.inlineSeparator)[3];
+  
+  // todo: handle rating
+  console.log(rating, raterId, rateeId);
+});
+
+// Reports
+
+/**
+ * Handles case when freelancer is reported
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerId = msg.data.split(strings.inlineSeparator)[2];
+  // todo: handle report
+  console.log(jobId, freelancerId);
+});
+
+/**
+ * Handles case when client is reported
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerIdReported = msg.data.split(strings.inlineSeparator)[2];
+  // todo: handle report
+  console.log(jobId, freelancerIdReported);
+});
+
+/**
+ * Handles case when job is reported
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerUsernameReported = msg.data.split(strings.inlineSeparator)[3];
+  // todo: handle report
+  console.log(jobId, freelancerUsernameReported);
+});
+
 /**
 //// Client side
 */
@@ -244,16 +376,17 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
  * @param  {Mongoose:Job} job Job that freelancers are offered
  */
 function sendUsersJobOffer(bot, users, job) {
-  // todo: move selectAnotherFreelancerInline to another method maybe?
   if (job.state === strings.jobStates.searchingForFreelancer) {
     users.forEach(user => {
       let keyboard = [];
       Object.keys(strings.freelancerOptions).forEach(key => {
-        let option = strings.freelancerOptions[key];
+        const option = strings.freelancerOptions[key];
+        const inline = option === strings.freelancerOptions.report ?
+          strings.reportJobInline : strings.freelancerJobInline;
         keyboard.push([{
           text: option,
           callback_data:
-            strings.freelancerJobInline +
+            inline +
             strings.inlineSeparator +
             job._id +
             strings.inlineSeparator +
@@ -282,17 +415,6 @@ function showSelectFreelancers(msg, job, bot) {
     }),
     text: strings.selectCandidateMessage
   }).catch(err => console.log(err.error.description));
-}
-
-/**
- * Used to report a freelancer
- * @param  {Telegram:Bot} bot  Bot that sohuld respond
- * @param  {Telegram:Message} msg  Message that came with action
- * @param  {Mongoose:Job} job  Relevant to this report job
- * @param  {Mongoose:User} user User to be reported
- */
-function reportFreelancer(bot, msg, job, user) {
-  //  todo: handle report
 }
 
 // Management freelancers
@@ -450,29 +572,33 @@ function updateJobMessageForFinished(job, bot) {
     .then(user => {
       let keyboard = [[{
           text: strings.jobFinishedOptions.rate,
-          callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + job._id
+          callback_data: 
+            strings.askRateFreelancerInline + 
+            strings.inlineSeparator + 
+            job._id
         },
         {
           text: strings.jobFinishedOptions.report,
-          callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + job._id + strings.inlineSeparator + user._id
+          callback_data: 
+            strings.reportFreelancerInline + 
+            strings.inlineSeparator + 
+            job._id + 
+            strings.inlineSeparator + 
+            user._id
         }
       ]];
 
       let send = {
         chat_id: job.current_inline_chat_id,
         message_id: job.current_inline_message_id,
-        text: `${strings.contactWithFreelancerMessage} @${user.username}`,
+        text: `${ strings.contactWithFreelancerMessage }\n@${ user.username }`,
         reply_markup: {
           inline_keyboard: keyboard
         }
       };
       send.reply_markup = JSON.stringify(send.reply_markup);
       bot.editMessageText(send)
-      .catch(err => {
-        if (err.error.description !== 'Bad Request: message is not modified') {
-          console.log(err.error.description);
-        }
-      });
+      .catch(err => console.log(err.error.description));
     });
 }
 
@@ -703,29 +829,6 @@ function makeAccepted(accept, bot, msg, job, user) {
   }
 }
 
-/**
- * Initializes job report
- * @param  {Telegram:Bot} bot  Bot that should respond
- * @param  {Telegram:Message} msg  Message passed with action
- * @param  {Mongoose:Job} job  Job object to report
- * @param  {Mongoose:User} user User who reports
- */
-function reportJob(bot, msg, job, user) {
-  // user.input_state = strings.inputReportMessage;
-  // user.report_draft = job._id;
-  // user.save(err => {
-  //   if (!err) {
-  //     bot.sendMessage({
-  //       chat_id: msg.from.id,
-  //       text: strings.report.reason
-  //     });
-  //     makeInterested(false, bot, msg, job, user);
-  //     updateJobMessage(job, bot);
-  //     updateFreelancerMessage(bot, msg, user, job);
-  //   }
-  // });
-}
-
 // Update message
 
 /**
@@ -831,54 +934,37 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
 function updateFreelancerMessageForFinished(bot, msg, user, job) {
   let keyboard = [[{
       text: strings.jobFinishedOptions.rate,
-      callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + user._id
+      callback_data: 
+        strings.askRateClientInline + 
+        strings.inlineSeparator + 
+        job._id + 
+        strings.inlineSeparator + 
+        user._id
     },
     {
       text: strings.jobFinishedOptions.report,
-      callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + user._id
+      callback_data: 
+        strings.reportClientInline + 
+        strings.inlineSeparator + 
+        job._id + 
+        strings.inlineSeparator + 
+        user._id
     }
   ]];
-
-  let send = {
-    chat_id: msg.message.chat.id,
-    message_id: msg.message.message_id,
-    text: `${prefix}\n\n${job.description}`,
-    reply_markup: {
-      inline_keyboard: keyboard
-    }
-  };
-
-  send.reply_markup = JSON.stringify(send.reply_markup);
-  bot.editMessageText(send)
-    .catch(err => {
-      if (err.error.description !== 'Bad Request: message is not modified') {
-        console.log(err.error.description);
+  job.populate('client', (err, job) => {
+    let send = {
+      chat_id: msg.message.chat.id,
+      message_id: msg.message.message_id,
+      text: `${ strings.contactWithClientMessage }\n\n@${ job.client.username }\n${job.description}`,
+      reply_markup: {
+        inline_keyboard: keyboard
       }
-    });
-}
+    };
 
-// Keyboards
-
-function freelancerRateInlineKeyboard(jobId) {
-  let keyboard = [];
-  let keys = Object.keys(strings.rateOptions);
-  for (let j in keys) {
-    let option = strings.rateOptions[keys[j]];
-    keyboard.push([{
-      text: option,
-      callback_data: strings.freelancerJobInline +
-      strings.inlineSeparator +
-      jobId +
-      strings.inlineSeparator +
-      strings.jobFinishedOptions.rate +
-      strings.inlineSeparator +
-      strings.reviewTypes.byFreelancer +
-      strings.inlineSeparator +
-      option
-    }]);
-  }
-
-  return keyboard;
+    send.reply_markup = JSON.stringify(send.reply_markup);
+    bot.editMessageText(send)
+      .catch(err => console.log(err.error.description));
+  });
 }
 
 /**
