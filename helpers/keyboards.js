@@ -3,6 +3,7 @@
  */
 
 const strings = require('./strings');
+const dbmanager = require('./dbmanager');
 
 // Keyboards
 
@@ -51,6 +52,129 @@ function freelancerKeyboard(user) {
 };
 
 /**
+ * Constructs rate keyboard with particular inline prefix in button data
+ * @param  {String} inline Inline prefix
+ * @param  {Mongo:ObjectId} raterId Id of user who rates
+ * @param  {Mongo:ObjectId} rateeId Id of user who is rated
+ * @return {Telegram:InlineKeyboard} Keyboard with stars and give inline data prefix
+ */
+function rateKeyboard(inline, raterId, rateeId) {
+  return [
+    [{
+      text: strings.rateOptions.oneStar,
+      callback_data: inline + strings.inlineSeparator + '1' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+    },
+    {
+      text: strings.rateOptions.twoStars,
+      callback_data: inline + strings.inlineSeparator + '2' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+    },
+    {
+      text: strings.rateOptions.threeStars,
+      callback_data: inline + strings.inlineSeparator + '3' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+    }],
+    [{
+      text: strings.rateOptions.fourStars,
+      callback_data: inline + strings.inlineSeparator + '4' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+    },
+    {
+      text: strings.rateOptions.fiveStars,
+      callback_data: inline + strings.inlineSeparator + '5' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+    }]
+  ];
+};
+
+function freelancerRateInlineKeyboard(jobId) {
+  let keyboard = [];
+  let keys = Object.keys(strings.rateOptions);
+  for (let j in keys) {
+    let option = strings.rateOptions[keys[j]];
+    keyboard.push([{
+      text: option,
+      callback_data: strings.freelancerJobInline +
+      strings.inlineSeparator +
+      jobId +
+      strings.inlineSeparator +
+      strings.jobFinishedOptions.rate +
+      strings.inlineSeparator +
+      strings.reviewTypes.byFreelancer +
+      strings.inlineSeparator +
+      option
+    }]);
+  }
+
+  return keyboard;
+}
+
+/**
+ * Sends main menu keyboard to user with chat id
+ * @param {Telegram:Bot} bot Bot that should send keyboard
+ * @param {Number} chatId Chat id of user who should receive this keyboard
+ */
+function sendMainMenu(bot, chatId) {
+  sendKeyboard(
+    bot,
+    chatId, 
+    strings.mainMenuMessage, 
+    mainMenuKeyboard);
+};
+
+/**
+ * Sends client menu to user with chat id
+ * @param {Telegram:Bot} bot Bot that should send keyboard
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
+function sendClientMenu(bot, chatId) {
+  sendKeyboard(
+    bot,
+    chatId, 
+    strings.clientMenuMessage, 
+    clientKeyboard);
+};
+
+/**
+ * Sends freelancer menu to user with chat id; checks if user is busy or not, filled bio, hourly rate, categories or not; and sends relevant menu buttons
+ * @param {Telegram:Bot} bot Bot that should send keyboard
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
+function sendFreelanceMenu(bot, chatId) {
+  /** Main freelancer keyboard.
+   * It appears after pressing "Find Work" button
+   * Here freelancer can add his Bio,
+   * Set categories, edit hourly rate,
+   * and set Busy status.
+   */
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
+      let text = user.busy ? 
+        strings.fullFreelancerMessageBusy :
+        strings.fullFreelancerMessageAvailable;
+      if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
+        text = strings.emptyFreelancerMessage;
+      } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
+        text = strings.missingFreelancerMessage;
+      }
+      sendKeyboard(
+        bot,
+        chatId,
+        text,
+        freelancerKeyboard(user));
+    });
+};
+
+/**
+ * Sends menu with help to user chat id
+ * @param {Telegram:Bot} bot Bot that should send keyboard
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
+function sendHelp(chatId) {
+  sendInline(
+    bot,
+    chatId,
+    strings.helpMessage,
+    helpKeyboard);
+};
+
+/**
  * Sends keyboard to user
  * @param  {Telegram:Bot} bot      Bot that should send keyboard
  * @param  {Number} chatId   Telegram chat id where to send keyboard
@@ -96,12 +220,15 @@ function sendInline(bot, chatId, text, keyboard) {
 // Exports
 
 module.exports = {
-  // Keyboards
+  freelancerKeyboard,
+  rateKeyboard,
   mainMenuKeyboard,
   clientKeyboard,
   helpKeyboard,
-  // Functions
-  freelancerKeyboard,
+  sendMainMenu,
+  sendClientMenu,
+  sendFreelanceMenu,
+  sendHelp,
   sendKeyboard,
   sendInline
 };

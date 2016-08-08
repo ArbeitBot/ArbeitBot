@@ -11,9 +11,9 @@ let strings = require('./strings');
  * @param  {Telegram:Bot} bot Bot that should edit or send hourly rate keyboard
  * @param  {Telegram:Message} msg Message that came along with inline button click
  */
-function handleInline(bot, msg) {
+eventEmitter.on(strings.hourlyRateInline, ({ msg, bot }) => {
   editHourlyRate(bot, msg);
-};
+});
 
 /**
  * Sends initial message with hourly rate picker inline
@@ -21,10 +21,8 @@ function handleInline(bot, msg) {
  * @param  {Number} chatId Chat id of user who should receive inline
  */
 function sendHourlyRate(bot, chatId) {
-  dbmanager.getUser(chatId, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
       let hourlyRates = strings.hourlyRateOptions;
       let keyboard = hourlyRateKeyboard(user, hourlyRates);
       keyboards.sendInline(
@@ -32,10 +30,7 @@ function sendHourlyRate(bot, chatId) {
         user.id,
         strings.editHourlyRateMessage,
         keyboard);
-    } else {
-      // todo: handle if user isn't there
-    }
-  });
+    });
 };
 
 /**
@@ -59,10 +54,8 @@ function editHourlyRate(bot, msg) {
     .catch(err => console.log(err));
   };
 
-  dbmanager.getUser(msg.message.chat.id, (err, user) => {
-    if (err) {
-      // todo: handle error
-    } else if (user) {
+  dbmanager.findUser({ id: msg.message.chat.id })
+    .then(user => {
       let needCongrats = !user.hourly_rate;
       user.hourly_rate = command;
       user.save((err, user) => {
@@ -81,10 +74,7 @@ function editHourlyRate(bot, msg) {
           // todo: handle if user wasn't returned
         }
       });
-    } else {
-      // todo: handle if user wasn't found
-    }
-  });
+    });
 };
 
 /**
@@ -121,6 +111,5 @@ function hourlyRateKeyboard(user, hourlyRates) {
 // Exports
 
 module.exports = {
-  sendHourlyRate: sendHourlyRate,
-  handleInline: handleInline
+  sendHourlyRate: sendHourlyRate
 };

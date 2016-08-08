@@ -57,12 +57,4 @@ var userSchema = new Schema({
   }
 });
 
-userSchema.methods.name = () => {
-  if (this.username) {
-    return '@' + this.username;
-  } else {
-    return this.first_name || this.last_name;
-  }
-};
-
 mongoose.model('user', userSchema);
