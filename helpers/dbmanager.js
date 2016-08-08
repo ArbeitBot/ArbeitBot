@@ -211,7 +211,7 @@ function freelancersForJob(job) {
       { categories: job.category },
       { busy: false },
       { bio: { $exists: true } },
-      { hourly_rate: { $exists: true } },
+      { hourly_rate: job.hourly_rate },
       { _id: { $nin: job.notInterestedCandidates } }
     ]})
       .limit(10)
