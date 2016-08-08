@@ -18,7 +18,6 @@ var reviewSchema = new Schema({
     type: Number,
     required: true
   },
-  review: String,
   reviewType: {
     type: String,
     required: true

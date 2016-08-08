@@ -54,56 +54,33 @@ function freelancerKeyboard(user) {
 /**
  * Constructs rate keyboard with particular inline prefix in button data
  * @param  {String} inline Inline prefix
- * @param  {Mongo:ObjectId} raterId Id of user who rates
- * @param  {Mongo:ObjectId} rateeId Id of user who is rated
+ * @param  {Mongo:ObjectId} jobId Id of job
  * @return {Telegram:InlineKeyboard} Keyboard with stars and give inline data prefix
  */
-function rateKeyboard(inline, raterId, rateeId) {
+function rateKeyboard(inline, jobId) {
   return [
     [{
       text: strings.rateOptions.oneStar,
-      callback_data: inline + strings.inlineSeparator + '1' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+      callback_data: inline + strings.inlineSeparator + '1' + strings.inlineSeparator + jobId
     },
     {
       text: strings.rateOptions.twoStars,
-      callback_data: inline + strings.inlineSeparator + '2' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+      callback_data: inline + strings.inlineSeparator + '2' + strings.inlineSeparator + jobId
     },
     {
       text: strings.rateOptions.threeStars,
-      callback_data: inline + strings.inlineSeparator + '3' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+      callback_data: inline + strings.inlineSeparator + '3' + strings.inlineSeparator + jobId
     }],
     [{
       text: strings.rateOptions.fourStars,
-      callback_data: inline + strings.inlineSeparator + '4' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+      callback_data: inline + strings.inlineSeparator + '4' + strings.inlineSeparator + jobId
     },
     {
       text: strings.rateOptions.fiveStars,
-      callback_data: inline + strings.inlineSeparator + '5' + strings.inlineSeparator + raterId + strings.inlineSeparator + rateeId
+      callback_data: inline + strings.inlineSeparator + '5' + strings.inlineSeparator + jobId
     }]
   ];
 };
-
-function freelancerRateInlineKeyboard(jobId) {
-  let keyboard = [];
-  let keys = Object.keys(strings.rateOptions);
-  for (let j in keys) {
-    let option = strings.rateOptions[keys[j]];
-    keyboard.push([{
-      text: option,
-      callback_data: strings.freelancerJobInline +
-      strings.inlineSeparator +
-      jobId +
-      strings.inlineSeparator +
-      strings.jobFinishedOptions.rate +
-      strings.inlineSeparator +
-      strings.reviewTypes.byFreelancer +
-      strings.inlineSeparator +
-      option
-    }]);
-  }
-
-  return keyboard;
-}
 
 /**
  * Sends main menu keyboard to user with chat id

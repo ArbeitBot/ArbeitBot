@@ -109,13 +109,9 @@ module.exports = {
     frozen: 'frozen',
     banned: 'banned'
   },
-  reviewStates: {
-    rate: 'rate',
-    review: 'review'
-  },
   reviewTypes: {
-    byClient: 'byClient',
-    byFreelancer: 'byFreelancer'
+    byClient: 'byCl',
+    byFreelancer: 'byFl'
   },
   freelancerOptions: {
     interested: 'Interested',
@@ -141,9 +137,5 @@ module.exports = {
     threeStars: '⭐⭐⭐',
     fourStars: '⭐⭐⭐⭐',
     fiveStars: '⭐⭐⭐⭐⭐'
-  },
-  reviewOptions: {
-    review: 'Review',
-    no: 'No'
   }
 };
