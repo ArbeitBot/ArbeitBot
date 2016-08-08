@@ -148,7 +148,7 @@ function askForNewJobCategory(msg, bot) {
           strings.selectCategoryMessage,
           categoryButtons);
       });
-  };
+  }
   dbmanager.findUser({ id: msg.chat.id })
     .then(user => {
       user.input_state = strings.inputCategoryNameState;

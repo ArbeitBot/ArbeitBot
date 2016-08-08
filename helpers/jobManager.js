@@ -558,7 +558,7 @@ function messageFromFreelancers(users) {
  */
 function makeInterested(interested, bot, msg, job, user) {
   if (job.state !== strings.jobStates.searchingForFreelancer) {
-    var send = {
+    let send = {
       chat_id: msg.from.id,
       message_id: msg.message.message_id,
       text: strings.clientHasChosenAnotherFreelancer,
@@ -571,9 +571,9 @@ function makeInterested(interested, bot, msg, job, user) {
       .catch(err => console.log(err.error.description));
   } else {
     // Remove user from candidates
-    var candIndex = job.candidates.indexOf(user._id);
-    var intIndex = job.interestedCandidates.indexOf(user._id);
-    var notIntIndex = job.notInterestedCandidates.indexOf(user._id);
+    let candIndex = job.candidates.indexOf(user._id);
+    let intIndex = job.interestedCandidates.indexOf(user._id);
+    let notIntIndex = job.notInterestedCandidates.indexOf(user._id);
     if (candIndex > -1) {
       job.candidates.splice(candIndex, 1);
     }
