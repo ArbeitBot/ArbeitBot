@@ -214,6 +214,7 @@ function freelancersForJob(job) {
       { hourly_rate: { $exists: true } },
       { _id: { $nin: job.notInterestedCandidates } }
     ]})
+      .limit(10)
       .exec((err, users) => {
         if (err) {
           throw err;
