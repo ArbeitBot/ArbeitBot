@@ -37,6 +37,7 @@ module.exports = {
   reviewClientMessage: 'reviewClientMessage',
   thanksReviewMessage: 'thanksReviewMessage',
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
+  noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
   mainMenuOptions: {
     findJobs: 'Find work',
     findContractors: 'Find contractors',

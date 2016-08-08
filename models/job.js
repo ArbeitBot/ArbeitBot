@@ -34,7 +34,7 @@ var jobSchema = new Schema({
   },
   client: {
     type: Schema.ObjectId,
-    ref: 'client',
+    ref: 'user',
     required: true
   },
   candidates: [{

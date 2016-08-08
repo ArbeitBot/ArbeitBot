@@ -207,6 +207,28 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const option = msg.data.split(strings.inlineSeparator)[2];
   const freelancerUsername = msg.data.split(strings.inlineSeparator)[3];
+
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUser({ username: freelancerUsername })
+        .then(user => {
+          if (option === strings.freelancerAcceptOptions.accept) {
+            job.state = strings.jobStates.finished;
+            job.save()
+              .then(job => {
+                updateJobMessage(job, bot);
+                updateFreelancerMessage(bot, msg, user, job);
+              });
+          } else {
+            job.state = strings.jobStates.searchingForFreelancer;
+            job.candidate = null;
+            job.save()
+              .then(job => {
+                makeInterested(false, bot, msg, job, user);
+              });
+          }
+        });
+    });
 });
 
 /**
@@ -572,6 +594,9 @@ function messageFromFreelancers(users) {
     const lineBreak = i == 0 ? '' : '\n';
     message = `${ message }${ lineBreak }@${ user.username }\n${ user.bio }`;
   }
+  if (message.length <= 0) {
+    message = strings.noCandidatesMessage;
+  }
   return message;
 }
 
@@ -620,7 +645,7 @@ function makeInterested(interested, bot, msg, job, user) {
     if (notIntIndex > -1) {
       job.notInterestedCandidates.splice(notIntIndex, 1);
     }
-    // Add user to interesed or not interested
+    // Add user to interested or not interested
     if (interested) {
       job.interestedCandidates.push(user._id);
     } else {
@@ -761,38 +786,38 @@ function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
  * @param  {Mongoose:Job} job  Relevant job
  */
 function updateFreelancerMessageForSelected(bot, msg, user, job) {
-  let prefix = `${strings.refuseOption} ${strings.freelancerAcceptOptions.refuse}`;
-
   job.populate('freelancer_chat_inlines', (err, job) => {
-    let chatInline = dbmanager.chatInline(job, user);
+    job.populate('client', (err, job) => {
+      let chatInline = dbmanager.chatInline(job, user);
 
-    let keyboard = [];
-    Object.keys(strings.freelancerAcceptOptions).forEach(key => {
-      const option = strings.freelancerAcceptOptions[key];
-      keyboard.push([{
-        text: option,
-        callback_data:
-        strings.freelancerAcceptInline +
-        strings.inlineSeparator +
-        job._id +
-        strings.inlineSeparator +
-        option +
-        strings.inlineSeparator +
-        user.username
-      }]);
+      let keyboard = [];
+      Object.keys(strings.freelancerAcceptOptions).forEach(key => {
+        const option = strings.freelancerAcceptOptions[key];
+        keyboard.push([{
+          text: option,
+          callback_data:
+          strings.freelancerAcceptInline +
+          strings.inlineSeparator +
+          job._id +
+          strings.inlineSeparator +
+          option +
+          strings.inlineSeparator +
+          user.username
+        }]);
+      });
+
+      let message = {
+        chat_id: chatInline.chat_id,
+        message_id: chatInline.message_id,
+        text: `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n@${job.client.username}\n${ job.description }\n\n${ strings.acceptOrRejectMessage }`,
+        reply_markup: {
+          inline_keyboard: keyboard
+        }
+      };
+      message.reply_markup = JSON.stringify(message.reply_markup);
+      bot.editMessageText(message)
+        .catch(err => console.log(err.error.description))
     });
-
-    let message = {
-      chat_id: chatInline.chat_id,
-      message_id: chatInline.message_id,
-      text: `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n${ job.description }\n\n${ strings.acceptOrRejectMessage }`,
-      reply_markup: {
-        inline_keyboard: keyboard
-      }
-    };
-    message.reply_markup = JSON.stringify(message.reply_markup);
-    bot.editMessageText(message)
-      .catch(err => console.log(err.error.description))
   });
 }
 
@@ -804,8 +829,6 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
  * @param  {Mongoose:Job} job  Relevant job
  */
 function updateFreelancerMessageForFinished(bot, msg, user, job) {
-  let prefix = `${strings.acceptOption} ${strings.freelancerAcceptOptions.accept}\n${strings.waitClientResponseMessage}`;
-
   let keyboard = [[{
       text: strings.jobFinishedOptions.rate,
       callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + user._id
