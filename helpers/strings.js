@@ -4,6 +4,7 @@
 
 module.exports = {
   mainMenuMessage: 'Welcome to @arbeit_bot! I am a completelly free of charge Telegram based freelance market. Please select whether you are looking for job or contractors.',
+  noJobsExistMessage: 'No jobs exist. You can create one by clicking "Post new job" button.',
   clientMenuMessage: 'What would you like to do?',
   selectCategoryMessage: 'Please select category that your job falls into. Number of contractors available can be found between [square brackets].',
   selectJobHourlyRateMessage: 'Please select how much money would you like to pay. Price is given in USD per hour to identify level of developers. Yet you can negotiate fixed price in private messages with contractor later on. Number of available contractors in selected category for rate is given in [square brackets].',

@@ -74,7 +74,7 @@ function handleKeyboard(msg) {
   else if (text === clientOptions.postNewJob) {
     textInput.askForNewJobCategory(msg, bot);
   } else if (text === clientOptions.myJobs) {
-    // todo: send all jobs as cards
+    jobManager.sendAllJobs(bot, msg);
   }
   // Check freelance menu
   else if (text === freelanceMenuOptions.editBio || text === freelanceMenuOptions.addBio) {

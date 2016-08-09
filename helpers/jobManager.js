@@ -34,6 +34,24 @@ function sendJobCreatedMessage(user, bot, job) {
     });
 }
 
+/**
+ * Used to send user all his jobs that aren't yet closed; deletes previous existing job cards
+ * @param  {Telegram:Bot} bot Bot that should send cards
+ * @param  {Telegram:Message} msg Message that came with this command
+ */
+function sendAllJobs(bot, msg) {
+  dbmanager.findUser({ id: msg.from.id })
+    .then(user => {
+      if (user.jobs.length <= 0) {
+        keyboards.sendInline(bot, user.id, strings.noJobsExistMessage, [])
+          .catch(err => console.log(err.error.description));
+      } else {
+
+      }
+      console.log(user.jobs);
+    });
+}
+
 /** Handles */
 
 // Job process
@@ -741,5 +759,6 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
 
 // Exports
 module.exports = {
-  sendJobCreatedMessage
+  sendJobCreatedMessage,
+  sendAllJobs
 };
