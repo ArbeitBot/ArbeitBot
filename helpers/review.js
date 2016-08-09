@@ -114,6 +114,8 @@ function writeReview(bot, job, rating, client, freelancer, reviewType) {
   const chat_id = (byClient) ? job.current_inline_chat_id : chatInline.chat_id;
   const message_id = (byClient) ? job.current_inline_message_id : chatInline.message_id;
 
+  if ((job.reviewByClient && byClient) || (job.reviewByFreelancer && !byClient)) return;
+
   dbmanager.addReview({
     byUser: byUser,
     toUser: toUser,
@@ -132,6 +134,13 @@ function writeReview(bot, job, rating, client, freelancer, reviewType) {
             // todo: Send a message stating that you have received a review
           });
       });
+
+      if (byClient) {
+        job.reviewByClient = dbReviewObject._id;
+      } else {
+        job.reviewByFreelancer = dbReviewObject._id;
+      }
+      job.save();
 
       byUser.writeReview.push(dbReviewObject._id);
       byUser.save()

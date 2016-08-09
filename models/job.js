@@ -19,6 +19,14 @@ var jobSchema = new Schema({
   }],
   description: String,
   hourly_rate: String,
+  reviewByClient: {
+    type: Schema.ObjectId,
+    ref: 'review'
+  },
+  reviewByFreelancer: {
+    type: Schema.ObjectId,
+    ref: 'review'
+  },
   reports: [{
     type: Schema.ObjectId,
     ref: 'report'
