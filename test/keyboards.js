@@ -5,7 +5,6 @@ var keyboards = require('../helpers/keyboards');
 var sinon = require('sinon');
 let strings = require('../helpers/strings');
 var bot = require('../helpers/telegramBot');
-var Q = require("q");
 
 describe("Keyboards ", function() {
 
@@ -21,7 +20,7 @@ describe("Keyboards ", function() {
 
     describe("#sendKeyboard()", function() {
 
-        let deferredFail = Q.defer();
+    
 
         let sendMessageFail,
             sendMessageSuccess;
@@ -42,17 +41,18 @@ describe("Keyboards ", function() {
             let deferredSuccess;
 
             before( ()=> {
-                deferredSuccess = Q.defer();
+
+                let responseData = {
+                    "data": {}
+                }
+
+                deferredSuccess = new Promise( (resolve, reject) => { resolve(responseData) })
             })
 
             it("should be call @then if @then (function) exist", function (done) {
 
-                sendMessageSuccess = sinon.stub(bot, 'sendMessage').returns(deferredSuccess.promise);
-                var responseData = {
-                    "data": {}
-                }
+                sendMessageSuccess = sinon.stub(bot, 'sendMessage').returns(deferredSuccess);
 
-                deferredSuccess.resolve(responseData);
       
                 keyboards.sendKeyboard(bot, 213375221, 'text', [], (some)=>{ 
                     done();
@@ -65,17 +65,20 @@ describe("Keyboards ", function() {
         })
 
         describe("with error answer from server", function() {
+
+            let responseData = {
+                "error": {
+                    "code": 404,
+                    "message": "For test 1"
+                }
+            }
+            let deferredFail = new Promise( (resolve, reject) =>{ reject(responseData) });
+
             it("should be send err in @then if @then (function) exist", function () {
 
-                sendMessageFail = sinon.stub(bot, 'sendMessage').returns(deferredFail.promise);
-                var responseData = {
-                    "error": {
-                        "code": 404,
-                        "message": "For test 1"
-                    }
-                };
+                sendMessageFail = sinon.stub(bot, 'sendMessage').returns(deferredFail);
 
-                deferredFail.reject(responseData);
+
                 return keyboards.sendKeyboard(bot, 213375221, '', [], then);
             });
             after(function () {
@@ -85,18 +88,19 @@ describe("Keyboards ", function() {
         describe("with success answer from server", function() {
 
             let deferredSuccess;
-            before( ()=>  {
-                deferredSuccess = Q.defer();
+
+            before( ()=> {
+
+                let responseData = {
+                    "data": {}
+                }
+
+                deferredSuccess = new Promise( (resolve, reject) => { resolve(responseData) })
             })
 
             it("should be not send err in @then if @then (function) exist", function () {
 
-                sendMessageSuccess = sinon.stub(bot, 'sendMessage').returns(deferredSuccess.promise);
-                var responseData = {
-                    "data": {}
-                };
-
-                deferredSuccess.resolve(responseData);
+                sendMessageSuccess = sinon.stub(bot, 'sendMessage').returns(deferredSuccess);
                 return keyboards.sendKeyboard(bot, 213375221, 'text', [], then);
             });
 
@@ -118,8 +122,9 @@ describe("Keyboards ", function() {
 
     describe("#sendInline()", function() {
 
-        let deferredFail = Q.defer();
-        let deferredSuccess = Q.defer();
+
+        let deferredFail;
+        let deferredSuccess;
 
         let sendInlineFail,
             sendInlineSuccess;
@@ -137,18 +142,30 @@ describe("Keyboards ", function() {
         };
 
 
+        before( ()=> {
+
+            let responseData = {
+                "data": {}
+            }
+
+            deferredSuccess = new Promise( (resolve, reject) => { resolve(responseData) });
+
+            let responseDataError = {
+                "error": {
+                    "code": 404,
+                    "message": "For test 2"
+                }
+            };
+
+            deferredFail = new Promise( (resolve, reject)=> { reject(responseDataError) });
+        })
+
+
         describe("with error answer from server", function() {
             it("should be use bot.sendMessage", function () {
 
-                sendInlineFail = sinon.stub(bot, 'sendMessage').returns(deferredFail.promise);
-                var responseData  = {
-                    "error": {
-                        "code": 404,
-                        "message": "For test 2"
-                    }
-                };
+                sendInlineFail = sinon.stub(bot, 'sendMessage').returns(deferredFail);
 
-                deferredFail.reject(responseData);
                 return keyboards.sendInline(bot, 213375221, '', []);
             });
 
@@ -160,12 +177,7 @@ describe("Keyboards ", function() {
         describe("with success answer from server", function() {
             it("should be use bot.sendMessage", function () {
 
-                sendInlineSuccess = sinon.stub(bot, 'sendMessage').returns(deferredSuccess.promise);
-                var responseData = {
-                    "data": {}
-                };
-
-                deferredSuccess.resolve(responseData);
+                sendInlineSuccess = sinon.stub(bot, 'sendMessage').returns(deferredSuccess);
                 return keyboards.sendInline(bot, 213375221, 'text', []);
             });
 
