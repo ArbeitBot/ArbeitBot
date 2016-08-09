@@ -10,6 +10,10 @@ var userSchema = new Schema({
   hourly_rate: String,
   input_state: String,
   input_state_data: String,
+  rate: {
+    type: Number,
+    default: 0
+  },
   reports: [{
     type: Schema.ObjectId,
     ref: 'report'
@@ -56,5 +60,24 @@ var userSchema = new Schema({
     ref: 'job'
   }
 });
+
+
+userSchema.methods = {
+  /**
+   * @return {number}
+   */
+  GetRate: function () {
+    return this.rate / this.reviews.length;
+  },
+  UpdateRate: function () {
+    let tRate = 0;
+    this.reviews.forEach(review => {
+      tRate += review.rate;
+    });
+    console.log('tr', tRate);
+    this.rate = tRate;
+    this.save();
+  }
+};
 
 mongoose.model('user', userSchema);

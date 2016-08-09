@@ -124,13 +124,14 @@ function writeReview(bot, job, rating, client, freelancer, reviewType) {
   })
     .then(dbReviewObject => {
       dbmanager.findUserById(toUser)
-        .then(toUser => {
-          toUser.reviews.push(dbReviewObject._id);
-          toUser.save()
-            .then(toUser => {
-              // todo: Send a message stating that you have received a review
-            });
-        });
+      .then(toUser => {
+        toUser.reviews.push(dbReviewObject._id);
+        toUser.rate += parseInt(rating);
+        toUser.save()
+          .then(toUser => {
+            // todo: Send a message stating that you have received a review
+          });
+      });
 
       byUser.writeReview.push(dbReviewObject._id);
       byUser.save()

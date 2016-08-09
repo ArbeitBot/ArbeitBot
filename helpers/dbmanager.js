@@ -20,7 +20,7 @@ const UserChatInline = mongoose.model('userChatInline');
 function findUser(query) {
   return new Promise(fullfill => {
     User.findOne(query)
-      .populate(['categories', 'jobs', 'job_draft'])
+      .populate(['categories', 'jobs', 'job_draft', 'reviews'])
       .exec((err, user) => {
         if (err) {
           throw err;
@@ -38,7 +38,7 @@ function findUser(query) {
 function findUserById(id) {
   return new Promise(fullfill => {
     User.findById(id)
-      .populate(['categories', 'jobs', 'job_draft'])
+      .populate(['categories', 'jobs', 'job_draft', 'reviews'])
       .exec((err, user) => {
         if (err) {
           throw err;
