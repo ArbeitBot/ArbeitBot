@@ -181,7 +181,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
  * @param  {String} text     Text to send along with inline
  * @param  {Telegram:Inline} keyboard Inline keyboard to send
  */
-function sendInline(bot, chatId, text, keyboard) {
+function sendInline(bot, chatId, text, keyboard, then) {
   let message = {
     chat_id: chatId,
     text: text,
@@ -191,7 +191,8 @@ function sendInline(bot, chatId, text, keyboard) {
   }
   message.reply_markup = JSON.stringify(message.reply_markup);
   bot.sendMessage(message)
-  .catch(err => console.log(err));
+    .then(then)
+    .catch(err => console.log(err));
 }
 
 // Exports

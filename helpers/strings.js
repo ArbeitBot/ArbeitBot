@@ -3,6 +3,8 @@
  */
 
 module.exports = {
+  loadingMessage: '🐤',
+  deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ;)',
   mainMenuMessage: 'Welcome to @arbeit_bot! I am a completelly free of charge Telegram based freelance market. Please select whether you are looking for job or contractors.',
   noJobsExistMessage: 'No jobs exist. You can create one by clicking "Post new job" button.',
   clientMenuMessage: 'What would you like to do?',
