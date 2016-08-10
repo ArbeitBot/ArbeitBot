@@ -258,6 +258,7 @@ function cancelJobCreation(msg, user, bot) {
 function startJobDraft(categoryTitle, msg, user, bot) {
   dbmanager.getCategory(categoryTitle)
     .then(category => {
+      if (!category) return;
       let draft = new Job({
         category: category,
         client: user
@@ -270,7 +271,7 @@ function startJobDraft(categoryTitle, msg, user, bot) {
               askForNewJobPriceRange(msg, user, bot, job, category);
             });
         });
-    });
+    })
 }
 
 /**

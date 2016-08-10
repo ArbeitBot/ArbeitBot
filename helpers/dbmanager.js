@@ -141,8 +141,6 @@ function getCategory(categoryTitle) {
       .exec((err, category) => {
         if (err) {
           throw err;
-        } else if (!category) {
-          throw new Error('No category found');
         } else {
           fullfill(category);
         }
