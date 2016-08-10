@@ -110,7 +110,8 @@ module.exports = {
     freelancerChosen: 'freelancerChosen',
     finished: 'finished',
     frozen: 'frozen',
-    banned: 'banned'
+    banned: 'banned',
+    rated: 'rated'
   },
   reviewTypes: {
     byClient: 'byCl',

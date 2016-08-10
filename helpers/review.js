@@ -140,6 +140,11 @@ function writeReview(bot, job, rating, client, freelancer, reviewType) {
       } else {
         job.reviewByFreelancer = dbReviewObject._id;
       }
+
+      if (job.reviewByClient && job.reviewByFreelancer) {
+        job.state = strings.jobStates.rated;
+      }
+
       job.save();
 
       byUser.writeReview.push(dbReviewObject._id);
