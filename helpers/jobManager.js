@@ -34,6 +34,23 @@ function sendJobCreatedMessage(user, bot, job) {
     });
 }
 
+/**
+ * Used to send user all his jobs that aren't yet closed; deletes previous existing job cards; sends no jobs message if no jobs exist for this user
+ * @param  {Telegram:Bot} bot Bot that should send cards
+ * @param  {Telegram:Message} msg Message that came with this command
+ */
+function sendAllJobs(bot, msg) {
+  dbmanager.findUser({ id: msg.from.id })
+    .then(user => {
+      if (user.jobs.length <= 0) {
+        keyboards.sendInline(bot, user.id, strings.noJobsExistMessage, [])
+          .catch(err => console.log(err.error.description));
+      } else {
+        sendJobMessages(user, bot);
+      }
+    });
+}
+
 /** Handles */
 
 // Job process
@@ -251,6 +268,39 @@ function showSelectFreelancers(msg, job, bot) {
   }).catch(err => console.log(err.error.description));
 }
 
+/**
+ * Used to send user all his jobs that aren't yet closed; deletes previous existing job cards
+ * @param  {Mongoose:User} user User whos jobs should be sent
+ * @param  {Telegram:Bot} bot Bot that should send cards
+ */
+function sendJobMessages(user, bot) {
+  user.jobs.forEach(job => {
+    sendNewJobMessage(job, user, bot);
+  });
+}
+
+/**
+ * Used to send a new job message replacing the previous one
+ * @param  {Mongoose:Job} job  Job that should have new message sent
+ * @param  {Mongoose:User} user Owner of this job
+ * @param  {Telegram:Bot} bot  Bot that should operate
+ */
+function sendNewJobMessage(job, user, bot) {
+  deprecateJobMessage(job, bot);
+  keyboards.sendInline(bot, 
+    user.id, 
+    strings.loadingMessage, 
+    [],
+    data => {
+      job.current_inline_chat_id = data.chat.id;
+      job.current_inline_message_id = data.message_id;
+      job.save()
+        .then(job => {
+          updateJobMessage(job, bot);
+        });
+    });
+}
+
 // Management freelancers
 
 /**
@@ -347,6 +397,25 @@ function updateJobMessage(job, bot) {
   } else if (job.state === strings.jobStates.finished) {
     updateJobMessageForFinished(job, bot);
   }
+}
+
+/**
+ * Used to deprecate job message
+ * @param  {Mongoose:Job} job Job which message should be deprecated
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
+function deprecateJobMessage(job, bot) {
+  let send = {
+    chat_id: job.current_inline_chat_id,
+    message_id: job.current_inline_message_id,
+    text: strings.deprecatedMessage,
+    reply_markup: {
+      inline_keyboard: []
+    }
+  };
+  send.reply_markup = JSON.stringify(send.reply_markup);
+  bot.editMessageText(send)
+    .catch(err => console.log(err.error.description));
 }
 
 /**
@@ -741,5 +810,6 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
 
 // Exports
 module.exports = {
-  sendJobCreatedMessage
+  sendJobCreatedMessage,
+  sendAllJobs
 };
