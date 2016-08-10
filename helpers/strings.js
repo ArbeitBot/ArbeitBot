@@ -3,9 +3,9 @@
  */
 
 module.exports = {
-  loadingMessage: '🐤',
+  loadingMessage: '🦄 Loading...',
   deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ;)',
-  mainMenuMessage: 'Welcome to @arbeit_bot! I am a completelly free of charge Telegram based freelance market. Please select whether you are looking for job or contractors.',
+  mainMenuMessage: 'Welcome to @arbeit_bot! I am a completelly free of charge Telegram based freelance market. Please select if you are looking for contractors or add your profile if you are looking for job.',
   noJobsExistMessage: 'No jobs exist. You can create one by clicking "Post new job" button.',
   clientMenuMessage: 'What would you like to do?',
   selectCategoryMessage: 'Please select category that your job falls into. Number of contractors available can be found between [square brackets].',
@@ -43,22 +43,22 @@ module.exports = {
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
   noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
   mainMenuOptions: {
-    findJobs: 'Find work',
-    findContractors: 'Find contractors',
-    help: 'Help'
+    findJobs: '👤 Profile',
+    findContractors: '⛑ Find contractors',
+    help: '❔ Help'
   },
   clientMenuOptions: {
-    postNewJob: 'Post new job',
-    myJobs: 'My jobs',
+    postNewJob: '🔨 Post new job',
+    myJobs: '🛠 My jobs',
     back: '🔙 Back'
   },
   freelanceMenuOptions: {
-    editBio: 'Edit bio',
-    addBio: 'Add bio',
-    editCategories: 'Edit categories',
-    addCategories: 'Add categories',
-    editHourlyRate: 'Edit hourly rate',
-    addHourlyRate: 'Add hourly rate',
+    editBio: '🖊 Edit bio',
+    addBio: '🖊 Add bio',
+    editCategories: '📌 Edit categories',
+    addCategories: '📌 Add categories',
+    editHourlyRate: '💲 Edit hourly rate',
+    addHourlyRate: '💲 Add hourly rate',
     back: '🔙 Back',
     busy: '⚒ Busy',
     available: '✅ Available',
@@ -117,17 +117,17 @@ module.exports = {
     byFreelancer: 'byFl'
   },
   freelancerOptions: {
-    interested: 'Interested',
-    notInterested: 'Not interested',
-    report: 'Report'
+    interested: '✅ Interested',
+    notInterested: '❌ Not interested',
+    report: '❗️ Report'
   },
   freelancerAcceptOptions: {
-    accept: 'Accept',
-    refuse: 'Refuse'
+    accept: '✅ Accept',
+    refuse: '❌ Refuse'
   },
   jobFinishedOptions: {
-    rate: 'Rate',
-    report: 'Report'
+    rate: '⭐ Rate',
+    report: '❗️ Report'
   },
   report: {
     thanks: 'Спасибо за вашу бдительность!',

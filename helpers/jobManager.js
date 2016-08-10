@@ -264,7 +264,9 @@ function showSelectFreelancers(msg, job, bot) {
     reply_markup: JSON.stringify({
       inline_keyboard: jobSelectCandidateKeyboard(job)
     }),
-    text: strings.selectCandidateMessage
+    text: 
+      strings.selectCandidateMessage + '\n\n' + 
+      messageFromFreelancers(job.interestedCandidates)
   }).catch(err => console.log(err.error.description));
 }
 
@@ -429,7 +431,9 @@ function updateJobMessageForSearch(job, bot) {
       let send = {
         chat_id: job.current_inline_chat_id,
         message_id: job.current_inline_message_id,
-        text: messageFromFreelancers(users),
+        text: 
+          job.description + '\n\n' +
+          messageFromFreelancers(users),
         reply_markup: {
           inline_keyboard: jobInlineKeyboard(users, job)
         }
@@ -449,7 +453,9 @@ function updateJobMessageForSelected(job, bot) {
   let send = {
     chat_id: job.current_inline_chat_id,
     message_id: job.current_inline_message_id,
-    text: strings.waitContractorResponseMessage,
+    text: 
+      job.description + '\n\n' +
+      strings.waitContractorResponseMessage,
     reply_markup: {
       inline_keyboard: [[{
         text: strings.jobSelectAnotherFreelancer,
@@ -494,7 +500,7 @@ function updateJobMessageForFinished(job, bot) {
       let send = {
         chat_id: job.current_inline_chat_id,
         message_id: job.current_inline_message_id,
-        text: `${ strings.contactWithFreelancerMessage }\n@${ user.username }`,
+        text: `${ job.description }\n\n${ strings.contactWithFreelancerMessage }\n@${ user.username }`,
         reply_markup: {
           inline_keyboard: keyboard
         }
@@ -599,7 +605,9 @@ function messageFromFreelancers(users) {
   for (let i in users) {
     const user = users[i];
     const lineBreak = i == 0 ? '' : '\n';
-    message = `${ message }${ lineBreak }@${ user.username }\n${ user.bio }`;
+    if (user.username) {
+      message = `${ message }${ lineBreak }@${ user.username }\n${ user.bio }`;
+    }
   }
   if (message.length <= 0) {
     message = strings.noCandidatesMessage;
