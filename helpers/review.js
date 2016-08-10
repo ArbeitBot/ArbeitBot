@@ -148,7 +148,7 @@ function writeReview(bot, job, rating, client, freelancer, reviewType) {
           let send = {
             chat_id: chat_id,
             message_id: message_id,
-            text: strings.thanksReviewMessage,
+            text: `${job.description}\n\n${strings.thanksReviewMessage}`,
             reply_markup: {
               inline_keyboard: []
             }
