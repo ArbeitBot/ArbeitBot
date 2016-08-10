@@ -258,6 +258,7 @@ function cancelJobCreation(msg, user, bot) {
 function startJobDraft(categoryTitle, msg, user, bot) {
   dbmanager.getCategory(categoryTitle)
     .then(category => {
+      if (!category) return;
       let draft = new Job({
         category: category,
         client: user
@@ -270,7 +271,7 @@ function startJobDraft(categoryTitle, msg, user, bot) {
               askForNewJobPriceRange(msg, user, bot, job, category);
             });
         });
-    });
+    })
 }
 
 /**
@@ -281,6 +282,8 @@ function startJobDraft(categoryTitle, msg, user, bot) {
  * @param {Telegram:Bot} bot        Bot that should respond
  */
 function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
+  if (!strings.hourlyRateOptions.includes(hourlyRate)) return;
+
   user.job_draft.hourly_rate = hourlyRate;
   user.job_draft.save((err, draft) => {
     if (err) {
@@ -336,7 +339,8 @@ function completeReport(reportMessage, msg, user, bot) {
   user.save();
   // Создаем новый обьект Report с полученной информацией
   let report = new Report({
-    user: user._id,
+    sendBy: user._id,
+    sendTo: jobId,
     message: reportMessage
   });
   report.save();
@@ -344,7 +348,7 @@ function completeReport(reportMessage, msg, user, bot) {
   dbmanager.findJobById(jobId)
     .then(job => {
       // Обновить обьект job добавив туда новый Report
-      job.reports.push(report);
+      job.reports.push(report._id);
       if (job.reports.length >= reportsLimit) {
         job.state = strings.jobStates.frozen;
       }

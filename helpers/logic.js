@@ -90,6 +90,71 @@ function handleKeyboard(msg) {
   else if (text === freelanceMenuOptions.back) {
     keyboards.sendMainMenu(bot, msg.chat.id);
   }
+};
+
+/**
+ * Sends main menu keyboard to user with chat id
+ * @param {Number} chatId Chat id of user who should receive this keyboard
+ */
+function sendMainMenu(chatId) {
+  keyboards.sendKeyboard(
+    bot,
+    chatId, 
+    strings.mainMenuMessage, 
+    keyboards.mainMenuKeyboard);
+}
+
+/**
+ * Sends client menu to user with chat id
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
+function sendClientMenu(chatId) {
+  keyboards.sendKeyboard(
+    bot,
+    chatId, 
+    strings.clientMenuMessage, 
+    keyboards.clientKeyboard);
+}
+
+/**
+ * Sends freelancer menu to user with chat id; checks if user is busy or not, filled bio, hourly rate, categories or not; and sends relevant menu buttons
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
+function sendFreelanceMenu(chatId) {
+  /** Main freelancer keyboard.
+   * It appears after pressing "Find Work" button
+   * Here freelancer can add his Bio,
+   * Set categories, edit hourly rate,
+   * and set Busy status.
+   */
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
+      let text = user.busy ? 
+        strings.fullFreelancerMessageBusy :
+        strings.fullFreelancerMessageAvailable;
+      if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
+        text = strings.emptyFreelancerMessage;
+      } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
+        text = strings.missingFreelancerMessage;
+      }
+      keyboards.sendKeyboard(
+        bot,
+        chatId,
+        text,
+        keyboards.freelancerKeyboard(user));
+    });
+}
+
+/**
+ * Sends menu with help to user chat id
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
+function sendHelp(chatId) {
+  keyboards.sendInline(
+    bot,
+    chatId,
+    strings.helpMessage,
+    keyboards.helpKeyboard);
 }
 
 // Helpers

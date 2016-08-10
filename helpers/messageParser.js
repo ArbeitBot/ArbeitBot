@@ -1,11 +1,11 @@
 /**
- * Used to check messages for conditions like meing a command ot answer to keyboard
+ * Used to check messages for conditions like being a command ot answer to keyboard
  */
 
 let strings = require('./strings');
 
 /**
- * Checks if mssage is '/start' bot command
+ * Checks if message is '/start' bot command
  * @param  {Telegram:Message} message Message to check
  * @return {Boolean}         true if '/start', false otherwise
  */

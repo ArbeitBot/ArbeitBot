@@ -8,7 +8,7 @@ const keyboards = require('./keyboards');
 const dbmanager = require('./dbmanager');
 const strings = require('./strings');
 const review = require('./review');
-
+const reports = require('./reports');
 /** Main functions */
 
 /**
@@ -106,7 +106,8 @@ eventEmitter.on(strings.freelancerJobInline, ({ msg, bot }) => {
               } else if (answer === strings.freelancerOptions.notInterested) {
                 makeInterested(false, bot, msg, job, user);
               } else if (answer === strings.freelancerOptions.report) {
-                reportJob(bot, msg, job, user);
+                makeInterested(false, bot, msg, job, user);
+                reports.reportJob(bot, msg, job, user);
               }
             });
         });
@@ -187,6 +188,13 @@ eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const freelancerId = msg.data.split(strings.inlineSeparator)[2];
   // todo: handle report
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUserById(freelancerId)
+        .then(user => {
+          reports.reportFreelancer(bot, msg, job, user);
+        })
+    });
   console.log(jobId, freelancerId);
 });
 
@@ -199,6 +207,13 @@ eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const freelancerIdReported = msg.data.split(strings.inlineSeparator)[2];
   // todo: handle report
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUserById(freelancerIdReported)
+        .then(user => {
+          reports.reportJob(bot, msg, job, user);
+        })
+    });
   console.log(jobId, freelancerIdReported);
 });
 
@@ -211,6 +226,15 @@ eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const freelancerUsernameReported = msg.data.split(strings.inlineSeparator)[3];
   // todo: handle report
+  
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUser({username: freelancerUsernameReported})
+        .then(user => {
+          makeInterested(false, bot, msg, job, user);
+          reports.reportJob(bot, msg, job, user);
+        })
+    });
   console.log(jobId, freelancerUsernameReported);
 });
 
@@ -221,7 +245,8 @@ eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
 // Functions
 
 /**
- * Sends freelancers job offer (description; inlines: interested, not interested, report); also adds freelancers to candidates of job
+ * Sends freelancers job offer (description; inlines: interested, not interested, report);
+ * also adds freelancers to candidates of job
  * @param  {Telegram:Bot} bot Bot that should send message
  * @param  {[Mongoose:User]} users Users that should receive job offer
  * @param  {Mongoose:Job} job Job that freelancers are offered
@@ -264,7 +289,9 @@ function showSelectFreelancers(msg, job, bot) {
     reply_markup: JSON.stringify({
       inline_keyboard: jobSelectCandidateKeyboard(job)
     }),
-    text: strings.selectCandidateMessage
+    text: 
+      strings.selectCandidateMessage + '\n\n' + 
+      messageFromFreelancers(job.interestedCandidates)
   }).catch(err => console.log(err.error.description));
 }
 
@@ -429,7 +456,9 @@ function updateJobMessageForSearch(job, bot) {
       let send = {
         chat_id: job.current_inline_chat_id,
         message_id: job.current_inline_message_id,
-        text: messageFromFreelancers(users),
+        text: 
+          job.description + '\n\n' +
+          messageFromFreelancers(users),
         reply_markup: {
           inline_keyboard: jobInlineKeyboard(users, job)
         }
@@ -449,7 +478,9 @@ function updateJobMessageForSelected(job, bot) {
   let send = {
     chat_id: job.current_inline_chat_id,
     message_id: job.current_inline_message_id,
-    text: strings.waitContractorResponseMessage,
+    text: 
+      job.description + '\n\n' +
+      strings.waitContractorResponseMessage,
     reply_markup: {
       inline_keyboard: [[{
         text: strings.jobSelectAnotherFreelancer,
@@ -494,7 +525,7 @@ function updateJobMessageForFinished(job, bot) {
       let send = {
         chat_id: job.current_inline_chat_id,
         message_id: job.current_inline_message_id,
-        text: `${ strings.contactWithFreelancerMessage }\n@${ user.username }`,
+        text: `${ job.description }\n\n${ strings.contactWithFreelancerMessage }\n@${ user.username }`,
         reply_markup: {
           inline_keyboard: keyboard
         }
@@ -599,7 +630,9 @@ function messageFromFreelancers(users) {
   for (let i in users) {
     const user = users[i];
     const lineBreak = i == 0 ? '' : '\n';
-    message = `${ message }${ lineBreak }@${ user.username }\n${ user.bio }`;
+    if (user.username) {
+      message = `${ message }${ lineBreak }@${ user.username }\n${ user.bio }`;
+    }
   }
   if (message.length <= 0) {
     message = strings.noCandidatesMessage;
@@ -695,6 +728,7 @@ function updateFreelancerMessage(bot, msg, user, job, chatInline) {
  */
 function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
   let prefix = '';
+  //job.interestedCandidates.find(userId => { userId == user._id })
   if (job.interestedCandidates.map(o => String(o)).includes(String(user._id))) {
     prefix = `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n`;
   } else if (job.notInterestedCandidates.map(o => String(o)).includes(String(user._id))) {

@@ -9,6 +9,8 @@ const User = mongoose.model('user');
 const Category = mongoose.model('category');
 const Job = mongoose.model('job');
 const Review = mongoose.model('review');
+//todo: functions to access reports
+const Report = mongoose.model('report');
 const UserChatInline = mongoose.model('userChatInline');
 
 // User
@@ -141,8 +143,6 @@ function getCategory(categoryTitle) {
       .exec((err, category) => {
         if (err) {
           throw err;
-        } else if (!category) {
-          throw new Error('No category found');
         } else {
           fullfill(category);
         }
