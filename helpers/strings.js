@@ -39,7 +39,7 @@ module.exports = {
   rateClientMessage: 'The only thing left is to rate your client. How good was your client?',
   reviewFreelancerMessage: 'reviewFreelancerMessage',
   reviewClientMessage: 'reviewClientMessage',
-  thanksReviewMessage: 'thanksReviewMessage',
+  thanksReviewMessage: 'Thank you a lot for the review!',
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
   noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
   mainMenuOptions: {
