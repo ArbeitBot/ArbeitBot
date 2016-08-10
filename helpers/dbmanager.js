@@ -9,6 +9,8 @@ const User = mongoose.model('user');
 const Category = mongoose.model('category');
 const Job = mongoose.model('job');
 const Review = mongoose.model('review');
+//todo: functions to access reports
+const Report = mongoose.model('report');
 const UserChatInline = mongoose.model('userChatInline');
 
 // User
