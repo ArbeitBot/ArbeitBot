@@ -8,7 +8,7 @@ const keyboards = require('./keyboards');
 const dbmanager = require('./dbmanager');
 const strings = require('./strings');
 const review = require('./review');
-
+const reports = require('./reports');
 /** Main functions */
 
 /**
@@ -106,7 +106,8 @@ eventEmitter.on(strings.freelancerJobInline, ({ msg, bot }) => {
               } else if (answer === strings.freelancerOptions.notInterested) {
                 makeInterested(false, bot, msg, job, user);
               } else if (answer === strings.freelancerOptions.report) {
-                reportJob(bot, msg, job, user);
+                makeInterested(false, bot, msg, job, user);
+                reports.reportJob(bot, msg, job, user);
               }
             });
         });
@@ -187,6 +188,13 @@ eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const freelancerId = msg.data.split(strings.inlineSeparator)[2];
   // todo: handle report
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUserById(freelancerId)
+        .then(user => {
+          reports.reportFreelancer(bot, msg, job, user);
+        })
+    });
   console.log(jobId, freelancerId);
 });
 
@@ -199,6 +207,13 @@ eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const freelancerIdReported = msg.data.split(strings.inlineSeparator)[2];
   // todo: handle report
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUserById(freelancerIdReported)
+        .then(user => {
+          reports.reportJob(bot, msg, job, user);
+        })
+    });
   console.log(jobId, freelancerIdReported);
 });
 
@@ -211,6 +226,15 @@ eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const freelancerUsernameReported = msg.data.split(strings.inlineSeparator)[3];
   // todo: handle report
+  
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUser({username: freelancerUsernameReported})
+        .then(user => {
+          makeInterested(false, bot, msg, job, user);
+          reports.reportJob(bot, msg, job, user);
+        })
+    });
   console.log(jobId, freelancerUsernameReported);
 });
 
@@ -221,7 +245,8 @@ eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
 // Functions
 
 /**
- * Sends freelancers job offer (description; inlines: interested, not interested, report); also adds freelancers to candidates of job
+ * Sends freelancers job offer (description; inlines: interested, not interested, report);
+ * also adds freelancers to candidates of job
  * @param  {Telegram:Bot} bot Bot that should send message
  * @param  {[Mongoose:User]} users Users that should receive job offer
  * @param  {Mongoose:Job} job Job that freelancers are offered
@@ -299,29 +324,6 @@ function sendNewJobMessage(job, user, bot) {
           updateJobMessage(job, bot);
         });
     });
-}
-
-/**
- * Initializes job report
- * @param  {Telegram:Bot} bot  Bot that should respond
- * @param  {Telegram:Message} msg  Message passed with action
- * @param  {Mongoose:Job} job  Job object to report
- * @param  {Mongoose:User} user User who reports
- */
-function reportJob(bot, msg, job, user) {
-  user.input_state = strings.inputReportMessage;
-  user.report_draft = job._id;
-  user.save(err => {
-    if (!err) {
-      bot.sendMessage({
-        chat_id: msg.from.id,
-        text: strings.report.reason
-      });
-      makeInterested(false, bot, msg, job, user);
-      updateJobMessage(job, bot);
-      updateFreelancerMessage(bot, msg, user, job);
-    }
-  });
 }
 
 // Management freelancers
@@ -718,6 +720,7 @@ function updateFreelancerMessage(bot, msg, user, job, chatInline) {
  */
 function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
   let prefix = '';
+  //job.interestedCandidates.find(userId => { userId == user._id })
   if (job.interestedCandidates.map(o => String(o)).includes(String(user._id))) {
     prefix = `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n`;
   } else if (job.notInterestedCandidates.map(o => String(o)).includes(String(user._id))) {

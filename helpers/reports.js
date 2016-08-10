@@ -63,6 +63,28 @@ function reportJob(bot, msg, job, user) {
   });
 }
 
+function reportFreelancer(bot, msg, job, user) {
+  let clientId = job.client;
+  let report = new Report({
+    sendBy: clientId,
+    sendTo: user._id,
+    job: job._id
+  });
+
+  report.save(err => {
+    if (err) { console.log(err) }
+    else {
+      user.reports.push(report._id);
+      user.reportedBy.push(clientId);
+      user.save();
+
+      sendReportAlert(bot, report);
+      sendResponseToUser(bot, msg);
+    }
+  });
+}
+
 module.exports = {
-  reportJob: reportJob
+  reportJob: reportJob,
+  reportFreelancer: reportFreelancer
 };
