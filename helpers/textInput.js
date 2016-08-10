@@ -282,6 +282,8 @@ function startJobDraft(categoryTitle, msg, user, bot) {
  * @param {Telegram:Bot} bot        Bot that should respond
  */
 function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
+  if (!strings.hourlyRateOptions.includes(hourlyRate)) return;
+
   user.job_draft.hourly_rate = hourlyRate;
   user.job_draft.save((err, draft) => {
     if (err) {
