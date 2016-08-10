@@ -6,6 +6,8 @@ const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
 const config = require('./config');
+const events = require('events');
+global.eventEmitter = new events.EventEmitter();
 
 // setup mongoose and load all models
 mongoose.Promise = global.Promise;

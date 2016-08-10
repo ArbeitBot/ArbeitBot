@@ -3,6 +3,7 @@
  */
 
 const strings = require('./strings');
+const dbmanager = require('./dbmanager');
 
 // Keyboards
 
@@ -48,7 +49,107 @@ function freelancerKeyboard(user) {
     [{ text: strings.freelanceMenuOptions.back },
      { text: availableText }]
   ];
-};
+}
+
+/**
+ * Constructs rate keyboard with particular inline prefix in button data
+ * @param  {String} inline Inline prefix
+ * @param  {Mongo:ObjectId} jobId Id of job
+ * @return {Telegram:InlineKeyboard} Keyboard with stars and give inline data prefix
+ */
+function rateKeyboard(inline, jobId) {
+  return [
+    [{
+      text: strings.rateOptions.oneStar,
+      callback_data: inline + strings.inlineSeparator + '1' + strings.inlineSeparator + jobId
+    },
+    {
+      text: strings.rateOptions.twoStars,
+      callback_data: inline + strings.inlineSeparator + '2' + strings.inlineSeparator + jobId
+    },
+    {
+      text: strings.rateOptions.threeStars,
+      callback_data: inline + strings.inlineSeparator + '3' + strings.inlineSeparator + jobId
+    }],
+    [{
+      text: strings.rateOptions.fourStars,
+      callback_data: inline + strings.inlineSeparator + '4' + strings.inlineSeparator + jobId
+    },
+    {
+      text: strings.rateOptions.fiveStars,
+      callback_data: inline + strings.inlineSeparator + '5' + strings.inlineSeparator + jobId
+    }]
+  ];
+}
+
+/**
+ * Sends main menu keyboard to user with chat id
+ * @param {Telegram:Bot} bot Bot that should send keyboard
+ * @param {Number} chatId Chat id of user who should receive this keyboard
+ */
+function sendMainMenu(bot, chatId) {
+  sendKeyboard(
+    bot,
+    chatId, 
+    strings.mainMenuMessage, 
+    mainMenuKeyboard);
+}
+
+/**
+ * Sends client menu to user with chat id
+ * @param {Telegram:Bot} bot Bot that should send keyboard
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
+function sendClientMenu(bot, chatId) {
+  sendKeyboard(
+    bot,
+    chatId, 
+    strings.clientMenuMessage, 
+    clientKeyboard);
+}
+
+/**
+ * Sends freelancer menu to user with chat id; checks if user is busy or not, filled bio, hourly rate, categories or not; and sends relevant menu buttons
+ * @param {Telegram:Bot} bot Bot that should send keyboard
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
+function sendFreelanceMenu(bot, chatId) {
+  /** Main freelancer keyboard.
+   * It appears after pressing "Find Work" button
+   * Here freelancer can add his Bio,
+   * Set categories, edit hourly rate,
+   * and set Busy status.
+   */
+  dbmanager.findUser({ id: chatId })
+    .then(user => {
+      let text = user.busy ? 
+        strings.fullFreelancerMessageBusy :
+        strings.fullFreelancerMessageAvailable;
+      if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
+        text = strings.emptyFreelancerMessage;
+      } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
+        text = strings.missingFreelancerMessage;
+      }
+      sendKeyboard(
+        bot,
+        chatId,
+        text,
+        freelancerKeyboard(user));
+    });
+}
+
+/**
+ * Sends menu with help to user chat id
+ * @param {Telegram:Bot} bot Bot that should send keyboard
+ * @param {Number} chatId Chat id of user who should receive keyboard
+ */
+function sendHelp(bot, chatId) {
+  sendInline(
+    bot,
+    chatId,
+    strings.helpMessage,
+    helpKeyboard);
+}
 
 /**
  * Sends keyboard to user
@@ -71,7 +172,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
   bot.sendMessage(message)
   .then(then)
   .catch(err => console.log(err));
-};
+}
 
 /**
  * Sends inline to user
@@ -80,7 +181,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
  * @param  {String} text     Text to send along with inline
  * @param  {Telegram:Inline} keyboard Inline keyboard to send
  */
-function sendInline(bot, chatId, text, keyboard) {
+function sendInline(bot, chatId, text, keyboard, then) {
   let message = {
     chat_id: chatId,
     text: text,
@@ -90,18 +191,22 @@ function sendInline(bot, chatId, text, keyboard) {
   }
   message.reply_markup = JSON.stringify(message.reply_markup);
   bot.sendMessage(message)
-  .catch(err => console.log(err));
-};
+    .then(then)
+    .catch(err => console.log(err));
+}
 
 // Exports
 
 module.exports = {
-  // Keyboards
+  freelancerKeyboard,
+  rateKeyboard,
   mainMenuKeyboard,
   clientKeyboard,
   helpKeyboard,
-  // Functions
-  freelancerKeyboard,
+  sendMainMenu,
+  sendClientMenu,
+  sendFreelanceMenu,
+  sendHelp,
   sendKeyboard,
   sendInline
 };

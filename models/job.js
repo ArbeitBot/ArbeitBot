@@ -11,10 +11,22 @@ var jobSchema = new Schema({
   },
   current_inline_message_id: String,
   current_inline_chat_id: String,
-  freelancer_inline_message_id: String,
-  freelancer_inline_chat_id: String,
+  freelancer_chat_inlines: [{
+    type: Schema.ObjectId,
+    ref: 'userChatInline',
+    required: true,
+    default: []
+  }],
   description: String,
   hourly_rate: String,
+  reviewByClient: {
+    type: Schema.ObjectId,
+    ref: 'review'
+  },
+  reviewByFreelancer: {
+    type: Schema.ObjectId,
+    ref: 'review'
+  },
   reports: [{
     type: Schema.ObjectId,
     ref: 'report'
@@ -30,23 +42,19 @@ var jobSchema = new Schema({
   },
   client: {
     type: Schema.ObjectId,
-    ref: 'client',
+    ref: 'user',
     required: true
   },
-  selectedCandidate: {
-    type: Schema.ObjectId,
-    ref: 'user'
-  }, 
   candidates: [{
     type: Schema.ObjectId,
     ref: 'user',
-    required: false,
+    required: true,
     default: []
   }],
   interestedCandidates: [{
     type: Schema.ObjectId,
     ref: 'user',
-    required: false,
+    required: true,
     default: []
   }],
   notInterestedCandidates: [{
@@ -54,7 +62,11 @@ var jobSchema = new Schema({
     ref: 'user',
     required: false,
     default: []
-  }]
+  }],
+  selectedCandidate: {
+    type: Schema.ObjectId,
+    ref: 'user'
+  }, 
 });
 
 mongoose.model('job', jobSchema);

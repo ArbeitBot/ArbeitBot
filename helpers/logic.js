@@ -27,9 +27,9 @@ bot.on('message', msg => {
     } else {
       if (check.botCommandStart(msg)) {
         dbmanager.addUser(msg.from)
-        .then(user => {
-          sendMainMenu(msg.chat.id);
-        });
+          .then(user => {
+            keyboards.sendMainMenu(bot, msg.chat.id);
+          });
       } else if (check.replyMarkup(msg)) {
         handleKeyboard(msg);
       } else {
@@ -44,19 +44,10 @@ bot.on('message', msg => {
  * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
  */
 bot.on('inline.callback.query', msg => {
-  if (msg.data.indexOf(strings.categoryInline) > -1) {
-    categoryPicker.handleInline(bot, msg);
-  } else if (msg.data.indexOf(strings.hourlyRateInline) > -1) {
-    hourlyRatePicker.handleInline(bot, msg);
-  } else if (msg.data.indexOf(strings.freelancerInline) > -1) {
-    jobManager.handleClientInline(bot, msg);
-  } else if (msg.data.indexOf(strings.freelancerJobInline) > -1) {
-    jobManager.handleFreelancerAnswerInline(bot, msg);
-  } else if (msg.data.indexOf(strings.selectFreelancerInline) > -1) {
-    jobManager.handleSelectFreelancerInline(bot, msg);
-  } else {
-    console.log(msg);
-  }
+  let options = msg.data.split(strings.inlineSeparator);
+  let inlineQuerry = options[0];
+
+  eventEmitter.emit(inlineQuerry, { msg, bot })
 });
 
 // Helpers
@@ -73,17 +64,17 @@ function handleKeyboard(msg) {
 
   // Check main menu
   if (text === mainMenuOptions.findJobs) {
-    sendFreelanceMenu(msg.chat.id);
+    keyboards.sendFreelanceMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.findContractors) {
-    sendClientMenu(msg.chat.id);
+    keyboards.sendClientMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.help) {
-    sendHelp(msg.chat.id);
+    keyboards.sendHelp(bot, msg.chat.id);
   }
   // Check client menu
   else if (text === clientOptions.postNewJob) {
     textInput.askForNewJobCategory(msg, bot);
   } else if (text === clientOptions.myJobs) {
-    sendAllJobsList(msg.from.id, msg.chat.id);
+    jobManager.sendAllJobs(bot, msg);
   }
   // Check freelance menu
   else if (text === freelanceMenuOptions.editBio || text === freelanceMenuOptions.addBio) {
@@ -97,50 +88,9 @@ function handleKeyboard(msg) {
   }
   // Check back button
   else if (text === freelanceMenuOptions.back) {
-    sendMainMenu(msg.chat.id);
+    keyboards.sendMainMenu(bot, msg.chat.id);
   }
 };
-
-// Sending messages
-
-/**
- * Sends all job's that are created by user and are currently not finished yet.
- * @param {Number} userId: id of user, to search through database
- * @param {Number} chatId: id of chat, where to respond with message
- *searchingForFreelancer: 'searchingForFreelancer',
-  freelancerChosen: 'freelancerChosen',
-  finished: 'finished',
-  frozen: 'frozen',
-  banned: 'banned'
- */
-function sendAllJobsList(userId, chatId) {
-  dbmanager.findUser(userId, user => {
-    if (user) {
-      let unfinishedJobs = user.jobs.find((job) => {
-        return job.state != strings.jobStates.finished;
-      });
-
-      for (var job of unfinishedJobs) {
-        //delete old message
-        deleteMessage(
-          job.current_inline_message_id,
-          job.current_inline_chat_id);
-        //send new one
-        reassignJobMessage(chatId, job);
-      }
-    } else {
-      // todo: user not found
-    }
-  })
-}
-
-function deleteMessage(msgId, chatId) {
-
-}
-
-function reassignJobMessage(chatId, job) {
-
-}
 
 /**
  * Sends main menu keyboard to user with chat id
@@ -152,7 +102,7 @@ function sendMainMenu(chatId) {
     chatId, 
     strings.mainMenuMessage, 
     keyboards.mainMenuKeyboard);
-};
+}
 
 /**
  * Sends client menu to user with chat id
@@ -164,7 +114,7 @@ function sendClientMenu(chatId) {
     chatId, 
     strings.clientMenuMessage, 
     keyboards.clientKeyboard);
-};
+}
 
 /**
  * Sends freelancer menu to user with chat id; checks if user is busy or not, filled bio, hourly rate, categories or not; and sends relevant menu buttons
@@ -193,7 +143,7 @@ function sendFreelanceMenu(chatId) {
         text,
         keyboards.freelancerKeyboard(user));
     });
-};
+}
 
 /**
  * Sends menu with help to user chat id
@@ -205,7 +155,7 @@ function sendHelp(chatId) {
     chatId,
     strings.helpMessage,
     keyboards.helpKeyboard);
-};
+}
 
 // Helpers
 
@@ -216,11 +166,11 @@ function sendHelp(chatId) {
 function toggleUserAvailability(chatId) {
   dbmanager.toggleUserAvailability(chatId)
     .then(user => {
-      const message = user.busy ? 
+      let message = user.busy ?
         strings.becameBusyMessage : 
         strings.becameAvailableMessage;
       if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
-        message = user.busy ? 
+        message = user.busy ?
         strings.missingBecameBusyMessage : 
         strings.missingBecameAvailableMessage;
       }
@@ -230,4 +180,4 @@ function toggleUserAvailability(chatId) {
         message,
         keyboards.freelancerKeyboard(user));
     });
-};
+}

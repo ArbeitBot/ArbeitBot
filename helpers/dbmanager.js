@@ -11,6 +11,8 @@ const Job = mongoose.model('job');
 const Review = mongoose.model('review');
 //todo: functions to access reports
 const Report = mongoose.model('report');
+const UserChatInline = mongoose.model('userChatInline');
+
 // User
 
 /**
@@ -20,7 +22,7 @@ const Report = mongoose.model('report');
 function findUser(query) {
   return new Promise(fullfill => {
     User.findOne(query)
-      .populate(['categories', 'jobs', 'job_draft'])
+      .populate(['categories', 'jobs', 'job_draft', 'reviews'])
       .exec((err, user) => {
         if (err) {
           throw err;
@@ -38,7 +40,7 @@ function findUser(query) {
 function findUserById(id) {
   return new Promise(fullfill => {
     User.findById(id)
-      .populate(['categories', 'jobs', 'job_draft'])
+      .populate(['categories', 'jobs', 'job_draft', 'reviews'])
       .exec((err, user) => {
         if (err) {
           throw err;
@@ -211,9 +213,10 @@ function freelancersForJob(job) {
       { categories: job.category },
       { busy: false },
       { bio: { $exists: true } },
-      { hourly_rate: { $exists: true } },
+      { hourly_rate: job.hourly_rate },
       { _id: { $nin: job.notInterestedCandidates } }
     ]})
+      .limit(10)
       .exec((err, users) => {
         if (err) {
           throw err;
@@ -234,6 +237,27 @@ function freelancersForJobId(jobId) {
       .then(job => {
         freelancersForJob(job)
           .then(fullfill);
+      });
+  });
+}
+
+/**
+ * Saves freelancer's message id and chat id to job in order to reuse later (i.e. edit job message)
+ * @param  {Telegram:Message} msg  Message came with inline
+ * @param  {Mongoose:Job} job  Job to which we should add freelancer's inline
+ * @param  {Mongoose:User} user Freelancer whos inline should be added
+ */
+function saveFreelancerMessageToJob(msg, job, user) {
+  return new Promise(fullfill => {
+    const chatInline = new UserChatInline({
+      user,
+      message_id: msg.message.message_id,
+      chat_id: msg.message.chat.id
+    });
+    chatInline.save()
+      .then(chatInline => {
+        job.freelancer_chat_inlines.push(chatInline);
+        job.save().then(fullfill);
       });
   });
 }
@@ -271,6 +295,24 @@ function addReview(review) {
   });
 }
 
+// Helpers
+
+/**
+ * Returns the right chat inline from job for freelancer
+ * @param {Mongoose:Job} job  Job where to search
+ * @param {Mongoose:User} user User for shom to search
+ * @returns {Mongoose:UserChatInline} Chat inline object
+ */
+function chatInline(job, user) {
+  let chatInline;
+  job.freelancer_chat_inlines.forEach(ci => {
+    if (ci.chat_id == user.id) {
+      chatInline = ci;
+    }
+  });
+  return chatInline;
+}
+
 // Export
 
 module.exports = {
@@ -287,7 +329,10 @@ module.exports = {
   findJobById,
   freelancersForJob,
   freelancersForJobId,
-  //Review
+  saveFreelancerMessageToJob,
+  // Review
   findReviewById,
-  addReview
+  addReview,
+  // Helpers
+  chatInline
 };

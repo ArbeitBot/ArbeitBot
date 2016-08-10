@@ -11,9 +11,9 @@ let strings = require('./strings');
  * @param  {Telegram:Bot} bot Bot that should edit or send hourly rate keyboard
  * @param  {Telegram:Message} msg Message that came along with inline button click
  */
-function handleInline(bot, msg) {
+eventEmitter.on(strings.hourlyRateInline, ({ msg, bot }) => {
   editHourlyRate(bot, msg);
-};
+});
 
 /**
  * Sends initial message with hourly rate picker inline
@@ -31,7 +31,7 @@ function sendHourlyRate(bot, chatId) {
         strings.editHourlyRateMessage,
         keyboard);
     });
-};
+}
 
 /**
  * Used to edit existing message with inline of user who has changed his hourly rate
@@ -42,7 +42,7 @@ function editHourlyRate(bot, msg) {
   let command = msg.data.split(strings.inlineSeparator)[1];
 
   function getUserCallback(user) {
-    var send = {
+    let send = {
       chat_id: msg.message.chat.id,
       message_id: msg.message.message_id,
       reply_markup: {
@@ -52,7 +52,7 @@ function editHourlyRate(bot, msg) {
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageReplyMarkup(send)
     .catch(err => console.log(err));
-  };
+  }
 
   dbmanager.findUser({ id: msg.message.chat.id })
     .then(user => {
@@ -75,7 +75,7 @@ function editHourlyRate(bot, msg) {
         }
       });
     });
-};
+}
 
 /**
  * Gets hourly rate inline keyboard for freelancer; highlights hourly rate that is currently selected
@@ -86,8 +86,8 @@ function editHourlyRate(bot, msg) {
 function hourlyRateKeyboard(user, hourlyRates) {
   let hourlyRate = user.hourly_rate;
 
-  var keyboard = [];
-  var tempRow = [];
+  let keyboard = [];
+  let tempRow = [];
   for (var i in hourlyRates) {
     let isOdd = i % 2 == 1;
     let currentHR = hourlyRates[i];
@@ -106,11 +106,10 @@ function hourlyRateKeyboard(user, hourlyRates) {
     }
   }
   return keyboard;
-};
+}
 
 // Exports
 
 module.exports = {
-  sendHourlyRate: sendHourlyRate,
-  handleInline: handleInline
+  sendHourlyRate: sendHourlyRate
 };

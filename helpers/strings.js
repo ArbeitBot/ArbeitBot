@@ -3,7 +3,10 @@
  */
 
 module.exports = {
+  loadingMessage: '🐤',
+  deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ;)',
   mainMenuMessage: 'Welcome to @arbeit_bot! I am a completelly free of charge Telegram based freelance market. Please select whether you are looking for job or contractors.',
+  noJobsExistMessage: 'No jobs exist. You can create one by clicking "Post new job" button.',
   clientMenuMessage: 'What would you like to do?',
   selectCategoryMessage: 'Please select category that your job falls into. Number of contractors available can be found between [square brackets].',
   selectJobHourlyRateMessage: 'Please select how much money would you like to pay. Price is given in USD per hour to identify level of developers. Yet you can negotiate fixed price in private messages with contractor later on. Number of available contractors in selected category for rate is given in [square brackets].',
@@ -27,15 +30,18 @@ module.exports = {
   editHourlyRateMessage: 'What is your hourly rate?',
   pickCategoriesMessage: 'Please pick categories',
   suggestCategoryMessage: 'Want to suggest a category?',
-  waitContractorResponseMessage: 'waitContractorResponseMessage',
+  waitContractorResponseMessage: 'You sent the offer to one of the freelancers. Please wait until freelancer accepts or rejects your offer, or simply select another freeelancer if you do not want to wait anymore.',
+  acceptOrRejectMessage: 'Please accept or reject this job offer. After you accept this job offer you will only be able to finish the job.',
   waitClientResponseMessage: 'waitClientResponseMessage',
-  contactWithFreelancerMessage: 'contactWithFreelancerMessage',
-  rateFreelancerMessage: 'rateFreelancerMessage',
-  rateClientMessage: 'rateClientMessage',
+  contactWithFreelancerMessage: 'Wonderful! You got a contractor who accepted your offer. Please contact your new contractor directly and please rate your contractor experience after you finish this contract.',
+  contactWithClientMessage: 'Great! You have accepted this offer. Now please communicate with the client directly and rate your experience as soon as you finish the job.',
+  rateFreelancerMessage: 'The only thing left is to rate your contractor, how good was your contractor?',
+  rateClientMessage: 'The only thing left is to rate your client. How good was your client?',
   reviewFreelancerMessage: 'reviewFreelancerMessage',
   reviewClientMessage: 'reviewClientMessage',
   thanksReviewMessage: 'thanksReviewMessage',
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
+  noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
   mainMenuOptions: {
     findJobs: 'Find work',
     findContractors: 'Find contractors',
@@ -74,9 +80,15 @@ module.exports = {
   freelancerJobInline: 'fJI',
   selectFreelancerInline: 'sFI',
   selectAnotherFreelancerInline: 'sAFI',
-  rateClientFreelancerInline: 'rCFI',
-  reviewClientFreelancerInline: 'reCFI',
+  freelancerAcceptInline: 'fAI',
+  askRateClientInline: 'aRCI',
+  askRateFreelancerInline: 'aRFI',
+  rateClientInline: 'rCI',
+  rateFreelancerInline: 'rFI',
   completeJobInline: 'cJI',
+  reportJobInline: 'rpJI',
+  reportFreelancerInline: 'rpFI',
+  reportClientInline: 'rpCI',
   inputBioState: 'inputBioState',
   inputCategoryNameState: 'inputCategoryNameState',
   inputHourlyRateState: 'inputHourlyRateState',
@@ -100,13 +112,9 @@ module.exports = {
     frozen: 'frozen',
     banned: 'banned'
   },
-  reviewStates: {
-    rate: 'rate',
-    review: 'review'
-  },
   reviewTypes: {
-    byClient: 'byClient',
-    byFreelancer: 'byFreelancer'
+    byClient: 'byCl',
+    byFreelancer: 'byFl'
   },
   freelancerOptions: {
     interested: 'Interested',
@@ -132,9 +140,5 @@ module.exports = {
     threeStars: '⭐⭐⭐',
     fourStars: '⭐⭐⭐⭐',
     fiveStars: '⭐⭐⭐⭐⭐'
-  },
-  reviewOptions: {
-    review: 'Review',
-    no: 'No'
   }
 };

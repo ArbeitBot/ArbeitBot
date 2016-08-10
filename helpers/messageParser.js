@@ -1,11 +1,11 @@
 /**
- * Used to check messages for conditions like meing a command ot answer to keyboard
+ * Used to check messages for conditions like being a command ot answer to keyboard
  */
 
 let strings = require('./strings');
 
 /**
- * Checks if mssage is '/start' bot command
+ * Checks if message is '/start' bot command
  * @param  {Telegram:Message} message Message to check
  * @return {Boolean}         true if '/start', false otherwise
  */
@@ -21,7 +21,7 @@ function botCommandStart(message) {
   } else {
     return false;
   }
-};
+}
 
 /**
  * Checks if message is answer to any keyboard buttons
@@ -34,7 +34,7 @@ function replyMarkup(message) {
   let clientMenuOptions = Object.keys(strings.clientMenuOptions).map(key => strings.clientMenuOptions[key]);
   let allOptions = mainMenuOptions.concat(freelanceMenuOptions, clientMenuOptions);
   return allOptions.indexOf(message.text) > -1;
-};
+}
 
 // Export
 

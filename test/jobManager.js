@@ -8,7 +8,6 @@ const app = require('../app');
 let sinon = require('sinon');
 let strings = require('../helpers/strings');
 let bot = require('../helpers/telegramBot');
-let Q = require("q");
 
 let keyboards = require('../helpers/keyboards');
 
@@ -32,7 +31,7 @@ describe("JobManager ", function() {
 	 * @param  {Telegram:Bot} bot  Bot that should send message
 	 * @param  {Mongoose:Job} job  Relevant job
 	 */
-	 /*
+	 
 	describe("#sendJobCreatedMessage( user, bot, job )", function() {
 
             
@@ -40,19 +39,19 @@ describe("JobManager ", function() {
 
         before( ()=> {
 
-            deferredSuccess = Q.defer();
-            sendKeyboard = sinon.spy( keyboards, 'sendKeyboard');
+            
+            let responseData = {
+            	"data": {}
+            };
+
+            deferredSuccess = new Promise( (resolve, reject)=> { resolve(responseData) });
+            sendKeyboard = sinon.spy( keyboards, 'sendKeyboard').return( deferredSuccess );
   
         })
 
 		it('should be call @dbmanager.freelancersForJob with @params: { Mongoose:job},{ Function: callback })', ()=> {
 	
 				let users = [ new User() ];
-                let responseData = {
-                    "users": users
-                }
-
-                deferredSuccess.resolve(responseData);
       
       			let user = new User();
       			let job = new Job();
@@ -63,10 +62,10 @@ describe("JobManager ", function() {
         });
 
 		after(()=> {
- 			//freelancersForJob.restore();
+ 		
  			sendKeyboard.restore();
 		})
 
-	});*/
+	});
 
 });

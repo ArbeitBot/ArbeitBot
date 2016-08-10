@@ -25,7 +25,7 @@ function check(msg, callback) {
         callback();
       }
     })
-};
+}
 
 /**
  * Handler for user inputs, ran after check for input state was positive; depending on user's input state saves right values to db
@@ -37,33 +37,31 @@ function handle(msg, user, bot) {
   if (user.input_state == strings.inputBioState) {
     let newBio = msg.text.substring(0, 150);
     
-    let needsCongrats = !user.bio;
+    let needsCongrats = !user.bio && !!user.hourly_rate && user.categories.length > 0;
 
     user.bio = newBio;
     user.input_state = undefined;
-    user.save((err, user) => {
-      bot.sendMessage({
+    user.save()
+      .then(user => {
+        bot.sendMessage({
           chat_id: msg.chat.id,
           text: strings.changedBioMessage+user.bio,
           reply_markup: JSON.stringify({
             keyboard: keyboards.freelancerKeyboard(user),
-            resize_keyboard: true
-        })})
-        .then(function() 
-        {
-          if (needsCongrats &&user.hourly_rate && user.categories.length > 0) {
-            keyboards.sendKeyboard(
-              bot,
-              user.id, 
-              strings.filledEverythingMessage, 
-              keyboards.freelancerKeyboard(user));
-          }
+            resize_keyboard: true 
+          })
         })
-        .catch(function(err)
-        {
-          console.log(err);
-        });
-    });
+          .then(data => {
+            if (needsCongrats) {
+              keyboards.sendKeyboard(
+                bot,
+                user.id, 
+                strings.filledEverythingMessage, 
+                keyboards.freelancerKeyboard(user));
+            }
+          })
+          .catch(err => console.log(err));
+      });
   } else if (user.input_state == strings.inputCategoryNameState) {
     if (msg.text == strings.jobCreateCancel) {
       cancelJobCreation(msg, user, bot);
@@ -92,7 +90,7 @@ function handle(msg, user, bot) {
   } else {
     console.log(msg);
   }
-};
+}
 
 /**
  * Sends message to user asking for bio and adds relevant flags to user's object
@@ -150,7 +148,7 @@ function askForNewJobCategory(msg, bot) {
           strings.selectCategoryMessage,
           categoryButtons);
       });
-  };
+  }
   dbmanager.findUser({ id: msg.chat.id })
     .then(user => {
       user.input_state = strings.inputCategoryNameState;
@@ -159,7 +157,7 @@ function askForNewJobCategory(msg, bot) {
             saveUserCallback(saveUserCallback);
         });
     });
-};
+}
 
 /**
  * Sends message asking for job hourly rate of job that is being created, saves relevant flag to db for user
@@ -199,7 +197,7 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
         strings.selectJobHourlyRateMessage,
         keyboard);
   });
-};
+}
 
 /**
  * Sends message asking for job description of job that is being created, saves relevant flag to db for user
@@ -226,7 +224,7 @@ function askForNewJobDescription(msg, bot, user) {
       });
     }
   });
-};
+}
 
 /**
  * Cancels job creation, removes job draft and resets user's input state
@@ -248,7 +246,7 @@ function cancelJobCreation(msg, user, bot) {
         keyboards.clientKeyboard);
     }
   });
-};
+}
 
 /**
  * Creates job draft for user
@@ -273,7 +271,7 @@ function startJobDraft(categoryTitle, msg, user, bot) {
             });
         });
     });
-};
+}
 
 /**
  * Adds hourly rate to job draft and sends next step
@@ -291,7 +289,7 @@ function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
       askForNewJobDescription(msg, bot, user);
     }
   })
-};
+}
 
 /**
  * Adds desctiption to job draft and sends next step
@@ -316,7 +314,7 @@ function addDescriptionToJobDraft(description, msg, user, bot) {
       });
     }
   })
-};
+}
 
 //
 function completeReport(reportMessage, msg, user, bot) {
@@ -338,7 +336,8 @@ function completeReport(reportMessage, msg, user, bot) {
   user.save();
   // Создаем новый обьект Report с полученной информацией
   let report = new Report({
-    user: user._id,
+    sendBy: user._id,
+    sendTo: jobId,
     message: reportMessage
   });
   report.save();
@@ -346,7 +345,7 @@ function completeReport(reportMessage, msg, user, bot) {
   dbmanager.findJobById(jobId)
     .then(job => {
       // Обновить обьект job добавив туда новый Report
-      job.reports.push(report);
+      job.reports.push(report._id);
       if (job.reports.length >= reportsLimit) {
         job.state = strings.jobStates.frozen;
       }

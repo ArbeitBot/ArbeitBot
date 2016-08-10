@@ -4,9 +4,10 @@
  * Please see docs/job_process.txt to get better idea on job life cycle
  */
 
-let keyboards = require('./keyboards');
-let dbmanager = require('./dbmanager');
-let strings = require('./strings');
+const keyboards = require('./keyboards');
+const dbmanager = require('./dbmanager');
+const strings = require('./strings');
+const review = require('./review');
 
 /** Main functions */
 
@@ -17,7 +18,6 @@ let strings = require('./strings');
  * @param  {Mongoose:Job} job  Relevant job
  */
 function sendJobCreatedMessage(user, bot, job) {
-  // todo: handle if user doesn't have username
   dbmanager.freelancersForJob(job)
     .then(users => {
       keyboards.sendKeyboard(bot,
@@ -28,100 +28,39 @@ function sendJobCreatedMessage(user, bot, job) {
           keyboards.sendInline(
             bot,
             user.id,
-            messageFromFreelancers(freelancers),
-            jobInlineKeyboard(freelancers, job));
+            messageFromFreelancers(users),
+            jobInlineKeyboard(users, job));
         });
     });
 }
 
-function writeReview(bot, msg, job, user, data, reviewTypes) {
-  let byClient = (reviewTypes === strings.reviewTypes.byClient);
-  let chat_id = (byClient) ? job.current_inline_chat_id : job.freelancer_inline_chat_id;
-  let message_id = (byClient) ? job.current_inline_message_id : job.freelancer_inline_message_id;
-
-  if (data[4] === undefined) {
-    let keyboard = (byClient) ? clientRateInlineKeyboard(job._id) : freelancerRateInlineKeyboard(job._id);
-
-    let send = {
-      chat_id: chat_id,
-      message_id: message_id,
-      text: (byClient) ? strings.rateFreelancerMessage : strings.rateClientMessage,
-      reply_markup: {
-        inline_keyboard: keyboard
+/**
+ * Used to send user all his jobs that aren't yet closed; deletes previous existing job cards; sends no jobs message if no jobs exist for this user
+ * @param  {Telegram:Bot} bot Bot that should send cards
+ * @param  {Telegram:Message} msg Message that came with this command
+ */
+function sendAllJobs(bot, msg) {
+  dbmanager.findUser({ id: msg.from.id })
+    .then(user => {
+      if (user.jobs.length <= 0) {
+        keyboards.sendInline(bot, user.id, strings.noJobsExistMessage, [])
+          .catch(err => console.log(err.error.description));
+      } else {
+        sendJobMessages(user, bot);
       }
-    };
-    send.reply_markup = JSON.stringify(send.reply_markup);
-
-    bot.editMessageText(send)
-      .catch(err => {
-        if (err.error.description !== 'Bad Request: message is not modified') {
-          console.log(err);
-        }
-      });
-  } else if (data[4] === strings.rateOptions.back) {
-    if (byClient) {
-      updateJobMessage(job, bot);
-    } else {
-      updateFreelancerMessage(bot, msg, user, job);
-    }
-  } else {
-    let rate = data[4].length;
-    /*if (data[4] === strings.rateOptions.oneStar) rate = 1;
-     else if (data[4] === strings.rateOptions.twoStars) rate = 2;
-     else if (data[4] === strings.rateOptions.threeStars) rate = 3;
-     else if (data[4] === strings.rateOptions.fourStars) rate = 4;
-     else if (data[4] === strings.rateOptions.fiveStars) rate = 5;*/
-    let toUser = (byClient) ? job.selectedCandidate : job.client;
-
-    dbmanager.addReview({
-      byUser: user._id,
-      toUser: toUser,
-      job: job._id,
-      rate: rate,
-      review: '',
-      reviewType: reviewTypes
-    })
-      .then(dbReviewObject => {
-        dbmanager.findUserById(toUser)
-          .then(toUser => {
-            toUser.reviews.push(dbReviewObject._id);
-            toUser.save()
-              .then(toUser => {
-                //todo: Send a message stating that you have received a review
-              });
-          });
-
-        user.writeReview.push(dbReviewObject._id);
-        user.save()
-          .then(user => {
-            let send = {
-              chat_id: chat_id,
-              message_id: message_id,
-              text: strings.thanksReviewMessage,
-              reply_markup: {
-                inline_keyboard: []
-              }
-            };
-            send.reply_markup = JSON.stringify(send.reply_markup);
-            bot.editMessageText(send)
-            .catch(err => {
-              if (err.error.description !== 'Bad Request: message is not modified') {
-                console.log(err);
-              }
-            });
-          });
-      });
-  }
+    });
 }
 
 /** Handles */
+
+// Job process
 
 /**
  * Handles inline when client selects a freelancer (that should receive a job offer from client later on) from the list of available freelancers; also handles option when sending to all freelancers
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Messager} msg Message received
  */
-function handleClientInline(bot, msg) {
+eventEmitter.on(strings.freelancerInline, ({ msg, bot }) => {
   // Get essential info
   let options = msg.data.split(strings.inlineSeparator);
   let freelancerId = options[1];
@@ -137,92 +76,143 @@ function handleClientInline(bot, msg) {
       .then(job => {
         showSelectFreelancers(msg, job, bot);
       });
-  } else if (freelancerId === strings.jobFinishedOptions.report) {
-    dbmanager.findJobById(jobId)
-      .then(job => {
-        dbmanager.findUserById(options[3])
-          .then(user => {
-            reportFreelancer(bot, msg, job, user);
-          });
-      });
-  } else if (freelancerId === strings.jobFinishedOptions.rate) {
-    dbmanager.findJobById(jobId)
-      .then(job => {
-        dbmanager.findUserById(job.client)
-          .then(user => {
-            writeReview(bot, msg, job, user, options, strings.reviewTypes.byClient);
-          });
-      });
   } else {
     dbmanager.findUserById(freelancerId)
       .then(user => {
         addFreelancersToCandidates(jobId, [user], msg, bot);
       });
   }
-}
+});
+
+/**
+ * Handles freelancer inline answer whether he is interested ot not or want to report
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Message} msg Message that was sent with this inline
+ */
+eventEmitter.on(strings.freelancerJobInline, ({ msg, bot }) => {
+  let options = msg.data.split(strings.inlineSeparator);
+  let jobId = options[1];
+  let answer = options[2];
+  let freelancerUsername = options[3];
+
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUser({ username: freelancerUsername })
+        .then(user => {
+          dbmanager.saveFreelancerMessageToJob(msg, job, user)
+            .then(job => {
+              if (answer === strings.freelancerOptions.interested) {
+                makeInterested(true, bot, msg, job, user);
+              } else if (answer === strings.freelancerOptions.notInterested) {
+                makeInterested(false, bot, msg, job, user);
+              } else if (answer === strings.freelancerOptions.report) {
+                reportJob(bot, msg, job, user);
+              }
+            });
+        });
+    });
+});
 
 /**
  * Handles case when freelancer should be selected for job from client
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Messager} msg Message received
  */
-function handleSelectFreelancerInline(bot, msg) {
+eventEmitter.on(strings.selectFreelancerInline, ({ msg, bot }) => {
   // Get essential info
-  let freelancerId = msg.data.split(strings.inlineSeparator)[1];
-  let jobId = msg.data.split(strings.inlineSeparator)[2];
+  const freelancerId = msg.data.split(strings.inlineSeparator)[1];
+  const jobId = msg.data.split(strings.inlineSeparator)[2];
 
   if (freelancerId === strings.selectFreelancerCancel) {
     dbmanager.findJobById(jobId)
       .then(job => {
         updateJobMessage(job, bot);
       });
-  } else if (freelancerId === strings.selectAnotherFreelancerInline) {
-    selectAnotherFreelancerForJob(bot, jobId);
   } else {
     selectFreelancerForJob(bot, msg, freelancerId, jobId);
   }
-}
+});
 
 /**
- * Handles freelancer inline answer whether he is interested ot not or wanr to report
+ * Handles case when freelancer didn't respond yet and client would like to select another freelancer
  * @param  {Telegram:Bot} bot Bot that should respond
- * @param  {Telegram:Message} msg Message that was sent with this inline
+ * @param  {Telegram:Messager} msg Message received
  */
-function handleFreelancerAnswerInline(bot, msg) {
-  let options = msg.data.split(strings.inlineSeparator);
-  let jobId = options[1];
-  let answer = options[2];
+eventEmitter.on(strings.selectAnotherFreelancerInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  selectAnotherFreelancerForJob(bot, jobId);
+});
 
-  if (answer === strings.jobFinishedOptions.rate) {
-    dbmanager.findJobById(jobId)
-      .then(job => {
-        dbmanager.findUserById(job.selectedCandidate)
-          .then(user => {
-            writeReview(bot, msg, job, user, options, strings.reviewTypes.byFreelancer);
-          });
-      });
-  } else {
-    let freelancerUsername = options[3];
+/**
+ * Handles case when freelancer accepts or rejects job offer
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const option = msg.data.split(strings.inlineSeparator)[2];
+  const freelancerUsername = msg.data.split(strings.inlineSeparator)[3];
 
-    dbmanager.findJobById(jobId)
-      .then(job => {
-        dbmanager.findUser({ username: freelancerUsername })
-          .then(user => {
-            if (answer === strings.freelancerOptions.interested) {
-              makeInterested(true, bot, msg, job, user);
-            } else if (answer === strings.freelancerOptions.notInterested) {
-              makeInterested(false, bot, msg, job, user);
-            } else if (answer === strings.freelancerOptions.report) {
-              reportJob(bot, msg, job, user);
-            } else if (answer === strings.freelancerAcceptOptions.accept) {
-              makeAccepted(true, bot, msg, job, user);
-            } else if (answer === strings.freelancerAcceptOptions.refuse) {
-              makeAccepted(false, bot, msg, job, user);
-            }
-          });
-      });
-  }
-}
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUser({ username: freelancerUsername })
+        .then(user => {
+          if (option === strings.freelancerAcceptOptions.accept) {
+            job.state = strings.jobStates.finished;
+            job.save()
+              .then(job => {
+                updateJobMessage(job, bot);
+                updateFreelancerMessage(bot, msg, user, job);
+              });
+          } else {
+            job.state = strings.jobStates.searchingForFreelancer;
+            job.candidate = null;
+            job.save()
+              .then(job => {
+                makeInterested(false, bot, msg, job, user);
+              });
+          }
+        });
+    });
+});
+
+// Reports
+
+/**
+ * Handles case when freelancer is reported
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerId = msg.data.split(strings.inlineSeparator)[2];
+  // todo: handle report
+  console.log(jobId, freelancerId);
+});
+
+/**
+ * Handles case when client is reported
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerIdReported = msg.data.split(strings.inlineSeparator)[2];
+  // todo: handle report
+  console.log(jobId, freelancerIdReported);
+});
+
+/**
+ * Handles case when job is reported
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerUsernameReported = msg.data.split(strings.inlineSeparator)[3];
+  // todo: handle report
+  console.log(jobId, freelancerUsernameReported);
+});
 
 /**
 //// Client side
@@ -237,76 +227,27 @@ function handleFreelancerAnswerInline(bot, msg) {
  * @param  {Mongoose:Job} job Job that freelancers are offered
  */
 function sendUsersJobOffer(bot, users, job) {
-  if (users === strings.selectAnotherFreelancerInline) {
-    let send = {
-      chat_id: job.freelancer_inline_chat_id,
-      message_id: job.freelancer_inline_message_id,
-      text: strings.clientHasChosenAnotherFreelancer,
-      reply_markup: {
-        inline_keyboard: []
-      }
-    };
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageText(send)
-      .catch(err => console.log(err));
-  } else if (job.state === strings.jobStates.searchingForFreelancer) {
-    for (let i in users) {
-      let user = users[i];
-        let keyboard = [];
-        let keys = Object.keys(strings.freelancerOptions);
-        for (let j in keys) {
-          let option = strings.freelancerOptions[keys[j]];
-          keyboard.push([{
-            text: option,
-            callback_data:
-            strings.freelancerJobInline +
+  if (job.state === strings.jobStates.searchingForFreelancer) {
+    users.forEach(user => {
+      let keyboard = [];
+      Object.keys(strings.freelancerOptions).forEach(key => {
+        const option = strings.freelancerOptions[key];
+        const inline = option === strings.freelancerOptions.report ?
+          strings.reportJobInline : strings.freelancerJobInline;
+        keyboard.push([{
+          text: option,
+          callback_data:
+            inline +
             strings.inlineSeparator +
             job._id +
             strings.inlineSeparator +
             option +
             strings.inlineSeparator +
             user.username
-          }]);
-        }
-        keyboards.sendInline(bot, user.id, job.description, keyboard);
-    }
-  } else if (job.state === strings.jobStates.freelancerChosen) {
-    let user = users[0];
-
-    let keyboard = [];
-    let keys = Object.keys(strings.freelancerAcceptOptions);
-    for (let i in keys) {
-      let option = strings.freelancerAcceptOptions[keys[i]];
-      keyboard.push([{
-        text: option,
-        callback_data:
-        strings.freelancerJobInline +
-        strings.inlineSeparator +
-        job._id +
-        strings.inlineSeparator +
-        option +
-        strings.inlineSeparator +
-        user.username
-      }]);
-    }
-
-    let message = {
-      chat_id: user.id,
-      text: job.description,
-      reply_markup: {
-        inline_keyboard: keyboard
-      }
-    };
-    message.reply_markup = JSON.stringify(message.reply_markup);
-    bot.sendMessage(message)
-    .catch(err => console.log(err))
-    .then(data => {
-      job.freelancer_inline_chat_id = data.chat.id;
-      job.freelancer_inline_message_id = data.message_id;
-      job.save();
+        }]);
+      });
+      keyboards.sendInline(bot, user.id, job.description, keyboard);
     });
-  } else if (job.state === strings.jobStates.finished) {
-    // todo: handle when job is finished
   }
 }
 
@@ -324,18 +265,40 @@ function showSelectFreelancers(msg, job, bot) {
       inline_keyboard: jobSelectCandidateKeyboard(job)
     }),
     text: strings.selectCandidateMessage
-  }).catch(err => console.log(err));
+  }).catch(err => console.log(err.error.description));
 }
 
 /**
- * Used to report a freelancer
- * @param  {Telegram:Bot} bot  Bot that sohuld respond
- * @param  {Telegram:Message} msg  Message that came with action
- * @param  {Mongoose:Job} job  Relevant to this report job
- * @param  {Mongoose:User} user User to be reported
+ * Used to send user all his jobs that aren't yet closed; deletes previous existing job cards
+ * @param  {Mongoose:User} user User whos jobs should be sent
+ * @param  {Telegram:Bot} bot Bot that should send cards
  */
-function reportFreelancer(bot, msg, job, user) {
-  //  todo: handle report
+function sendJobMessages(user, bot) {
+  user.jobs.forEach(job => {
+    sendNewJobMessage(job, user, bot);
+  });
+}
+
+/**
+ * Used to send a new job message replacing the previous one
+ * @param  {Mongoose:Job} job  Job that should have new message sent
+ * @param  {Mongoose:User} user Owner of this job
+ * @param  {Telegram:Bot} bot  Bot that should operate
+ */
+function sendNewJobMessage(job, user, bot) {
+  deprecateJobMessage(job, bot);
+  keyboards.sendInline(bot, 
+    user.id, 
+    strings.loadingMessage, 
+    [],
+    data => {
+      job.current_inline_chat_id = data.chat.id;
+      job.current_inline_message_id = data.message_id;
+      job.save()
+        .then(job => {
+          updateJobMessage(job, bot);
+        });
+    });
 }
 
 /**
@@ -372,26 +335,27 @@ function reportJob(bot, msg, job, user) {
  * @param {Mongoose:Job} job   (Optional) pass a job if you have any so that bot doesn't have to fetch job by Job id from db
  */
 function addFreelancersToCandidates(jobId, users, msg, bot, job) {
+  const jobCallback = job => {
+    users = users.filter(user => {
+      return !job.candidates.map(o => String(o)).includes(String(user._id)) && 
+        !job.interestedCandidates.map(o => String(o)).includes(String(user._id)) &&
+        !job.notInterestedCandidates.map(o => String(o)).includes(String(user._id));
+    });
+    job.current_inline_chat_id = msg.message.chat.id;
+    job.current_inline_message_id = msg.message.message_id;
+    users.forEach(user => job.candidates.push(user));
+    job.save()
+      .then(newJob => {
+        sendUsersJobOffer(bot, users, newJob);
+        updateJobMessage(newJob, bot);
+      });
+  };
+
   if (job) {
     jobCallback(job);
   } else {
     dbmanager.findJobById(jobId)
-      .then(newJob => {
-        users = users.filter(user => {
-          return !job.candidates || 
-            (job.candidates.indexOf(user._id) === -1 && 
-            job.interestedCandidates.indexOf(user._id) === 
-            -1 && job.notInterestedCandidates.indexOf(user._id) === -1);
-        });
-        job.current_inline_chat_id = msg.message.chat.id;
-        job.current_inline_message_id = msg.message.message_id;
-        users.forEach(user => job.candidates.push(user));
-        job.save()
-          .then(newJob => {
-            sendUsersJobOffer(bot, users, newJob);
-            updateJobMessage(newJob, bot);
-          });
-      });
+      .then(jobCallback);
   }
 }
 
@@ -412,7 +376,7 @@ function selectFreelancerForJob(bot, msg, userId, jobId) {
           job.save()
             .then(newJob => {
                 updateJobMessage(newJob, bot);
-                sendUsersJobOffer(bot, [user], newJob);
+                updateFreelancerMessage(bot, msg, user, job);
             });
         });
     });
@@ -424,16 +388,18 @@ function selectFreelancerForJob(bot, msg, userId, jobId) {
  * @param  {Mongo:ObjectId} jobId Id of relevant job
  */
 function selectAnotherFreelancerForJob(bot, jobId) {
-  dbmanager.findJobById(jobId)
+  dbmanager.findJobById(jobId, 'freelancer_chat_inlines')
     .then(job => {
       dbmanager.findUserById(job.selectedCandidate)
         .then(user => {
+          const chatInline = dbmanager.chatInline(job, user);
           job.selectedCandidate = null;
           job.state = strings.jobStates.searchingForFreelancer;
+          // job.interestedCandidates.push(user);
           job.save()
             .then(newJob => {
               updateJobMessage(newJob, bot);
-              sendUsersJobOffer(bot, strings.selectAnotherFreelancerInline, newJob);
+              updateFreelancerMessage(bot, null, user, job, chatInline);
             })
         });
     });
@@ -457,32 +423,43 @@ function updateJobMessage(job, bot) {
 }
 
 /**
+ * Used to deprecate job message
+ * @param  {Mongoose:Job} job Job which message should be deprecated
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
+function deprecateJobMessage(job, bot) {
+  let send = {
+    chat_id: job.current_inline_chat_id,
+    message_id: job.current_inline_message_id,
+    text: strings.deprecatedMessage,
+    reply_markup: {
+      inline_keyboard: []
+    }
+  };
+  send.reply_markup = JSON.stringify(send.reply_markup);
+  bot.editMessageText(send)
+    .catch(err => console.log(err.error.description));
+}
+
+/**
  * Updates job message with a list of available Freelancers
  * @param  {Mongoose:Job} job Job which message should be updated
  * @param  {Telegram:Bot} bot Bot that should update message
  */
 function updateJobMessageForSearch(job, bot) {
-  function updateKeyboard(users) {
-    let send = {
-      chat_id: job.current_inline_chat_id,
-      message_id: job.current_inline_message_id,
-      text: messageFromFreelancers(users),
-      reply_markup: {
-        inline_keyboard: jobInlineKeyboard(users, job)
-      }
-    };
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageText(send)
-    .catch(err => {
-      if (err.error.description !== 'Bad Request: message is not modified') {
-        console.log(err);
-      }
-    });
-  }
-
   dbmanager.freelancersForJob(job)
     .then(users => {
-      updateKeyboard(users);
+      let send = {
+        chat_id: job.current_inline_chat_id,
+        message_id: job.current_inline_message_id,
+        text: messageFromFreelancers(users),
+        reply_markup: {
+          inline_keyboard: jobInlineKeyboard(users, job)
+        }
+      };
+      send.reply_markup = JSON.stringify(send.reply_markup);
+      bot.editMessageText(send)
+        .catch(err => console.log(err.error.description));
     });
 }
 
@@ -500,21 +477,15 @@ function updateJobMessageForSelected(job, bot) {
       inline_keyboard: [[{
         text: strings.jobSelectAnotherFreelancer,
         callback_data:
-        strings.selectFreelancerInline +
-        strings.inlineSeparator +
-        strings.selectAnotherFreelancerInline +
-        strings.inlineSeparator +
-        job._id
+          strings.selectAnotherFreelancerInline +
+          strings.inlineSeparator +
+          job._id
       }]]
     }
   };
   send.reply_markup = JSON.stringify(send.reply_markup);
   bot.editMessageText(send)
-  .catch(err => {
-    if (err.error.description !== 'Bad Request: message is not modified') {
-      console.log(err);
-    }
-  });
+    .catch(err => console.log(err.error.description));
 }
 
 /**
@@ -527,29 +498,33 @@ function updateJobMessageForFinished(job, bot) {
     .then(user => {
       let keyboard = [[{
           text: strings.jobFinishedOptions.rate,
-          callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + job._id
+          callback_data: 
+            strings.askRateFreelancerInline + 
+            strings.inlineSeparator + 
+            job._id
         },
         {
           text: strings.jobFinishedOptions.report,
-          callback_data: strings.freelancerInline + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + job._id + strings.inlineSeparator + user._id
+          callback_data: 
+            strings.reportFreelancerInline + 
+            strings.inlineSeparator + 
+            job._id + 
+            strings.inlineSeparator + 
+            user._id
         }
       ]];
 
       let send = {
         chat_id: job.current_inline_chat_id,
         message_id: job.current_inline_message_id,
-        text: `${strings.contactWithFreelancerMessage} @${user.username}`,
+        text: `${ strings.contactWithFreelancerMessage }\n@${ user.username }`,
         reply_markup: {
           inline_keyboard: keyboard
         }
       };
       send.reply_markup = JSON.stringify(send.reply_markup);
       bot.editMessageText(send)
-      .catch(err => {
-        if (err.error.description !== 'Bad Request: message is not modified') {
-          console.log(err);
-        }
-      });
+      .catch(err => console.log(err.error.description));
     });
 }
 
@@ -567,21 +542,21 @@ function jobInlineKeyboard(freelancers, job) {
     keyboard.push([{
       text: strings.jobSelectFreelancer,
       callback_data:
-      strings.freelancerInline +
-      strings.inlineSeparator +
-      strings.jobSelectFreelancer +
-      strings.inlineSeparator +
-      job._id
+        strings.freelancerInline +
+        strings.inlineSeparator +
+        strings.jobSelectFreelancer +
+        strings.inlineSeparator +
+        job._id
     }]);
   }
   keyboard.push([{
     text: strings.jobSendAllFreelancers,
     callback_data:
-    strings.freelancerInline +
-    strings.inlineSeparator +
-    strings.jobSendAllFreelancers +
-    strings.inlineSeparator +
-    job._id
+      strings.freelancerInline +
+      strings.inlineSeparator +
+      strings.jobSendAllFreelancers +
+      strings.inlineSeparator +
+      job._id
   }]);
   freelancers.forEach(freelancer => {
     // Get postfix
@@ -593,13 +568,13 @@ function jobInlineKeyboard(freelancers, job) {
     }
     // Add freelancer button
     keyboard.push([{
-      text: freelancer.username + ' ' + postfix,
+      text: `${ freelancer.username }${ postfix }`,
       callback_data:
-      strings.freelancerInline +
-      strings.inlineSeparator +
-      freelancer._id +
-      strings.inlineSeparator +
-      job._id
+        strings.freelancerInline +
+        strings.inlineSeparator +
+        freelancer._id +
+        strings.inlineSeparator +
+        job._id
     }]);
   });
   return keyboard;
@@ -619,7 +594,7 @@ function jobSelectCandidateKeyboard(job) {
     strings.inlineSeparator +
     strings.selectFreelancerCancel +
     strings.inlineSeparator +
-    job._id
+    job._id 
   }]);
   job.interestedCandidates.forEach(freelancer => {
     keyboard.push([{
@@ -635,28 +610,6 @@ function jobSelectCandidateKeyboard(job) {
   return keyboard;
 }
 
-function clientRateInlineKeyboard(jobId) {
-  let keyboard = [];
-  let keys = Object.keys(strings.rateOptions);
-  for (let j in keys) {
-    let option = strings.rateOptions[keys[j]];
-    keyboard.push([{
-      text: option,
-      callback_data: strings.freelancerInline +
-      strings.inlineSeparator +
-      strings.jobFinishedOptions.rate +
-      strings.inlineSeparator +
-      jobId +
-      strings.inlineSeparator +
-      strings.reviewTypes.byFreelancer +
-      strings.inlineSeparator +
-      option
-    }]);
-  }
-
-  return keyboard;
-}
-
 // Helpers
 
 /**
@@ -665,11 +618,14 @@ function clientRateInlineKeyboard(jobId) {
  * @return {String}       Message constructed from given users
  */
 function messageFromFreelancers(users) {
-  // todo: handle if user doesn't have username
   let message = '';
   for (let i in users) {
     const user = users[i];
-    message = message + (i == 0 ? '' : '\n') + '@' + user.username + '\n' + user.bio;
+    const lineBreak = i == 0 ? '' : '\n';
+    message = `${ message }${ lineBreak }@${ user.username }\n${ user.bio }`;
+  }
+  if (message.length <= 0) {
+    message = strings.noCandidatesMessage;
   }
   return message;
 }
@@ -694,7 +650,7 @@ function messageFromFreelancers(users) {
  */
 function makeInterested(interested, bot, msg, job, user) {
   if (job.state !== strings.jobStates.searchingForFreelancer) {
-    var send = {
+    let send = {
       chat_id: msg.from.id,
       message_id: msg.message.message_id,
       text: strings.clientHasChosenAnotherFreelancer,
@@ -704,12 +660,12 @@ function makeInterested(interested, bot, msg, job, user) {
     };
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageText(send)
-      .catch(err => console.log(err));
+      .catch(err => console.log(err.error.description));
   } else {
     // Remove user from candidates
-    var candIndex = job.candidates.indexOf(user._id);
-    var intIndex = job.interestedCandidates.indexOf(user._id);
-    var notIntIndex = job.notInterestedCandidates.indexOf(user._id);
+    let candIndex = job.candidates.indexOf(user._id);
+    let intIndex = job.interestedCandidates.indexOf(user._id);
+    let notIntIndex = job.notInterestedCandidates.indexOf(user._id);
     if (candIndex > -1) {
       job.candidates.splice(candIndex, 1);
     }
@@ -719,7 +675,7 @@ function makeInterested(interested, bot, msg, job, user) {
     if (notIntIndex > -1) {
       job.notInterestedCandidates.splice(notIntIndex, 1);
     }
-    // Add user to interesed or not interested
+    // Add user to interested or not interested
     if (interested) {
       job.interestedCandidates.push(user._id);
     } else {
@@ -733,85 +689,19 @@ function makeInterested(interested, bot, msg, job, user) {
   }
 }
 
-/**
- * Adds/removes user to/from field "selected candidate" of given job
- * @param  {Boolean} accept If true sets freelancer as selected candidate for job, otherwise removes him
- * @param  {Telegram:Bot} bot    Bot that should respond
- * @param  {Telegram:Message} msg    Message that came with inline action
- * @param  {Mongoose:Job} job    Job where to add freelancer
- * @param  {Mongoose:User} user   Freelancer to operate with
- */
-function makeAccepted(accept, bot, msg, job, user) {
-  var intIndex = job.interestedCandidates.indexOf(user._id);
-
-  if (''+job.selectedCandidate === ''+user._id) {
-    if (!accept) {
-      job.selectedCandidate = null;
-
-      if (intIndex > -1) {
-        job.interestedCandidates.splice(intIndex, 1);
-      }
-
-      job.notInterestedCandidates.push(user._id);
-    }
-
-    job.state = (accept) ? strings.jobStates.finished : strings.jobStates.freelancerChosen;
-
-    job.save()
-      .then(newJob => {
-        updateFreelancerMessage(bot, msg, user, newJob);
-        updateJobMessage(job, bot);
-      });
-  } else {
-    var send = {
-      chat_id: msg.from.id,
-      message_id: msg.message.message_id,
-      text: strings.clientHasChosenAnotherFreelancer,
-      reply_markup: {
-        inline_keyboard: []
-      }
-    };
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageText(send)
-      .catch(err => console.log(err));
-  }
-}
-
-/**
- * Initializes job report
- * @param  {Telegram:Bot} bot  Bot that should respond
- * @param  {Telegram:Message} msg  Message passed with action
- * @param  {Mongoose:Job} job  Job object to report
- * @param  {Mongoose:User} user User who reports
- */
-function reportJob(bot, msg, job, user) {
-  // user.input_state = strings.inputReportMessage;
-  // user.report_draft = job._id;
-  // user.save(err => {
-  //   if (!err) {
-  //     bot.sendMessage({
-  //       chat_id: msg.from.id,
-  //       text: strings.report.reason
-  //     });
-  //     makeInterested(false, bot, msg, job, user);
-  //     updateJobMessage(job, bot);
-  //     updateFreelancerMessage(bot, msg, user, job);
-  //   }
-  // });
-}
-
 // Update message
 
 /**
  * Used to update job messahe from freelancer side; uses updateFreelancerMessageForSearch, updateFreelancerMessageForSelected and updateFreelancerMessageForFinished respectively
  * @param  {Telegram:Bot} bot  Bot that should edit message
- * @param  {Telegram:Message} msg  Message that came along with action
+ * @param  {Telegram:Message} msg  (Optional) Message that came along with action, can use chatInline instead
  * @param  {Mongoose:User} user Freelancer whos message should be editted
  * @param  {Mongoose:Job} job  Relevant job
+ * @param {Mongoose:UserChatInline} chatInline (Optional) Chat inline to use instead of msg
  */
-function updateFreelancerMessage(bot, msg, user, job) {
+function updateFreelancerMessage(bot, msg, user, job, chatInline) {
   if (job.state === strings.jobStates.searchingForFreelancer) {
-    updateFreelancerMessageForSearch(bot, msg, user, job);
+    updateFreelancerMessageForSearch(bot, msg, user, job, chatInline);
   } else if (job.state === strings.jobStates.freelancerChosen) {
     updateFreelancerMessageForSelected(bot, msg, user, job);
   } else if (job.state === strings.jobStates.finished) {
@@ -826,30 +716,29 @@ function updateFreelancerMessage(bot, msg, user, job) {
  * @param  {Mongoose:User} user Freelancer whos message should be editted
  * @param  {Mongoose:Job} job  Relevant job
  */
-function updateFreelancerMessageForSearch(bot, msg, user, job) {
+function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
   let prefix = '';
-  if (job.interestedCandidates.indexOf(user._id) > -1) {
-    prefix = `${strings.interestedOption} ${strings.freelancerOptions.interested}\n\n`;
-  } else if (job.notInterestedCandidates.indexOf(user._id) > -1) {
-    prefix = `${strings.notInterestedOption} ${strings.freelancerOptions.notInterested}\n\n`;
+  if (job.interestedCandidates.map(o => String(o)).includes(String(user._id))) {
+    prefix = `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n`;
+  } else if (job.notInterestedCandidates.map(o => String(o)).includes(String(user._id))) {
+    prefix = `${ strings.notInterestedOption } ${ strings.freelancerOptions.notInterested }\n\n`;
   }
 
+  let chatId = (!!msg) ? msg.message.chat.id : chatInline.chat_id;
+  let messageId = (!!msg) ? msg.message.message_id : chatInline.message_id;
+
   let send = {
-    chat_id: msg.message.chat.id,
-    message_id: msg.message.message_id,
-    text: `${prefix}\n\n${job.description}`,
+    chat_id: chatId,
+    message_id: messageId,
+    text: `${ prefix }${ job.description }`,
     reply_markup: {
       inline_keyboard: []
     }
   };
-
   send.reply_markup = JSON.stringify(send.reply_markup);
+
   bot.editMessageText(send)
-    .catch(err => {
-      if (err.error.description !== 'Bad Request: message is not modified') {
-        console.log(err);
-      }
-    });
+    .catch(err => console.log(err.error.description));
 }
 
 /**
@@ -860,34 +749,39 @@ function updateFreelancerMessageForSearch(bot, msg, user, job) {
  * @param  {Mongoose:Job} job  Relevant job
  */
 function updateFreelancerMessageForSelected(bot, msg, user, job) {
-  if (job.state == strings.jobStates.freelancerChosen) {
-    let prefix = `${strings.refuseOption} ${strings.freelancerAcceptOptions.refuse}`;
+  job.populate('freelancer_chat_inlines', (err, job) => {
+    job.populate('client', (err, job) => {
+      let chatInline = dbmanager.chatInline(job, user);
 
-    let send = {
-      chat_id: msg.message.chat.id,
-      message_id: msg.message.message_id,
-      text: `${prefix}\n\n${job.description}`,
-      reply_markup: {
-        inline_keyboard: []
-      }
-    };
-
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageText(send)
-      .catch(err => {
-        if (err.error.description !== 'Bad Request: message is not modified') {
-          console.log(err);
-        }
-      })
-      .then(data => {
-        job.freelancer_inline_chat_id = data.chat.id;
-        job.freelancer_inline_message_id = data.message_id;
-        job.save();
+      let keyboard = [];
+      Object.keys(strings.freelancerAcceptOptions).forEach(key => {
+        const option = strings.freelancerAcceptOptions[key];
+        keyboard.push([{
+          text: option,
+          callback_data:
+          strings.freelancerAcceptInline +
+          strings.inlineSeparator +
+          job._id +
+          strings.inlineSeparator +
+          option +
+          strings.inlineSeparator +
+          user.username
+        }]);
       });
 
-    job.state = strings.jobStates.searchingForFreelancer;
-    job.save();
-  }
+      let message = {
+        chat_id: chatInline.chat_id,
+        message_id: chatInline.message_id,
+        text: `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n@${job.client.username}\n${ job.description }\n\n${ strings.acceptOrRejectMessage }`,
+        reply_markup: {
+          inline_keyboard: keyboard
+        }
+      };
+      message.reply_markup = JSON.stringify(message.reply_markup);
+      bot.editMessageText(message)
+        .catch(err => console.log(err.error.description))
+    });
+  });
 }
 
 /**
@@ -898,70 +792,47 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
  * @param  {Mongoose:Job} job  Relevant job
  */
 function updateFreelancerMessageForFinished(bot, msg, user, job) {
-  let prefix = `${strings.acceptOption} ${strings.freelancerAcceptOptions.accept}\n${strings.waitClientResponseMessage}`;
-
   let keyboard = [[{
       text: strings.jobFinishedOptions.rate,
-      callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.rate + strings.inlineSeparator + user._id
+      callback_data: 
+        strings.askRateClientInline + 
+        strings.inlineSeparator + 
+        job._id + 
+        strings.inlineSeparator + 
+        user._id
     },
     {
       text: strings.jobFinishedOptions.report,
-      callback_data: strings.freelancerJobInline + strings.inlineSeparator + job._id + strings.inlineSeparator + strings.jobFinishedOptions.report + strings.inlineSeparator + user._id
+      callback_data: 
+        strings.reportClientInline + 
+        strings.inlineSeparator + 
+        job._id + 
+        strings.inlineSeparator + 
+        user._id
     }
   ]];
-
-  let send = {
-    chat_id: msg.message.chat.id,
-    message_id: msg.message.message_id,
-    text: `${prefix}\n\n${job.description}`,
-    reply_markup: {
-      inline_keyboard: keyboard
-    }
-  };
-
-  send.reply_markup = JSON.stringify(send.reply_markup);
-  bot.editMessageText(send)
-    .catch(err => {
-      if (err.error.description !== 'Bad Request: message is not modified') {
-        console.log(err);
+  job.populate('client', (err, job) => {
+    let send = {
+      chat_id: msg.message.chat.id,
+      message_id: msg.message.message_id,
+      text: `${ strings.contactWithClientMessage }\n\n@${ job.client.username }\n${job.description}`,
+      reply_markup: {
+        inline_keyboard: keyboard
       }
-    });
-}
+    };
 
-// Keyboards
-
-function freelancerRateInlineKeyboard(jobId) {
-  let keyboard = [];
-  let keys = Object.keys(strings.rateOptions);
-  for (let j in keys) {
-    let option = strings.rateOptions[keys[j]];
-    keyboard.push([{
-      text: option,
-      callback_data: strings.freelancerJobInline +
-      strings.inlineSeparator +
-      jobId +
-      strings.inlineSeparator +
-      strings.jobFinishedOptions.rate +
-      strings.inlineSeparator +
-      strings.reviewTypes.byFreelancer +
-      strings.inlineSeparator +
-      option
-    }]);
-  }
-
-  return keyboard;
+    send.reply_markup = JSON.stringify(send.reply_markup);
+    bot.editMessageText(send)
+      .catch(err => console.log(err.error.description));
+  });
 }
 
 /**
 //// End Freelancers side
 */
 
-
-
 // Exports
 module.exports = {
   sendJobCreatedMessage,
-  handleClientInline,
-  handleSelectFreelancerInline,
-  handleFreelancerAnswerInline
+  sendAllJobs
 };
