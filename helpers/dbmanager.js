@@ -206,13 +206,14 @@ function findJobById(id, populate) {
  * @param  {Mongo:Job} job Job object for which freelancers are returned
  */
 function freelancersForJob(job) {
+  job.notInterestedCandidates.push(job.client);//TODO:refactoring
   return new Promise(fullfill => {
     User.find({ $and: [
       { categories: job.category },
       { busy: false },
       { bio: { $exists: true } },
       { hourly_rate: job.hourly_rate },
-      { _id: { $nin: (job.notInterestedCandidates.length > 0) ? [ job.client, job.notInterestedCandidates ] : job.client } }
+      { _id: { $nin: job.notInterestedCandidates } }
     ]})
       .limit(10)
       .exec((err, users) => {
