@@ -329,9 +329,17 @@ function showSelectFreelancers(msg, job, bot) {
  * @param  {Telegram:Bot} bot Bot that should send cards
  */
 function sendJobMessages(user, bot) {
+  let tCount = 0;
   user.jobs.forEach(job => {
-    sendNewJobMessage(job, user, bot);
+    if (!job.reviewByClient && job.state !== strings.jobStates.removed) {
+      tCount++;
+      sendNewJobMessage(job, user, bot);
+    }
   });
+  if (tCount === 0) {
+    keyboards.sendInline(bot, user.id, strings.noJobsExistMessage, [])
+      .catch(err => console.log(err.error.description));
+  }
 }
 
 /**
