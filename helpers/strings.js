@@ -42,6 +42,7 @@ module.exports = {
   thanksReviewMessage: 'Thank you a lot for the review!',
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
   noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
+  thisWorkIsRemoved: 'This work is removed.',
   mainMenuOptions: {
     findJobs: '👤 Profile',
     findContractors: '⛑ Find contractors',
@@ -77,6 +78,7 @@ module.exports = {
   categoryInline: 'cI',
   hourlyRateInline: 'hRI',
   freelancerInline: 'fI',
+  jobManageInline: 'jMI',
   freelancerJobInline: 'fJI',
   selectFreelancerInline: 'sFI',
   selectAnotherFreelancerInline: 'sAFI',
@@ -97,6 +99,9 @@ module.exports = {
   jobCreateCancel: '❌ Cancel',
   selectFreelancerCancel: '❌ Cancel',
   jobSendAllFreelancers: 'Send to all',
+  jobRefresh: 'Refresh',
+  jobDelete: 'Delete',
+  jobEdit: 'Edit',
   jobSelectFreelancer: 'Select contractor',
   jobSelectAnotherFreelancer: 'Select another contractor',
   interestedOption: '✅',
@@ -111,7 +116,8 @@ module.exports = {
     finished: 'finished',
     frozen: 'frozen',
     banned: 'banned',
-    rated: 'rated'
+    rated: 'rated',
+    removed: 'removed'
   },
   reviewTypes: {
     byClient: 'byCl',
