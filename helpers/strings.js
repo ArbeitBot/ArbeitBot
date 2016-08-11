@@ -111,6 +111,8 @@ module.exports = {
   acceptOption: '✅',
   refuseOption: '❌',
   pendingOption: '🕒',
+  star: '⭐',
+  bioReviews: 'Reviews:',
   saveReviewOption: 'saveReview',
   jobStates: {
     searchingForFreelancer: 'searchingForFreelancer',

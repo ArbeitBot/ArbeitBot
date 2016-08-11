@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+let strings = require('../helpers/strings');
 
 var userSchema = new Schema({
   id: Number,
@@ -64,12 +65,22 @@ var userSchema = new Schema({
 
 userSchema.methods = {
   /**
-   * @return {number}
+   * @return {string}
    */
-  GetRate: function () {
-    return this.rate / this.reviews.length;
+  GetRate: function() {
+    return this.rate ? (this.rate / this.reviews.length).toFixed(1) : 0;
   },
-  UpdateRate: function () {
+  /**
+   * @return {string}
+   */
+  GetRateStars: function() {
+    let ret = '';
+    for (let i = 0; i < Math.round(this.rate / this.reviews.length); i++) {
+      ret += strings.star;
+    }
+    return ret;
+  },
+  UpdateRate: function() {
     let tRate = 0;
     this.reviews.forEach(review => {
       tRate += review.rate;

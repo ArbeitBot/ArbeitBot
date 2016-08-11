@@ -728,7 +728,7 @@ function messageFromFreelancers(users) {
     const user = users[i];
     const lineBreak = i == 0 ? '' : '\n';
     if (user.username) {
-      message = `${ message }${ lineBreak }@${ user.username }\n${ user.bio }`;
+      message = `${message}${lineBreak}@${user.username}\n${user.GetRateStars()}(${user.GetRate()}) ${strings.bioReviews}${user.reviews.length}\n${user.bio}`;
     }
   }
   if (message.length <= 0) {
