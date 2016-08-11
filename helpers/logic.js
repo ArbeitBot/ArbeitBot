@@ -20,6 +20,7 @@ const jobManager = require('./jobManager');
  */
 bot.on('message', msg => {
   if (!msg) return;
+  if (!msg.from.username) sendAskForUsername(msg);
 
   textInput.check(msg, (isTextInput, user) => {
     if (isTextInput) {
@@ -44,6 +45,7 @@ bot.on('message', msg => {
  * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
  */
 bot.on('inline.callback.query', msg => {
+  if (!msg.from.username) sendAskForUsername(msg);
   let options = msg.data.split(strings.inlineSeparator);
   let inlineQuerry = options[0];
 
@@ -157,6 +159,12 @@ function sendHelp(chatId) {
     keyboards.helpKeyboard);
 }
 
+function sendAskForUsername(msg) {
+  bot.sendMessage({
+    chat_id: msg.from.id,
+    text: strings.askForUsername
+  })
+}
 // Helpers
 
 /**
