@@ -10,26 +10,7 @@ const strings = require('./strings');
  * @param  {Telegram:Messager} msg Message received
  */
 eventEmitter.on(strings.askRateFreelancerInline, ({ msg, bot }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
-
-  dbmanager.findJobById(jobId, 'selectedCandidate client')
-    .then(job => {
-      const freelancer = job.selectedCandidate;
-
-      let keyboard = keyboards.rateKeyboard(strings.rateClientInline, job._id);
-      let send = {
-        chat_id: job.current_inline_chat_id,
-        message_id: job.current_inline_message_id,
-        text: strings.rateClientMessage,
-        reply_markup: {
-          inline_keyboard: keyboard
-        },
-        disable_web_page_preview: 'true'
-      };
-      send.reply_markup = JSON.stringify(send.reply_markup);
-      bot.editMessageText(send)
-        .catch(err => console.log(err.error.description));
-    });
+  sendRateKeyboard(msg, bot, strings.rateClientInline);
 });
 
 /**
@@ -38,25 +19,7 @@ eventEmitter.on(strings.askRateFreelancerInline, ({ msg, bot }) => {
  * @param  {Telegram:Messager} msg Message received
  */
 eventEmitter.on(strings.askRateClientInline, ({ msg, bot }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
-
-  dbmanager.findJobById(jobId, 'client freelancer_chat_inlines selectedCandidate')
-    .then(job => {
-        let keyboard = keyboards.rateKeyboard(strings.rateFreelancerInline, job._id);
-        const chatInline = dbmanager.chatInline(job, job.selectedCandidate);
-        let send = {
-          chat_id: chatInline.chat_id,
-          message_id: chatInline.message_id,
-          text: strings.rateClientMessage,
-          reply_markup: {
-            inline_keyboard: keyboard
-          },
-          disable_web_page_preview: 'true'
-        };
-        send.reply_markup = JSON.stringify(send.reply_markup);
-        bot.editMessageText(send)
-          .catch(err => console.log(err.error.description));
-    });
+  sendRateKeyboard(msg, bot, strings.rateFreelancerInline);
 });
 
 /**
@@ -94,6 +57,27 @@ eventEmitter.on(strings.rateClientInline, ({ msg, bot }) => {
         });
     });
 });
+
+function sendRateKeyboard(msg, bot, type) {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      let keyboard = keyboards.rateKeyboard(type, job._id);
+      let send = {
+        chat_id: msg.message.chat.id,
+        message_id: msg.message.message_id,
+        text: strings.rateClientMessage,
+        reply_markup: {
+          inline_keyboard: keyboard
+        },
+        disable_web_page_preview: 'true'
+      };
+      send.reply_markup = JSON.stringify(send.reply_markup);
+      bot.editMessageText(send)
+        .catch(err => console.log(err.error.description));
+    });
+}
 
 /**
  * Adds review to client and freelancer user objects; clears message on user that rated
