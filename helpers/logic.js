@@ -20,7 +20,10 @@ const jobManager = require('./jobManager');
  */
 bot.on('message', msg => {
   if (!msg) return;
-  if (!msg.from.username) sendAskForUsername(msg);
+  else if (!msg.from.username) {
+    sendAskForUsername(msg);
+    return;
+  }
 
   textInput.check(msg, (isTextInput, user) => {
     if (isTextInput) {
@@ -45,7 +48,10 @@ bot.on('message', msg => {
  * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
  */
 bot.on('inline.callback.query', msg => {
-  if (!msg.from.username) sendAskForUsername(msg);
+  if (!msg.from.username) {
+    sendAskForUsername(msg);
+    return;
+  }
   let options = msg.data.split(strings.inlineSeparator);
   let inlineQuerry = options[0];
 
