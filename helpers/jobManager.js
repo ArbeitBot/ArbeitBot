@@ -644,15 +644,6 @@ function jobInlineKeyboard(freelancers, job) {
       job._id
   },
   {
-    text: strings.jobEdit,
-    callback_data:
-      strings.jobManageInline +
-      strings.inlineSeparator +
-      strings.jobEdit +
-      strings.inlineSeparator +
-      job._id
-  },
-  {
     text: strings.jobDelete,
     callback_data:
       strings.jobManageInline +
@@ -838,7 +829,6 @@ function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
 
   let chatId = (!!msg) ? msg.message.chat.id : chatInline.chat_id;
   let messageId = (!!msg) ? msg.message.message_id : chatInline.message_id;
-
   let send = {
     chat_id: chatId,
     message_id: messageId,
