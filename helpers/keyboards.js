@@ -167,7 +167,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
       keyboard: keyboard,
       resize_keyboard: true
     }
-  }
+  };
   message.reply_markup = JSON.stringify(message.reply_markup);
   bot.sendMessage(message)
   .then(then)
@@ -188,7 +188,7 @@ function sendInline(bot, chatId, text, keyboard, then) {
     reply_markup: {
       inline_keyboard: keyboard
     }
-  }
+  };
   message.reply_markup = JSON.stringify(message.reply_markup);
   bot.sendMessage(message)
     .then(then)
