@@ -39,27 +39,23 @@ eventEmitter.on(strings.askRateFreelancerInline, ({ msg, bot }) => {
  */
 eventEmitter.on(strings.askRateClientInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
-  const freelancerId = msg.data.split(strings.inlineSeparator)[2];
 
-  dbmanager.findJobById(jobId, 'client freelancer_chat_inlines')
+  dbmanager.findJobById(jobId, 'client freelancer_chat_inlines selectedCandidate')
     .then(job => {
-      dbmanager.findUserById(freelancerId)
-        .then(freelancer => {
-          let keyboard = keyboards.rateKeyboard(strings.rateFreelancerInline, job._id);
-          const chatInline = dbmanager.chatInline(job, freelancer);
-          let send = {
-            chat_id: chatInline.chat_id,
-            message_id: chatInline.message_id,
-            text: strings.rateClientMessage,
-            reply_markup: {
-              inline_keyboard: keyboard
-            },
-            disable_web_page_preview: 'true'
-          };
-          send.reply_markup = JSON.stringify(send.reply_markup);
-          bot.editMessageText(send)
-            .catch(err => console.log(err.error.description));
-        });
+        let keyboard = keyboards.rateKeyboard(strings.rateFreelancerInline, job._id);
+        const chatInline = dbmanager.chatInline(job, job.selectedCandidate);
+        let send = {
+          chat_id: chatInline.chat_id,
+          message_id: chatInline.message_id,
+          text: strings.rateClientMessage,
+          reply_markup: {
+            inline_keyboard: keyboard
+          },
+          disable_web_page_preview: 'true'
+        };
+        send.reply_markup = JSON.stringify(send.reply_markup);
+        bot.editMessageText(send)
+          .catch(err => console.log(err.error.description));
     });
 });
 

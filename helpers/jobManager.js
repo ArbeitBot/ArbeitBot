@@ -911,11 +911,9 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
   let keyboard = [[{
       text: strings.jobFinishedOptions.rate,
       callback_data: 
-        strings.askRateClientInline + 
-        strings.inlineSeparator + 
-        job._id + 
-        strings.inlineSeparator + 
-        user._id
+        strings.askRateClientInline +
+        strings.inlineSeparator +
+        job._id
     },
     {
       text: strings.jobFinishedOptions.report,
