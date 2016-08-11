@@ -31,13 +31,7 @@ eventEmitter.on(strings.rateFreelancerInline, ({ msg, bot }) => {
   const rating = msg.data.split(strings.inlineSeparator)[1];
   const jobId = msg.data.split(strings.inlineSeparator)[2];
 
-  dbmanager.findJobById(jobId, 'client freelancer_chat_inlines')
-    .then(job => {
-      dbmanager.findUserById(job.selectedCandidate)
-        .then(freelancer => {
-          writeReview(bot, job, rating, job.client, freelancer, strings.reviewTypes.byFreelancer);
-        });
-    });
+  writeReview(bot, jobId, rating, strings.reviewTypes.byFreelancer);
 });
 
 /**
@@ -49,13 +43,7 @@ eventEmitter.on(strings.rateClientInline, ({ msg, bot }) => {
   const rating = msg.data.split(strings.inlineSeparator)[1];
   const jobId = msg.data.split(strings.inlineSeparator)[2];
 
-  dbmanager.findJobById(jobId, 'client freelancer_chat_inlines')
-    .then(job => {
-      dbmanager.findUserById(job.selectedCandidate)
-        .then(freelancer => {
-          writeReview(bot, job, rating, job.client, freelancer, strings.reviewTypes.byClient);
-        });
-    });
+  writeReview(bot, jobId, rating, strings.reviewTypes.byClient);
 });
 
 function sendRateKeyboard(msg, bot, type) {
@@ -88,68 +76,74 @@ function sendRateKeyboard(msg, bot, type) {
  * @param  {Mongoose:User} freelancer Relevant freelancer
  * @param  {String} reviewType Type of review (client-freelancer or freelancer-client)
  */
-function writeReview(bot, job, rating, client, freelancer, reviewType) {
-  const byClient = (reviewType === strings.reviewTypes.byClient);
-  const byUser = (byClient) ? client : freelancer;
-  const toUser = (byClient) ? freelancer : client;
-  const chatInline = dbmanager.chatInline(job, freelancer);
-  const chat_id = (byClient) ? job.current_inline_chat_id : chatInline.chat_id;
-  const message_id = (byClient) ? job.current_inline_message_id : chatInline.message_id;
+function writeReview(bot, jobId, rating, reviewType) {
+  dbmanager.findJobById(jobId, 'client freelancer_chat_inlines')
+    .then(job => {
+      dbmanager.findUserById(job.selectedCandidate)
+        .then(freelancer => {
+          const byClient = (reviewType === strings.reviewTypes.byClient);
+          const byUser = (byClient) ? job.client : freelancer;
+          const toUser = (byClient) ? freelancer : job.client;
+          const chatInline = dbmanager.chatInline(job, freelancer);
+          const chat_id = (byClient) ? job.current_inline_chat_id : chatInline.chat_id;
+          const message_id = (byClient) ? job.current_inline_message_id : chatInline.message_id;
 
-  if ((job.reviewByClient && byClient) || (job.reviewByFreelancer && !byClient)) return;
+          if ((job.reviewByClient && byClient) || (job.reviewByFreelancer && !byClient)) return;
 
-  dbmanager.addReview({
-    byUser: byUser,
-    toUser: toUser,
-    job: job._id,
-    rate: rating,
-    review: '',
-    reviewType: reviewType
-  })
-    .then(dbReviewObject => {
-      dbmanager.findUserById(toUser)
-      .then(toUser => {
-        toUser.reviews.push(dbReviewObject._id);
-        toUser.rate += parseInt(rating);
-        toUser.save()
-          .then(toUser => {
-            let message = {
-              chat_id: toUser.id,
-              text: `${job.description}\n\n${strings.youWereRated} ${rating}`,
-              disable_web_page_preview: 'true'
-            };
-            bot.sendMessage(message)
-              .catch(err => console.log(err.error.description));
-          });
-      });
+          dbmanager.addReview({
+            byUser: byUser,
+            toUser: toUser,
+            job: job._id,
+            rate: rating,
+            review: '',
+            reviewType: reviewType
+          })
+            .then(dbReviewObject => {
+              dbmanager.findUserById(toUser)
+              .then(toUser => {
+                toUser.reviews.push(dbReviewObject._id);
+                toUser.rate += parseInt(rating);
+                toUser.save()
+                  .then(toUser => {
+                    let message = {
+                      chat_id: toUser.id,
+                      text: `${job.description}\n\n${strings.youWereRated} ${rating}`,
+                      disable_web_page_preview: 'true'
+                    };
+                    bot.sendMessage(message)
+                      .catch(err => console.log(err.error.description));
+                  });
+              });
 
-      if (byClient) {
-        job.reviewByClient = dbReviewObject._id;
-      } else {
-        job.reviewByFreelancer = dbReviewObject._id;
-      }
+              if (byClient) {
+                job.reviewByClient = dbReviewObject._id;
+              } else {
+                job.reviewByFreelancer = dbReviewObject._id;
+              }
 
-      if (job.reviewByClient && job.reviewByFreelancer) {
-        job.state = strings.jobStates.rated;
-      }
+              if (job.reviewByClient && job.reviewByFreelancer) {
+                job.state = strings.jobStates.rated;
+              }
 
-      job.save();
+              job.save();
 
-      byUser.writeReview.push(dbReviewObject._id);
-      byUser.save()
-        .then(byUser => {
-          let send = {
-            chat_id: chat_id,
-            message_id: message_id,
-            text: `${job.description}\n\n${strings.thanksReviewMessage}`,
-            reply_markup: {
-              inline_keyboard: []
-            },
-            disable_web_page_preview: 'true'
-          };
-          send.reply_markup = JSON.stringify(send.reply_markup);
-          bot.editMessageText(send)
-            .catch(err => console.log(err.error.description));
+              byUser.writeReview.push(dbReviewObject._id);
+              byUser.save()
+                .then(byUser => {
+                  let send = {
+                    chat_id: chat_id,
+                    message_id: message_id,
+                    text: `${job.description}\n\n${strings.thanksReviewMessage}`,
+                    reply_markup: {
+                      inline_keyboard: []
+                    },
+                    disable_web_page_preview: 'true'
+                  };
+                  send.reply_markup = JSON.stringify(send.reply_markup);
+                  bot.editMessageText(send)
+                    .catch(err => console.log(err.error.description));
+                });
+            });
         });
     });
 }
