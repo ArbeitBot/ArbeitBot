@@ -130,10 +130,10 @@ function askForNewJobCategory(msg, bot) {
     dbmanager.getCategories()
       .then(categories => {
         let categoryButtons = categories
-        .filter(category => category.freelancers.length > 0)
+        .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
         .map(category => {
           return [{
-            text: category.title + ' [' + category.freelancers.length + ']'
+            text: category.title + ' [' + (category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0)) + ']'
           }];
         });
         categoryButtons.unshift([{text:strings.jobCreateCancel}]);
@@ -149,7 +149,7 @@ function askForNewJobCategory(msg, bot) {
       user.input_state = strings.inputCategoryNameState;
       user.save()
         .then(user => {
-            saveUserCallback(saveUserCallback);
+            saveUserCallback(user);
         });
     });
 }
@@ -174,8 +174,8 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
       var count = 0;
       for (var j in category.freelancers) {
         let freelancer = category.freelancers[j];
-        if (freelancer.hourly_rate == option) {
-          count = count + 1;
+        if (freelancer.hourly_rate === option && String(freelancer._id) !== String(user._id)) {
+          count += 1;
         }
       }
 
