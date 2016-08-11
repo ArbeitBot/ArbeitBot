@@ -23,7 +23,8 @@ eventEmitter.on(strings.askRateFreelancerInline, ({ msg, bot }) => {
         text: strings.rateClientMessage,
         reply_markup: {
           inline_keyboard: keyboard
-        }
+        },
+        disable_web_page_preview: 'true'
       };
       send.reply_markup = JSON.stringify(send.reply_markup);
       bot.editMessageText(send)
@@ -52,7 +53,8 @@ eventEmitter.on(strings.askRateClientInline, ({ msg, bot }) => {
             text: strings.rateClientMessage,
             reply_markup: {
               inline_keyboard: keyboard
-            }
+            },
+            disable_web_page_preview: 'true'
           };
           send.reply_markup = JSON.stringify(send.reply_markup);
           bot.editMessageText(send)
@@ -133,7 +135,8 @@ function writeReview(bot, job, rating, client, freelancer, reviewType) {
           .then(toUser => {
             let message = {
               chat_id: toUser.id,
-              text: `${job.description}\n\n${strings.youWereRated} ${rating}`
+              text: `${job.description}\n\n${strings.youWereRated} ${rating}`,
+              disable_web_page_preview: 'true'
             };
             bot.sendMessage(message)
               .catch(err => console.log(err.error.description));
@@ -161,7 +164,8 @@ function writeReview(bot, job, rating, client, freelancer, reviewType) {
             text: `${job.description}\n\n${strings.thanksReviewMessage}`,
             reply_markup: {
               inline_keyboard: []
-            }
+            },
+            disable_web_page_preview: 'true'
           };
           send.reply_markup = JSON.stringify(send.reply_markup);
           bot.editMessageText(send)

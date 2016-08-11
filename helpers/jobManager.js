@@ -28,7 +28,8 @@ function sendJobCreatedMessage(user, bot, job) {
           keyboards.sendInline(
             bot,
             user.id,
-            messageFromFreelancers(users),
+            job.description + '\n\n' + 
+              messageFromFreelancers(users),
             jobInlineKeyboard(users, job));
         });
     });
@@ -319,7 +320,8 @@ function showSelectFreelancers(msg, job, bot) {
     }),
     text: 
       strings.selectCandidateMessage + '\n\n' + 
-      messageFromFreelancers(job.interestedCandidates)
+      messageFromFreelancers(job.interestedCandidates),
+    disable_web_page_preview: 'true'
   }).catch(err => console.log(err.error.description));
 }
 
@@ -478,7 +480,8 @@ function deprecateJobMessage(job, bot) {
     text: strings.deprecatedMessage,
     reply_markup: {
       inline_keyboard: []
-    }
+    },
+    disable_web_page_preview: 'true'
   };
   send.reply_markup = JSON.stringify(send.reply_markup);
   bot.editMessageText(send)
@@ -501,7 +504,8 @@ function updateJobMessageForSearch(job, bot) {
           messageFromFreelancers(users),
         reply_markup: {
           inline_keyboard: jobInlineKeyboard(users, job)
-        }
+        },
+        disable_web_page_preview: 'true'
       };
       send.reply_markup = JSON.stringify(send.reply_markup);
       bot.editMessageText(send)
@@ -529,7 +533,8 @@ function updateJobMessageForSelected(job, bot) {
           strings.inlineSeparator +
           job._id
       }]]
-    }
+    },
+    disable_web_page_preview: 'true'
   };
   send.reply_markup = JSON.stringify(send.reply_markup);
   bot.editMessageText(send)
@@ -568,7 +573,8 @@ function updateJobMessageForFinished(job, bot) {
         text: `${ job.description }\n\n${ strings.contactWithFreelancerMessage }\n@${ user.username }`,
         reply_markup: {
           inline_keyboard: keyboard
-        }
+        },
+        disable_web_page_preview: 'true'
       };
       send.reply_markup = JSON.stringify(send.reply_markup);
       bot.editMessageText(send)
@@ -583,7 +589,8 @@ function updateJobMessageForRated(job, bot) {
     text: `${job.description}\n\n${strings.thanksReviewMessage}`,
     reply_markup: {
       inline_keyboard: []
-    }
+    },
+    disable_web_page_preview: 'true'
   };
   send.reply_markup = JSON.stringify(send.reply_markup);
   bot.editMessageText(send)
@@ -597,7 +604,8 @@ function updateJobMessageForRemoved(job, bot) {
     text: `${job.description}\n\n${strings.thisWorkIsRemoved}`,
     reply_markup: {
       inline_keyboard: []
-    }
+    },
+    disable_web_page_preview: 'true'
   };
   send.reply_markup = JSON.stringify(send.reply_markup);
   bot.editMessageText(send)
@@ -754,7 +762,8 @@ function makeInterested(interested, bot, msg, job, user) {
       text: strings.clientHasChosenAnotherFreelancer,
       reply_markup: {
         inline_keyboard: []
-      }
+      },
+      disable_web_page_preview: 'true'
     };
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageText(send)
@@ -835,7 +844,8 @@ function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
     text: `${ prefix }${ job.description }`,
     reply_markup: {
       inline_keyboard: []
-    }
+    },
+    disable_web_page_preview: 'true'
   };
   send.reply_markup = JSON.stringify(send.reply_markup);
 
@@ -877,7 +887,8 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
         text: `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n@${job.client.username}\n${ job.description }\n\n${ strings.acceptOrRejectMessage }`,
         reply_markup: {
           inline_keyboard: keyboard
-        }
+        },
+        disable_web_page_preview: 'true'
       };
       message.reply_markup = JSON.stringify(message.reply_markup);
       bot.editMessageText(message)
@@ -920,7 +931,8 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
       text: `${ strings.contactWithClientMessage }\n\n@${ job.client.username }\n${job.description}`,
       reply_markup: {
         inline_keyboard: keyboard
-      }
+      },
+      disable_web_page_preview: 'true'
     };
 
     send.reply_markup = JSON.stringify(send.reply_markup);
@@ -936,7 +948,8 @@ function updateFreelancerMessageForRated(bot, msg, user, job) {
     text: `${job.description}\n\n${strings.thanksReviewMessage}`,
     reply_markup: {
       inline_keyboard: []
-    }
+    },
+    disable_web_page_preview: 'true'
   };
   send.reply_markup = JSON.stringify(send.reply_markup);
   bot.editMessageText(send)
