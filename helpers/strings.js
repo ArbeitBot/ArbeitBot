@@ -4,6 +4,7 @@
 
 module.exports = {
   loadingMessage: '🦄 Loading...',
+  askForUsername: 'Hi there! It looks like you don\'t have an username. Please, set it to which you want in Telegram settings.',
   deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ;)',
   initialMessage: 'Welcome to @arbeit_bot! This is a completelly free Telegram based freelance market. If you are searching for contractors please proceed to "Find contractors". In case if you are looking for job please go to your "Profile" and fill it so that clients are able to find you. Also do not hesitate to click "Help" if you have any questions at all. Thank you for joining our @arbeit_bot family!',
   mainMenuMessage: 'Please select if you are looking for contractors or add your profile if you are looking for job.',
