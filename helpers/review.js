@@ -131,7 +131,12 @@ function writeReview(bot, job, rating, client, freelancer, reviewType) {
         toUser.rate += parseInt(rating);
         toUser.save()
           .then(toUser => {
-            // todo: Send a message stating that you have received a review
+            let message = {
+              chat_id: toUser.id,
+              text: `${job.description}\n\n${strings.youWereRated} ${rating}`
+            };
+            bot.sendMessage(message)
+              .catch(err => console.log(err.error.description));
           });
       });
 
