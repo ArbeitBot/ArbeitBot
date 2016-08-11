@@ -28,9 +28,14 @@ function sendJobCreatedMessage(user, bot, job) {
           keyboards.sendInline(
             bot,
             user.id,
-            job.description + '\n\n' + 
-              messageFromFreelancers(users),
-            jobInlineKeyboard(users, job));
+            job.description + '\n\n' +
+            messageFromFreelancers(users),
+            jobInlineKeyboard(users, job),
+            data2 => {
+              job.current_inline_chat_id = data2.chat.id;
+              job.current_inline_message_id = data2.message_id;
+              job.save();
+            });
         });
     });
 }
@@ -383,8 +388,6 @@ function addFreelancersToCandidates(jobId, users, msg, bot, job) {
         !job.interestedCandidates.map(o => String(o)).includes(String(user._id)) &&
         !job.notInterestedCandidates.map(o => String(o)).includes(String(user._id));
     });
-    job.current_inline_chat_id = msg.message.chat.id;
-    job.current_inline_message_id = msg.message.message_id;
     users.forEach(user => job.candidates.push(user));
     job.save()
       .then(newJob => {
