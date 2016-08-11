@@ -49,7 +49,8 @@ function handle(msg, user, bot) {
           reply_markup: JSON.stringify({
             keyboard: keyboards.freelancerKeyboard(user),
             resize_keyboard: true 
-          })
+          }),
+          disable_web_page_preview: 'true'
         })
           .then(data => {
             if (needsCongrats) {
@@ -101,26 +102,20 @@ function askForBio(msg, bot) {
   dbmanager.findUser({ id: msg.chat.id })
     .then(user => {
       user.input_state = strings.inputBioState;
-      user.save((err, user) => {
-        if (err) {
-          // todo: handle error
-        } else {
+      user.save()
+        .then(user => {
           let message = user.bio ?
-            strings.editBioMessage+'\n'+strings.yourCurrentBio+'\n\n'+user.bio :
+            strings.editBioMessage+'\n\n'+strings.yourCurrentBio+'\n\n'+user.bio :
             strings.editBioMessage;
           bot.sendMessage({
             chat_id: msg.chat.id,
             text: message,
             reply_markup: JSON.stringify({
               hide_keyboard: true
-            })
-          })
-          .catch(function(err)
-          {
-            console.log(err);
-          });
-        }
-      });
+            }),
+            disable_web_page_preview: 'true'
+          }).catch(err => console.log(err.error.description));
+        });
     });
 }
 
@@ -216,7 +211,8 @@ function askForNewJobDescription(msg, bot, user) {
         text: strings.addJobDescriptionMessage,
         reply_markup: JSON.stringify({
           hide_keyboard: true
-        })
+        }),
+        disable_web_page_preview: 'true'
       })
       .catch(function(err)
       {
@@ -366,7 +362,8 @@ function completeReport(reportMessage, msg, user, bot) {
         });
       bot.sendMessage({
         chat_id: msg.from.id,
-        text: strings.report.thanks
+        text: strings.report.thanks,
+        disable_web_page_preview: 'true'
       });
     });
 }

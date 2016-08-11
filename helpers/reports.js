@@ -10,7 +10,8 @@ function sendReportAlert(bot, report) {
   admins.forEach(admin => {
     bot.sendMessage({
       chat_id: admin,
-      text: `${report.sendBy} зарепортил ${report.sendTo} по работe ${report.job}`
+      text: `${report.sendBy} зарепортил ${report.sendTo} по работe ${report.job}`,
+      disable_web_page_preview: 'true'
     })
   })
 }
@@ -18,7 +19,8 @@ function sendReportAlert(bot, report) {
 function sendResponseToUser(bot, msg) {
   bot.sendMessage({
     chat_id: msg.from.id,
-    text: 'Thanks you for reporting'
+    text: 'Thank you for reporting',
+    disable_web_page_preview: 'true'
   })
 }
 

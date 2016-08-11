@@ -47,7 +47,8 @@ function editHourlyRate(bot, msg) {
       message_id: msg.message.message_id,
       reply_markup: {
         inline_keyboard: hourlyRateKeyboard(user, strings.hourlyRateOptions)
-      }
+      },
+      disable_web_page_preview: 'true'
     };
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageReplyMarkup(send)
