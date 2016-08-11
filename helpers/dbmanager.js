@@ -195,7 +195,7 @@ function findJobById(id, populate) {
       .populate(populate || '')
       .exec((err, job) => {
         if (err) {
-          throw error;
+          throw err;
         } else {
           fullfill(job);
         }
