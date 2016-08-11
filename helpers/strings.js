@@ -125,8 +125,8 @@ module.exports = {
     byFreelancer: 'byFl'
   },
   freelancerOptions: {
-    interested: '✅ Interested',
-    notInterested: '❌ Not interested',
+    interested: 'Interested',
+    notInterested: 'Not interested',
     report: '❗️ Report'
   },
   freelancerAcceptOptions: {
