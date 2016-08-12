@@ -24,9 +24,10 @@ bot.on('message', msg => {
     sendAskForUsername(msg);
     return;
   }
-
   textInput.check(msg, (isTextInput, user) => {
-    if (isTextInput) {
+    if (user && user.ban_state) {
+      sendBanMessage(msg);
+    } else if (isTextInput) {
       textInput.handle(msg, user, bot);
     } else {
       if (check.botCommandStart(msg)) {
@@ -52,10 +53,18 @@ bot.on('inline.callback.query', msg => {
     sendAskForUsername(msg);
     return;
   }
-  let options = msg.data.split(strings.inlineSeparator);
-  let inlineQuerry = options[0];
+  dbmanager.findUser({id: msg.from.id})
+    .then(user => {
+      if (user.ban_state) {
+        sendBanMessage(msg);
+        return;
+      }
+      let options = msg.data.split(strings.inlineSeparator);
+      let inlineQuerry = options[0];
 
-  eventEmitter.emit(inlineQuerry, { msg, bot })
+      eventEmitter.emit(inlineQuerry, { msg, bot })
+    });
+
 });
 
 // Helpers
@@ -169,6 +178,12 @@ function sendAskForUsername(msg) {
   bot.sendMessage({
     chat_id: msg.from.id,
     text: strings.askForUsername
+  })
+}
+function sendBanMessage(msg) {
+  bot.sendMessage({
+    chat_id: msg.from.id,
+    text: 'You\'re banned sorry.'
   })
 }
 // Helpers

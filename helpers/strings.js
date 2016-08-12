@@ -80,6 +80,7 @@ module.exports = {
   inlineSeparator: '~',
   categoryInline: 'cI',
   hourlyRateInline: 'hRI',
+  adminBanInline: 'abI',
   freelancerInline: 'fI',
   jobManageInline: 'jMI',
   freelancerJobInline: 'fJI',
@@ -119,6 +120,7 @@ module.exports = {
     searchingForFreelancer: 'searchingForFreelancer',
     freelancerChosen: 'freelancerChosen',
     finished: 'finished',
+    //need to delete this later
     frozen: 'frozen',
     banned: 'banned',
     rated: 'rated',

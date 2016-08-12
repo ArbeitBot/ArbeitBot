@@ -221,15 +221,32 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
 eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const freelancerId = msg.data.split(strings.inlineSeparator)[2];
+
   // todo: handle report
   dbmanager.findJobById(jobId)
     .then(job => {
       dbmanager.findUserById(freelancerId)
         .then(user => {
           reports.reportFreelancer(bot, msg, job, user);
+          let keyboard = [[{
+            text: strings.jobFinishedOptions.rate,
+            callback_data:
+            strings.askRateFreelancerInline +
+            strings.inlineSeparator +
+            job._id +
+            strings.inlineSeparator +
+            job.client._id
+          }]];
+          
+          bot.editMessageReplyMarkup({
+            chat_id: msg.message.chat.id,
+            message_id: msg.message.message_id,
+            reply_markup: JSON.stringify({
+              inline_keyboard: keyboard
+            })
+          }).catch(err => console.log(err));
         })
     });
-  console.log(jobId, freelancerId);
 });
 
 /**
@@ -241,14 +258,39 @@ eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
   const freelancerIdReported = msg.data.split(strings.inlineSeparator)[2];
   // todo: handle report
+  
   dbmanager.findJobById(jobId)
     .then(job => {
       dbmanager.findUserById(freelancerIdReported)
         .then(user => {
+          // We don't really have difference between reporting job
+          // or reporting client, who had created the job.
+          // so we can handle both situations with one function
+          // the 'user' param here: the reported user(client this time)
           reports.reportJob(bot, msg, job, user);
+          // search the freelancer by his telegram id, to get mongoDb id
+          // so we can put it in the data of Rate button
+          dbmanager.findUser({id: msg.from.id})
+            .then(freelancer => {
+              let keyboard = [[{
+                text: strings.jobFinishedOptions.rate,
+                callback_data:
+                strings.askRateClientInline +
+                strings.inlineSeparator +
+                job._id +
+                strings.inlineSeparator +
+                freelancer._id
+              }]];
+              bot.editMessageReplyMarkup({
+                chat_id: msg.message.chat.id,
+                message_id: msg.message.message_id,
+                reply_markup: JSON.stringify({
+                  inline_keyboard: keyboard
+                })
+              }).catch(err => console.log(err));
+            });
         })
     });
-  console.log(jobId, freelancerIdReported);
 });
 
 /**
@@ -269,7 +311,6 @@ eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
           reports.reportJob(bot, msg, job, user);
         })
     });
-  console.log(jobId, freelancerUsernameReported);
 });
 
 /**
@@ -557,7 +598,9 @@ function updateJobMessageForFinished(job, bot) {
           callback_data: 
             strings.askRateFreelancerInline + 
             strings.inlineSeparator + 
-            job._id
+            job._id +
+            strings.inlineSeparator +
+            user._id
         },
         {
           text: strings.jobFinishedOptions.report,
@@ -909,19 +952,21 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
  */
 function updateFreelancerMessageForFinished(bot, msg, user, job) {
   let keyboard = [[{
-      text: strings.jobFinishedOptions.rate,
-      callback_data: 
-        strings.askRateClientInline +
-        strings.inlineSeparator +
-        job._id
+    text: strings.jobFinishedOptions.rate,
+    callback_data:
+      strings.askRateClientInline +
+      strings.inlineSeparator +
+      job._id +
+      strings.inlineSeparator +
+      user._id
     },
     {
       text: strings.jobFinishedOptions.report,
-      callback_data: 
-        strings.reportClientInline + 
-        strings.inlineSeparator + 
-        job._id + 
-        strings.inlineSeparator + 
+      callback_data:
+        strings.reportClientInline +
+        strings.inlineSeparator +
+        job._id +
+        strings.inlineSeparator +
         user._id
     }
   ]];
