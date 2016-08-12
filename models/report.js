@@ -16,6 +16,13 @@ var reportSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'job',
     required: true
+  },
+  inlineMessages: [{
+    type: String
+  }],
+  resolved: {
+    type: Boolean,
+    default: false
   }
 });
 
