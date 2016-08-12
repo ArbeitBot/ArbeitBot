@@ -24,9 +24,8 @@ bot.on('message', msg => {
     sendAskForUsername(msg);
     return;
   }
-
   textInput.check(msg, (isTextInput, user) => {
-    if (user.ban_state) {
+    if (user && user.ban_state) {
       sendBanMessage(msg);
     } else if (isTextInput) {
       textInput.handle(msg, user, bot);
