@@ -312,6 +312,26 @@ function chatInline(job, user) {
   });
   return chatInline;
 }
+// Report
+
+/**
+ * Get report by id
+ * @param  {Mongo:ObjectId}   id       Id of review to retrieve
+ * @param  {JS Object or String}   populate Option to populate fields in query result
+ */
+function findReportById(id, populate) {
+  return new Promise(fullfill => {
+    Report.findById(id)
+      .populate(populate || '')
+      .exec((err, review) => {
+        if (err) {
+          throw err;
+        } else {
+          fullfill(review);
+        }
+      })
+  });
+}
 
 // Export
 
@@ -334,5 +354,7 @@ module.exports = {
   findReviewById,
   addReview,
   // Helpers
-  chatInline
+  chatInline,
+  // Reports
+  findReportById
 };
