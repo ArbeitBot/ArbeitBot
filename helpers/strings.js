@@ -3,6 +3,7 @@
  */
 
 module.exports = {
+  reportThankYouMessage: 'Thank you a lot for this report! Our moderators have received it and will take immediate actions to prevent reported behaviour in future.',
   banMessage: 'It looks like somebody reported you and our moderators decided that there is a reason to ban you. If this was a mistake, please let my creator @borodutch know – we will see what we can do ;)',
   loadingMessage: '🦄 Loading...',
   askForUsername: 'Hi there! It looks like you don\'t have an username. Please, set it to which you want in Telegram settings.',
@@ -43,7 +44,7 @@ module.exports = {
   reviewFreelancerMessage: 'reviewFreelancerMessage',
   reviewClientMessage: 'reviewClientMessage',
   thanksReviewMessage: 'Thank you a lot for the review!',
-  youWereRated: 'You were rated',
+  youWereRated: 'You have received new rating:',
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
   noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
   thisWorkIsRemoved: 'This work is removed.',
@@ -121,7 +122,7 @@ module.exports = {
     searchingForFreelancer: 'searchingForFreelancer',
     freelancerChosen: 'freelancerChosen',
     finished: 'finished',
-    //need to delete this later
+    // todo: need to delete this later
     frozen: 'frozen',
     banned: 'banned',
     rated: 'rated',
@@ -155,5 +156,11 @@ module.exports = {
     threeStars: '⭐⭐⭐',
     fourStars: '⭐⭐⭐⭐',
     fiveStars: '⭐⭐⭐⭐⭐'
-  }
+  },
+  rateOptionsArray: [
+    '⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'
+  ],
+  shouldUpdateJobMessage: 'shouldUpdateJobMessage',
+  shouldUpdateFreelancerMessage: 'shouldUpdateFreelancerMessage',
+  shouldMakeInterested: 'shouldMakeInterested'
 };

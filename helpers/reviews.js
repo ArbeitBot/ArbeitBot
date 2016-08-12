@@ -90,6 +90,8 @@ function writeReview(bot, jobId, rating, reviewType) {
 
           if ((job.reviewByClient && byClient) || (job.reviewByFreelancer && !byClient)) return;
 
+          const ratingEmoji = strings.rateOptionsArray[rating-1];
+
           dbmanager.addReview({
             byUser: byUser,
             toUser: toUser,
@@ -107,7 +109,7 @@ function writeReview(bot, jobId, rating, reviewType) {
                   .then(toUser => {
                     let message = {
                       chat_id: toUser.id,
-                      text: `${job.description}\n\n${strings.youWereRated} ${rating}`,
+                      text: `${strings.youWereRated}\n${ratingEmoji}`,
                       disable_web_page_preview: 'true'
                     };
                     bot.sendMessage(message)
@@ -133,7 +135,7 @@ function writeReview(bot, jobId, rating, reviewType) {
                   let send = {
                     chat_id: chat_id,
                     message_id: message_id,
-                    text: `${job.description}\n\n${strings.thanksReviewMessage}`,
+                    text: `${job.description}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`,
                     reply_markup: {
                       inline_keyboard: []
                     },
@@ -147,8 +149,3 @@ function writeReview(bot, jobId, rating, reviewType) {
         });
     });
 }
-
-// Exports
-module.exports = {
-    writeReview
-};
