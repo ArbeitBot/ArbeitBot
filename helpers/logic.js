@@ -183,7 +183,7 @@ function sendAskForUsername(msg) {
 function sendBanMessage(msg) {
   bot.sendMessage({
     chat_id: msg.from.id,
-    text: 'You\'re banned sorry.'
+    text: strings.banMessage
   })
 }
 // Helpers

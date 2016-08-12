@@ -3,6 +3,7 @@
  */
 
 module.exports = {
+  banMessage: 'It looks like somebody reported you and our moderators decided that there is a reason to ban you. If this was a mistake, please let my creator @borodutch know – we will see what we can do ;)',
   loadingMessage: '🦄 Loading...',
   askForUsername: 'Hi there! It looks like you don\'t have an username. Please, set it to which you want in Telegram settings.',
   deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ;)',
