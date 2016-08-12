@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var strings = require('../helpers/strings');
 
 var userSchema = new Schema({
   id: Number,
@@ -10,6 +11,10 @@ var userSchema = new Schema({
   hourly_rate: String,
   input_state: String,
   input_state_data: String,
+  ban_state: {
+    type: Boolean,
+    default: false
+  },
   rate: {
     type: Number,
     default: 0
