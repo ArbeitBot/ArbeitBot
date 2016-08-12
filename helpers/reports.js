@@ -4,7 +4,84 @@ let dbmanager = require('./dbmanager');
 let Job = mongoose.model('job');
 let Report = mongoose.model('report');
 let strings = require('./strings');
-let admins = ['74169393', '-1001052392095']; //'-1001052392095'
+let admins = ['74169393', '-1001052392095'];
+
+// Inlines
+
+// Reports
+
+/**
+ * Handles case when freelancer is reported
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerId = msg.data.split(strings.inlineSeparator)[2];
+
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUserById(freelancerId)
+        .then(user => {
+          reports.reportFreelancer(bot, msg, job, user)
+            .then(() => {
+              eventEmitter.emit(
+                strings.shouldUpdateJobMessage,
+                { job, bot });
+            });
+        })
+    });
+});
+
+/**
+ * Handles case when client is reported
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerIdReported = msg.data.split(strings.inlineSeparator)[2];
+  
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUserById(freelancerIdReported)
+        .then(user => {
+          // We don't really have difference between reporting job
+          // or reporting client, who had created the job.
+          // so we can handle both situations with one function
+          // the 'user' param here: the reported user(client this time)
+          reports.reportJob(bot, msg, job, user)
+            .then(job => {
+              dbmanager.findUser({id: msg.from.id})
+                .then(freelancer => {
+                  eventEmitter.emit(
+                    shouldUpdateFreelancerMessage,
+                    { bot, msg, freelancer, job });
+                });
+            });
+        })
+    });
+});
+
+/**
+ * Handles case when job is reported
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const freelancerUsernameReported = msg.data.split(strings.inlineSeparator)[3];
+  
+  dbmanager.findJobById(jobId)
+    .then(job => {
+      dbmanager.findUser({username: freelancerUsernameReported})
+        .then(user => {
+          reportJob(bot, msg, job, user);
+        })
+    });
+});
+
+// The rest of the file
 
 eventEmitter.on(strings.adminBanInline, ({ msg, bot }) => {
   let data = msg.data.split(strings.inlineSeparator);
@@ -87,8 +164,8 @@ function sendReportAlert(bot, report) {
             report.save();
           })
           .catch(err => {console.log(err.name)})
-      })
-    })
+      });
+    });
 }
 
 function formReportMessage(report) {
@@ -113,7 +190,8 @@ function formReportMessage(report) {
 function sendResponseToUser(bot, msg) {
   bot.sendMessage({
     chat_id: msg.from.id,
-    text: 'Thanks you for reporting'
+    text: strings.reportThankYouMessage,
+    disable_web_page_preview: 'true'
   })
 }
 
@@ -130,30 +208,31 @@ function reportJob(bot, msg, job, user) {
   // Сохранить его и добавить его id к работе, которую зарепортили, и к создателю работы
   // Отправить сообщения с инфой о репорте всем админам
   // Отправить сообщение пользователю
+  return new Promise(fullfill => {
+    let clientId = job.client;
+    let report = new Report({
+        sendBy: user._id,
+        sendTo: clientId,
+        job: job._id
+      });
 
-  let clientId = job.client;
-  let report = new Report({
-      sendBy: user._id,
-      sendTo: clientId,
-      job: job._id
+    report.save()
+      .then(report => {
+        job.reports.push(report._id);
+        job.reportedBy.push(user._id);
+        job.save().then(fullfill);
+        dbmanager.findUserById(clientId)
+          .then(client => {
+            client.reports.push(report._id);
+            client.reportedBy.push(user._id);
+            client.save();
+          });
+        eventEmitter.emit(
+          strings.shouldMakeInterested, 
+          { interested: false, bot, msg, job, user });
+        sendReportAlert(bot, report);
+        sendResponseToUser(bot, msg);
     });
-
-  report.save(err => {
-    if (err) { console.log(err) }
-    else {
-      job.reports.push(report._id);
-      job.reportedBy.push(user._id);
-      job.save();
-      dbmanager.findUserById(clientId)
-        .then(client => {
-          client.reports.push(report._id);
-          client.reportedBy.push(user._id);
-          client.save();
-        });
-
-      sendReportAlert(bot, report);
-      sendResponseToUser(bot, msg);
-    }
   });
 }
 
@@ -167,17 +246,15 @@ function reportJob(bot, msg, job, user) {
  * @param job id
  */
 function reportUser(from, to, job) {
-  return new Promise((fullfill, reject) => {
+  return new Promise(fullfill => {
     let report = new Report({
       sendBy: from,
       sendTo: to,
       job: job
     });
 
-    report.save(err => {
-      if (err) {
-        reject(err);
-      } else {
+    report.save()
+      .then(report => {
         dbmanager.findUserById(to)
           .then(user => {
             user.reports.push(report);
@@ -185,34 +262,28 @@ function reportUser(from, to, job) {
             user.save();
             fulfill();
           })
-      }
-    })
-
-  })
+    });
+  });
 }
 
 function reportFreelancer(bot, msg, job, user) {
-  let clientId = job.client;
-  let report = new Report({
-    sendBy: clientId,
-    sendTo: user._id,
-    job: job._id
-  });
+  return new Promise(fullfill => {
+    let clientId = job.client;
+    let report = new Report({
+      sendBy: clientId,
+      sendTo: user._id,
+      job: job._id
+    });
 
-  report.save(err => {
-    if (err) { console.log(err) }
-    else {
-      user.reports.push(report._id);
-      user.reportedBy.push(clientId);
-      user.save();
+    report.save()
+      .then(report => {
+        user.reports.push(report._id);
+        user.reportedBy.push(clientId);
+        user.save();
 
-      sendReportAlert(bot, report);
-      sendResponseToUser(bot, msg);
-    }
-  });
+        sendReportAlert(bot, report);
+        sendResponseToUser(bot, msg);
+        fullfill();
+    });
+  })
 }
-
-module.exports = {
-  reportJob: reportJob,
-  reportFreelancer: reportFreelancer
-};

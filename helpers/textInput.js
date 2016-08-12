@@ -49,7 +49,8 @@ function handle(msg, user, bot) {
           reply_markup: JSON.stringify({
             keyboard: keyboards.freelancerKeyboard(user),
             resize_keyboard: true 
-          })
+          }),
+          disable_web_page_preview: 'true'
         })
           .then(data => {
             if (needsCongrats) {
@@ -101,26 +102,20 @@ function askForBio(msg, bot) {
   dbmanager.findUser({ id: msg.chat.id })
     .then(user => {
       user.input_state = strings.inputBioState;
-      user.save((err, user) => {
-        if (err) {
-          // todo: handle error
-        } else {
+      user.save()
+        .then(user => {
           let message = user.bio ?
-            strings.editBioMessage+'\n'+strings.yourCurrentBio+'\n\n'+user.bio :
+            strings.editBioMessage+'\n\n'+strings.yourCurrentBio+'\n\n'+user.bio :
             strings.editBioMessage;
           bot.sendMessage({
             chat_id: msg.chat.id,
             text: message,
             reply_markup: JSON.stringify({
               hide_keyboard: true
-            })
-          })
-          .catch(function(err)
-          {
-            console.log(err);
-          });
-        }
-      });
+            }),
+            disable_web_page_preview: 'true'
+          }).catch(err => console.log(err.error.description));
+        });
     });
 }
 
@@ -135,10 +130,10 @@ function askForNewJobCategory(msg, bot) {
     dbmanager.getCategories()
       .then(categories => {
         let categoryButtons = categories
-        .filter(category => category.freelancers.length > 0)
+        .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
         .map(category => {
           return [{
-            text: category.title + ' [' + category.freelancers.length + ']'
+            text: category.title + ' [' + (category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0)) + ']'
           }];
         });
         categoryButtons.unshift([{text:strings.jobCreateCancel}]);
@@ -154,7 +149,7 @@ function askForNewJobCategory(msg, bot) {
       user.input_state = strings.inputCategoryNameState;
       user.save()
         .then(user => {
-            saveUserCallback(saveUserCallback);
+            saveUserCallback(user);
         });
     });
 }
@@ -179,8 +174,8 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
       var count = 0;
       for (var j in category.freelancers) {
         let freelancer = category.freelancers[j];
-        if (freelancer.hourly_rate == option) {
-          count = count + 1;
+        if (freelancer.hourly_rate === option && String(freelancer._id) !== String(user._id)) {
+          count += 1;
         }
       }
 
@@ -216,7 +211,8 @@ function askForNewJobDescription(msg, bot, user) {
         text: strings.addJobDescriptionMessage,
         reply_markup: JSON.stringify({
           hide_keyboard: true
-        })
+        }),
+        disable_web_page_preview: 'true'
       })
       .catch(function(err)
       {
@@ -258,6 +254,7 @@ function cancelJobCreation(msg, user, bot) {
 function startJobDraft(categoryTitle, msg, user, bot) {
   dbmanager.getCategory(categoryTitle)
     .then(category => {
+      if (!category) return;
       let draft = new Job({
         category: category,
         client: user
@@ -270,7 +267,7 @@ function startJobDraft(categoryTitle, msg, user, bot) {
               askForNewJobPriceRange(msg, user, bot, job, category);
             });
         });
-    });
+    })
 }
 
 /**
@@ -281,6 +278,8 @@ function startJobDraft(categoryTitle, msg, user, bot) {
  * @param {Telegram:Bot} bot        Bot that should respond
  */
 function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
+  if (!strings.hourlyRateOptions.includes(hourlyRate)) return;
+
   user.job_draft.hourly_rate = hourlyRate;
   user.job_draft.save((err, draft) => {
     if (err) {
@@ -363,7 +362,8 @@ function completeReport(reportMessage, msg, user, bot) {
         });
       bot.sendMessage({
         chat_id: msg.from.id,
-        text: strings.report.thanks
+        text: strings.report.thanks,
+        disable_web_page_preview: 'true'
       });
     });
 }

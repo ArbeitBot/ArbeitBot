@@ -81,7 +81,8 @@ function editPage(bot, msg, page) {
       message_id: msg.message.message_id,
       reply_markup: {
         inline_keyboard: categoriesKeyboard(categories, user, page)
-      }
+      },
+      disable_web_page_preview: 'true'
     };
     send.reply_markup = JSON.stringify(send.reply_markup);
     bot.editMessageReplyMarkup(send)

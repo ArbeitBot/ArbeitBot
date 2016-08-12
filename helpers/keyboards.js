@@ -87,11 +87,11 @@ function rateKeyboard(inline, jobId) {
  * @param {Telegram:Bot} bot Bot that should send keyboard
  * @param {Number} chatId Chat id of user who should receive this keyboard
  */
-function sendMainMenu(bot, chatId) {
+function sendMainMenu(bot, chatId, firstTime) {
   sendKeyboard(
     bot,
     chatId, 
-    strings.mainMenuMessage, 
+    (firstTime) ? strings.initialMessage : strings.mainMenuMessage, 
     mainMenuKeyboard);
 }
 
@@ -166,8 +166,9 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
     reply_markup: {
       keyboard: keyboard,
       resize_keyboard: true
-    }
-  }
+    },
+    disable_web_page_preview: 'true'
+  };
   message.reply_markup = JSON.stringify(message.reply_markup);
   bot.sendMessage(message)
   .then(then)
@@ -187,7 +188,8 @@ function sendInline(bot, chatId, text, keyboard, then) {
     text: text,
     reply_markup: {
       inline_keyboard: keyboard
-    }
+    },
+    disable_web_page_preview: 'true'
   };
   message.reply_markup = JSON.stringify(message.reply_markup);
   bot.sendMessage(message)

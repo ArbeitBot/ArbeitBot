@@ -3,33 +3,36 @@
  */
 
 module.exports = {
-  loadingMessage: '🐤',
+  reportThankYouMessage: 'Thank you a lot for this report! Our moderators have received it and will take immediate actions to prevent reported behaviour in future.',
+  banMessage: 'It looks like somebody reported you and our moderators decided that there is a reason to ban you. If this was a mistake, please let my creator @borodutch know – we will see what we can do ;)',
+  loadingMessage: '🦄 Loading...',
   askForUsername: 'Hi there! It looks like you don\'t have an username. Please, set it to which you want in Telegram settings.',
   deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ;)',
-  mainMenuMessage: 'Welcome to @arbeit_bot! I am a completelly free of charge Telegram based freelance market. Please select whether you are looking for job or contractors.',
-  noJobsExistMessage: 'No jobs exist. You can create one by clicking "Post new job" button.',
+  initialMessage: 'Welcome to @arbeit_bot! This is a completelly free Telegram based freelance market. If you are searching for contractors please proceed to "Find contractors". In case if you are looking for job please go to your "Profile" and fill it so that clients are able to find you. Also do not hesitate to click "Help" if you have any questions at all. Thank you for joining our @arbeit_bot family!',
+  mainMenuMessage: 'Please select if you are looking for contractors or add your profile if you are looking for job.',
+  noJobsExistMessage: 'You do not have any jobs yet. You can create one by clicking "Post new job" button.',
   clientMenuMessage: 'What would you like to do?',
-  selectCategoryMessage: 'Please select category that your job falls into. Number of contractors available can be found between [square brackets].',
+  selectCategoryMessage: 'Please select category relevant for your job. Number of contractors available can be found between [square brackets].',
   selectJobHourlyRateMessage: 'Please select how much money would you like to pay. Price is given in USD per hour to identify level of developers. Yet you can negotiate fixed price in private messages with contractor later on. Number of available contractors in selected category for rate is given in [square brackets].',
   addJobDescriptionMessage: 'Please give us job description (limited to 500 characters). It will be visible to contractors. Please be brief, details can be discussed later with contractors in private dialogues.',
   filledEverythingMessage: 'You did it! Your profile is now complete. Now just sit back and wait for clients of your categories to offer you work (obviously if they like your bio).',
   fullFreelancerMessageAvailable: 'You are all set! Sit back and relax – clients from relevant categories will contact you if they like your bio and hourly rate.',
   fullFreelancerMessageBusy: 'You are all set! However, clients will not bother you as you are in busy status.',
   emptyFreelancerMessage: 'Welcome to the freelancer profile! Please fill in your bio, hourly rate and categories, so that clients can evaluate you and offer you job.',
-  missingFreelancerMessage: 'Welcome to the freelancer profile! Please remember that clients will not be able to find you if you don\'t have bio, categories or hourly rate.',
+  missingFreelancerMessage: 'Welcome to the freelancer profile! Please remember that clients will not be able to find you if you don\'t have bio, categories and hourly rate. Do not wait – fill it today!',
   languageMessage: 'What language do you speak?\n\nНа каком языке вы говорите?',
-  helpMessage: 'In case you have any requests, suggestions, concerns or just want to chat, contact by creator by clicking the button bellow.',
+  helpMessage: 'In case if you have any requests, suggestions, concerns or just want to chat, please contact my creator by clicking the button bellow.',
   becameBusyMessage: 'You just set your status to busy. You will not receive any new job offers until you switch back to available.',
   becameAvailableMessage: 'You just switched to available status. You will now receive relevant job offers until you switch back to busy.',
   missingBecameBusyMessage: 'You just changed your status to busy. But this doesn\'t mean much as clients will not be able to find you without properly filled bio, categories and hourly rate.',
   missingBecameAvailableMessage: 'You just changed to available status.  But this doesn\'t mean much as clients will not be able to find you without properly filled bio, categories and hourly rate.',
   pickFreelancersMessage: 'Success! Job has been created. Please select what freelancers should receive job offer from you.',
-  editBioMessage: 'Please enter your bio (up to 150 characters)',
+  editBioMessage: 'Please enter your bio (up to 150 characters). Keep it brief but descriptive – clients will see bio beside your rating.',
   selectCandidateMessage: 'Please select a candidate that you liked the most.',
   changedBioMessage: 'Congrats! Your new bio is:\n\n',
   yourCurrentBio: 'Your current bio:',
-  editHourlyRateMessage: 'What is your hourly rate?',
-  pickCategoriesMessage: 'Please pick categories',
+  editHourlyRateMessage: 'What is your hourly rate? You will only receive job offers from clients of relevant hourly rate.',
+  pickCategoriesMessage: 'Please pick your skills. You will only receive job offers from categories you select.',
   suggestCategoryMessage: 'Want to suggest a category?',
   waitContractorResponseMessage: 'You sent the offer to one of the freelancers. Please wait until freelancer accepts or rejects your offer, or simply select another freeelancer if you do not want to wait anymore.',
   acceptOrRejectMessage: 'Please accept or reject this job offer. After you accept this job offer you will only be able to finish the job.',
@@ -40,26 +43,28 @@ module.exports = {
   rateClientMessage: 'The only thing left is to rate your client. How good was your client?',
   reviewFreelancerMessage: 'reviewFreelancerMessage',
   reviewClientMessage: 'reviewClientMessage',
-  thanksReviewMessage: 'thanksReviewMessage',
+  thanksReviewMessage: 'Thank you a lot for the review!',
+  youWereRated: 'You have received new rating:',
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
   noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
+  thisWorkIsRemoved: 'This work is removed.',
   mainMenuOptions: {
-    findJobs: 'Find work',
-    findContractors: 'Find contractors',
-    help: 'Help'
+    findJobs: '👤 Profile',
+    findContractors: '⛑ Find contractors',
+    help: '❔ Help'
   },
   clientMenuOptions: {
-    postNewJob: 'Post new job',
-    myJobs: 'My jobs',
+    postNewJob: '🔨 Post new job',
+    myJobs: '🛠 My jobs',
     back: '🔙 Back'
   },
   freelanceMenuOptions: {
-    editBio: 'Edit bio',
-    addBio: 'Add bio',
-    editCategories: 'Edit categories',
-    addCategories: 'Add categories',
-    editHourlyRate: 'Edit hourly rate',
-    addHourlyRate: 'Add hourly rate',
+    editBio: '🖊 Edit bio',
+    addBio: '🖊 Add bio',
+    editCategories: '📌 Edit categories',
+    addCategories: '📌 Add categories',
+    editHourlyRate: '💲 Edit hourly rate',
+    addHourlyRate: '💲 Add hourly rate',
     back: '🔙 Back',
     busy: '⚒ Busy',
     available: '✅ Available',
@@ -79,6 +84,7 @@ module.exports = {
   hourlyRateInline: 'hRI',
   adminBanInline: 'abI',
   freelancerInline: 'fI',
+  jobManageInline: 'jMI',
   freelancerJobInline: 'fJI',
   selectFreelancerInline: 'sFI',
   selectAnotherFreelancerInline: 'sAFI',
@@ -99,6 +105,9 @@ module.exports = {
   jobCreateCancel: '❌ Cancel',
   selectFreelancerCancel: '❌ Cancel',
   jobSendAllFreelancers: 'Send to all',
+  jobRefresh: 'Refresh',
+  jobDelete: 'Delete',
+  jobEdit: 'Edit',
   jobSelectFreelancer: 'Select contractor',
   jobSelectAnotherFreelancer: 'Select another contractor',
   interestedOption: '✅',
@@ -106,14 +115,18 @@ module.exports = {
   acceptOption: '✅',
   refuseOption: '❌',
   pendingOption: '🕒',
+  star: '⭐',
+  bioReviews: 'Reviews:',
   saveReviewOption: 'saveReview',
   jobStates: {
     searchingForFreelancer: 'searchingForFreelancer',
     freelancerChosen: 'freelancerChosen',
     finished: 'finished',
-    //need to delete this later
+    // todo: need to delete this later
     frozen: 'frozen',
-    banned: 'banned'
+    banned: 'banned',
+    rated: 'rated',
+    removed: 'removed'
   },
   reviewTypes: {
     byClient: 'byCl',
@@ -122,15 +135,15 @@ module.exports = {
   freelancerOptions: {
     interested: 'Interested',
     notInterested: 'Not interested',
-    report: 'Report'
+    report: '❗️ Report'
   },
   freelancerAcceptOptions: {
-    accept: 'Accept',
-    refuse: 'Refuse'
+    accept: '✅ Accept',
+    refuse: '❌ Refuse'
   },
   jobFinishedOptions: {
-    rate: 'Rate',
-    report: 'Report'
+    rate: '⭐ Rate',
+    report: '❗️ Report'
   },
   report: {
     thanks: 'Thanks you for your alertness!',
@@ -143,5 +156,11 @@ module.exports = {
     threeStars: '⭐⭐⭐',
     fourStars: '⭐⭐⭐⭐',
     fiveStars: '⭐⭐⭐⭐⭐'
-  }
+  },
+  rateOptionsArray: [
+    '⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'
+  ],
+  shouldUpdateJobMessage: 'shouldUpdateJobMessage',
+  shouldUpdateFreelancerMessage: 'shouldUpdateFreelancerMessage',
+  shouldMakeInterested: 'shouldMakeInterested'
 };

@@ -143,8 +143,6 @@ function getCategory(categoryTitle) {
       .exec((err, category) => {
         if (err) {
           throw err;
-        } else if (!category) {
-          throw new Error('No category found');
         } else {
           fullfill(category);
         }
@@ -208,6 +206,7 @@ function findJobById(id, populate) {
  * @param  {Mongo:Job} job Job object for which freelancers are returned
  */
 function freelancersForJob(job) {
+  job.notInterestedCandidates.push(job.client);//TODO:refactoring
   return new Promise(fullfill => {
     User.find({ $and: [
       { categories: job.category },

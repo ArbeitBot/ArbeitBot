@@ -33,7 +33,7 @@ bot.on('message', msg => {
       if (check.botCommandStart(msg)) {
         dbmanager.addUser(msg.from)
           .then(user => {
-            keyboards.sendMainMenu(bot, msg.chat.id);
+            keyboards.sendMainMenu(bot, msg.chat.id, true);
           });
       } else if (check.replyMarkup(msg)) {
         handleKeyboard(msg);
@@ -183,7 +183,7 @@ function sendAskForUsername(msg) {
 function sendBanMessage(msg) {
   bot.sendMessage({
     chat_id: msg.from.id,
-    text: 'You\'re banned sorry.'
+    text: strings.banMessage
   })
 }
 // Helpers
