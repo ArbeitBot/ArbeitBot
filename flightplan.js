@@ -8,7 +8,7 @@ const tmpDir = `${ appName }-${ new Date().getTime() }`;
 // configuration
 plan.target('staging', [
   {
-    host: '138.68.6.70',
+    host: process.env.ARBEIT_BOT_STAGING_URL,
     username: username,
     agent: process.env.SSH_AUTH_SOCK
   }
@@ -16,7 +16,7 @@ plan.target('staging', [
 
 plan.target('production', [
   {
-    host: '138.68.6.70',
+    host: process.env.ARBEIT_BOT_PRODUCTION_URL,
     username: username,
     agent: process.env.SSH_AUTH_SOCK
   }
