@@ -1,4 +1,5 @@
 const plan = require('flightplan');
+const config = require('./config');
 
 const appName = 'arbeit-bot';
 const username = 'deploy';
@@ -8,7 +9,7 @@ const tmpDir = `${ appName }-${ new Date().getTime() }`;
 // configuration
 plan.target('staging', [
   {
-    host: process.env.ARBEIT_BOT_STAGING_URL,
+    host: config.staging_url,
     username: username,
     agent: process.env.SSH_AUTH_SOCK
   }
@@ -16,7 +17,7 @@ plan.target('staging', [
 
 plan.target('production', [
   {
-    host: process.env.ARBEIT_BOT_PRODUCTION_URL,
+    host: config.production_url,
     username: username,
     agent: process.env.SSH_AUTH_SOCK
   }
@@ -38,5 +39,5 @@ plan.remote(function(remote) {
 
   remote.log('Reload application');
   remote.sudo(`ln -snf ~/${ tmpDir } ~/${ appName }`, { user: username });
-  remote.exec('sudo restart arbeit-bot');
+  remote.exec('sudo systemctl restart arbeit-bot');
 });
