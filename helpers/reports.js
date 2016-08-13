@@ -23,7 +23,7 @@ eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
     .then(job => {
       dbmanager.findUserById(freelancerId)
         .then(user => {
-          reports.reportFreelancer(bot, msg, job, user)
+          reportFreelancer(bot, msg, job, user)
             .then(() => {
               eventEmitter.emit(
                 strings.shouldUpdateJobMessage,
@@ -50,12 +50,12 @@ eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
           // or reporting client, who had created the job.
           // so we can handle both situations with one function
           // the 'user' param here: the reported user(client this time)
-          reports.reportJob(bot, msg, job, user)
+          reportJob(bot, msg, job, user)
             .then(job => {
               dbmanager.findUser({id: msg.from.id})
                 .then(freelancer => {
                   eventEmitter.emit(
-                    shouldUpdateFreelancerMessage,
+                    strings.shouldUpdateFreelancerMessage,
                     { bot, msg, freelancer, job });
                 });
             });
@@ -169,6 +169,11 @@ function sendReportAlert(bot, report) {
 }
 
 function formReportMessage(report) {
+  function formUserInformation(job, user) {
+    let result = ((String(job.client) == String(user._id)) ? 'client' : 'freelancer');
+    return `@${user.username} (${result})`
+  }
+
   return new Promise(fulfill => {
     dbmanager.findUserById(report.sendBy)
       .then(sender => {
@@ -177,7 +182,7 @@ function formReportMessage(report) {
             dbmanager.findJobById(report.job)
               .then(job => {
                 let messageText =
-                  `@${sender.username} reported @${receiver.username}\n` +
+                  `${formUserInformation(job, sender)} reported ${formUserInformation(job, receiver)}\n` +
                   job._id + '\n' +
                   job.description;
                 fulfill(messageText);
