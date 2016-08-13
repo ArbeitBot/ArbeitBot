@@ -11,7 +11,7 @@ const categoryPicker = require('./categoryPicker');
 const hourlyRatePicker = require('./hourlyRatePicker');
 const textInput = require('./textInput');
 const jobManager = require('./jobManager');
-
+const adminPanel = require('./adminPanel');
 // Handle messages
 
 /**
@@ -35,6 +35,8 @@ bot.on('message', msg => {
           .then(user => {
             keyboards.sendMainMenu(bot, msg.chat.id, true);
           });
+      } else if (check.adminCommand(msg)) {
+        adminPanel.handleAdminCommand(msg, bot);
       } else if (check.replyMarkup(msg)) {
         handleKeyboard(msg);
       } else {
