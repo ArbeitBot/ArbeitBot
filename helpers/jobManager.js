@@ -533,8 +533,8 @@ function updateJobMessageForFinished(job, bot) {
         }
       ]];
 
-      // todo: not to show report if this freelancer has already been reported
-      if (true) {
+      // todo: not to show report if this freelancer has already been reported by this user
+      if (!String(user.reportedBy).includes(String(job.client))) {
         keyboard[0].push({
           text: strings.jobFinishedOptions.report,
           callback_data: 
@@ -897,7 +897,7 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
   ]];
 
   // todo: not to show reports if job has already been reported by this freelancer
-  if (true) {
+  if (!String(job.reportedBy).includes(String(user._id))) {
     keyboard[0].push({
       text: strings.jobFinishedOptions.report,
       callback_data:
