@@ -9,6 +9,7 @@ const dbmanager = require('./dbmanager');
 const strings = require('./strings');
 require('./reviews');
 require('./reports');
+
 /** Main functions */
 
 /**
