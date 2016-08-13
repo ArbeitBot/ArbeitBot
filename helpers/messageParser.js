@@ -23,6 +23,15 @@ function botCommandStart(message) {
   }
 }
 
+function adminCommand(message) {
+  let adminCommands = ['/ban', '/unban'];
+  for (let i = 0; i < adminCommands.length; ++i) {
+    if (message.text.indexOf(adminCommands[i]) != -1) {
+      return true;
+    }
+  }
+  return false;
+}
 /**
  * Checks if message is answer to any keyboard buttons
  * @param  {Telegram:Message} message Message to check
@@ -40,5 +49,6 @@ function replyMarkup(message) {
 
 module.exports = {
   botCommandStart: botCommandStart,
-  replyMarkup: replyMarkup
+  replyMarkup: replyMarkup,
+  adminCommand: adminCommand
 }
