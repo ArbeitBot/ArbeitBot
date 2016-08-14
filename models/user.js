@@ -63,7 +63,8 @@ var userSchema = new Schema({
   report_draft: {
     type: Schema.ObjectId,
     ref: 'job'
-  }
+  },
+  specialSymbol: String
 });
 
 
