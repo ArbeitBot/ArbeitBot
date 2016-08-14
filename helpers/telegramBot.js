@@ -40,12 +40,12 @@ if (config.should_use_webhooks) {
   }).listen(8443, () => {
     console.log('Server listening on: 8443');
   });
-
+  console.log(`${config.webhook_callback_url}${config.webhook_token}`);
   const pathToCertificate = path.join(__dirname, '/../certificates/crt.pem');
   bot.setWebhook({
     url: `${config.webhook_callback_url}${config.webhook_token}`, 
     certificate: pathToCertificate
-  });
+  }).then(data => console.log(data)).catch(err => console.log(err));
 }
 
 module.exports = bot;
