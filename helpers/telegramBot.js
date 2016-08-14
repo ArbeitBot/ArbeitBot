@@ -74,6 +74,7 @@ if (config.should_use_webhooks) {
   bot.setWebhook({
     url: ''
   })
+  console.log('Telegram is using updates instead of webhooks')
 }
 
 module.exports = bot;
