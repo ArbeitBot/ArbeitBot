@@ -46,6 +46,10 @@ if (config.should_use_webhooks) {
     url: `${config.webhook_callback_url}${config.webhook_token}`, 
     certificate: pathToCertificate
   }).then(data => console.log(data)).catch(err => console.log(err));
+} else {
+  bot.setWebhook({
+    url: ''
+  })
 }
 
 module.exports = bot;
