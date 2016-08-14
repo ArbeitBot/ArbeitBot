@@ -26,14 +26,14 @@ if (config.should_use_webhooks) {
       console.log('=======================');
       console.log('=======================');
       console.log('=======================');
-      console.log(req);
+      console.log(req.body);
       res.writeHead(200);
       res.end();
     } else {
       console.log('+++++++++++++++++++++++++++');
       console.log('+++++++++++++++++++++++++++');
       console.log('+++++++++++++++++++++++++++');
-      console.log(req);
+      console.log(req.body);
       res.writeHead(404);
       res.end('404');
     }
