@@ -17,6 +17,7 @@ const bot = new Telegram({
 });
 
 function handleBotMessage(item) {
+  if (!item) return;
   // Update events
   bot.emit('update', item);
 
