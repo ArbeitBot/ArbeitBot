@@ -39,5 +39,5 @@ plan.remote(function(remote) {
 
   remote.log('Reload application');
   remote.sudo(`ln -snf ~/${ tmpDir } ~/${ appName }`, { user: username });
-  remote.exec('sudo systemctl restart arbeit-bot');
+  // remote.exec('sudo systemctl restart arbeit-bot');
 });
