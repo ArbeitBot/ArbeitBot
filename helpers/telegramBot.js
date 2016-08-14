@@ -48,8 +48,8 @@ function handleBotMessage(item) {
 if (config.should_use_webhooks) {
   // Start http server for webhooks
   const options = {
-    key: fs.readFileSync(path.join(__dirname, '/../certificates/key.key')),
-    cert: fs.readFileSync(path.join(__dirname, '/../certificates/crt.pem'))
+    key: fs.readFileSync(path.join(config.ssl_key_path)),
+    cert: fs.readFileSync(path.join(config.ssl_certificate_path))
   };
   https.createServer(options, (req, res) => {
     if (String(req.url) === `/${config.webhook_token}`) {
@@ -65,7 +65,7 @@ if (config.should_use_webhooks) {
   }).listen(8443, () => {
     console.log('Server listening on: 8443');
   });
-  const pathToCertificate = path.join(__dirname, '/../certificates/crt.pem');
+  const pathToCertificate = path.join(config.ssl_certificate_path);
   bot.setWebhook({
     url: `${config.webhook_callback_url}${config.webhook_token}`, 
     certificate: pathToCertificate
