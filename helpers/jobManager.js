@@ -429,8 +429,6 @@ function selectAnotherFreelancerForJob(bot, jobId) {
  * @param  {Telegram:Bot} bot Bot that should update message
  */
 function updateJobMessage(job, bot) {
-  console.log(job.description);
-  console.log(job.state);
   if (job.state === strings.jobStates.searchingForFreelancer) {
     updateJobMessageForSearch(job, bot);
   } else if (job.state === strings.jobStates.freelancerChosen) {
