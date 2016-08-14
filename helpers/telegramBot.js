@@ -16,7 +16,7 @@ module.exports = new telegram({
 var http = require('http');
 var server = http.createServer((req, res) => {
 	console.log(req);
-	response.end(`It Works!! Path Hit: ${request.url}`);
+	res.end(`It Works!! Path Hit: ${request.url}`);
 });
 server.listen(8443, () => {
 	console.log('Server listening on: 8443');
