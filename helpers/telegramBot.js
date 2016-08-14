@@ -6,6 +6,7 @@ const Telegram = require('telegram-bot-api');
 const config = require('../config');
 const fs = require('fs');
 const https = require('https');
+const path = require('path');
 
 const bot = new Telegram({
   token: config.telegram_api_key,
@@ -17,30 +18,32 @@ const bot = new Telegram({
 if (config.should_use_webhooks) {
   // Start http server for webhooks
   const options = {
-    key: fs.readFileSync('../certificates/key.pem'),
-    cert: fs.readFileSync('../certificates/crt.pem')
+    key: fs.readFileSync(path.join(__dirname, '/../certificates/key.key')),
+    cert: fs.readFileSync(path.join(__dirname, '/../certificates/crt.pem'))
   };
-
+  console.log(options);
   https.createServer(options, (req, res) => {
-    if (String(req.url) === '/D83Lw8AXaW793xup1Sxj9j6wR6kE7sJj') {
+    if (String(req.url) === `/${config.webhook_token}`) {
       console.log('=======================');
       console.log('=======================');
       console.log('=======================');
       console.log(req);
+      res.writeHead(200);
+      res.end();
     } else {
       console.log('+++++++++++++++++++++++++++');
       console.log('+++++++++++++++++++++++++++');
       console.log('+++++++++++++++++++++++++++');
       console.log(req);
       res.writeHead(404);
-      res.end();
+      res.end('404');
     }
   }).listen(8443, () => {
     console.log('Server listening on: 8443');
   });
 
-  const pathToCertificate = '../certificates/crt.pem';
-  bot.setWebhook('https://138.68.6.70:8443/D83Lw8AXaW793xup1Sxj9j6wR6kE7sJj')
+  const pathToCertificate = path.join(__dirname, '/../certificates/crt.pem');
+  bot.setWebhook(`${config.webhook_callback_url}${config.webhook_token}`);
 }
 
 module.exports = bot;
