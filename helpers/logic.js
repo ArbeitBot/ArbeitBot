@@ -66,7 +66,6 @@ bot.on('inline.callback.query', msg => {
 
       eventEmitter.emit(inlineQuerry, { msg, bot })
     });
-
 });
 
 // Helpers
