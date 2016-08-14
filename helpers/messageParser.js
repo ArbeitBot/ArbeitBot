@@ -24,7 +24,7 @@ function botCommandStart(message) {
 }
 
 function adminCommand(message) {
-  let adminCommands = ['/ban', '/unban'];
+  let adminCommands = ['/ban', '/unban', '/godvoice'];
   for (let i = 0; i < adminCommands.length; ++i) {
     if (message.text.indexOf(adminCommands[i]) != -1) {
       return true;
