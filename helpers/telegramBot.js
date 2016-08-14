@@ -7,6 +7,7 @@ const config = require('../config');
 const fs = require('fs');
 const https = require('https');
 const path = require('path');
+const body = require("body/json")
 
 const bot = new Telegram({
   token: config.telegram_api_key,
@@ -23,29 +24,23 @@ if (config.should_use_webhooks) {
   };
   https.createServer(options, (req, res) => {
     if (String(req.url) === `/${config.webhook_token}`) {
-      console.log('=======================');
-      console.log('=======================');
-      console.log('=======================');
-      console.log(req.body);
+      body(req, res, (err, body) => {
+        console.log(body);
+      });
       res.writeHead(200);
       res.end();
     } else {
-      console.log('+++++++++++++++++++++++++++');
-      console.log('+++++++++++++++++++++++++++');
-      console.log('+++++++++++++++++++++++++++');
-      console.log(req.body);
       res.writeHead(404);
       res.end('404');
     }
   }).listen(8443, () => {
     console.log('Server listening on: 8443');
   });
-  console.log(`${config.webhook_callback_url}${config.webhook_token}`);
   const pathToCertificate = path.join(__dirname, '/../certificates/crt.pem');
   bot.setWebhook({
     url: `${config.webhook_callback_url}${config.webhook_token}`, 
     certificate: pathToCertificate
-  }).then(data => console.log(data)).catch(err => console.log(err));
+  }).then(data => console.log('Telegram webhook is active'))
 } else {
   bot.setWebhook({
     url: ''
