@@ -11,3 +11,13 @@ module.exports = new telegram({
       enabled: true
     }
 });
+
+// Start http server for webhooks
+var http = require('http');
+var server = http.createServer((req, res) => {
+	console.log(request);
+	response.end(`It Works!! Path Hit: ${request.url}`);
+});
+server.listen(8443, () => {
+	console.log('Server listening on: 8443');
+});

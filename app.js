@@ -21,15 +21,5 @@ fs.readdirSync(path.join(__dirname, '/models')).forEach(filename => {
 // start bot
 require('./helpers/logic');
 
-// Start http server for webhooks
-var http = require('http');
-var server = http.createServer((req, res) => {
-	console.log(request);
-	response.end(`It Works!! Path Hit: ${request.url}`);
-});
-server.listen(80, () => {
-	console.log('Server listening on: 80');
-});
-
 // print a message to assure that bot is up and running
 console.log('Bot is up and running!');
