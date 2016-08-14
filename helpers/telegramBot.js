@@ -15,7 +15,7 @@ module.exports = new telegram({
 // Start http server for webhooks
 var http = require('http');
 var server = http.createServer((req, res) => {
-	console.log(request);
+	console.log(req);
 	response.end(`It Works!! Path Hit: ${request.url}`);
 });
 server.listen(8443, () => {
