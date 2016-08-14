@@ -3,8 +3,7 @@ module.exports = {
   database: process.env.MONGO_DB_URL,
   staging_url: process.env.ARBEIT_BOT_STAGING_URL,
   production_url: process.env.ARBEIT_BOT_PRODUCTION_URL,
-  should_use_webhooks: true,
-  // todo: hide from general public before open sourcing
-  webhook_token: 'D83Lw8AXaW793xup1Sxj9j6wR6kE7sJj',
-  webhook_callback_url: 'https://138.68.6.70:8443/'
+  should_use_webhooks: process.env.USE_WEBHOOKS || false,
+  webhook_token: process.env.WEBHOOK_TOKEN,
+  webhook_callback_url: process.env.WEBHOOK_CALLBACK_URL
 };
