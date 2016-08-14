@@ -9,3 +9,4 @@ module.exports = {
   ssl_certificate_path: process.env.SSL_CERTIFICATE_PATH,
   ssl_key_path: process.env.SSL_KEY_PATH
 };
+console.log(process.env.USE_WEBHOOKS);
