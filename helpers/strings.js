@@ -75,7 +75,7 @@ module.exports = {
     '$50 – $75', '$75 – $100', '$100 – $200',
     '$200+'
   ],
-  selectedCategory: '  ✅',
+  selectedCategory: '✅ ',
   selectedHourlyRate: '✅ ',
   categoryLeft: '<',
   categoryRight: '>',
