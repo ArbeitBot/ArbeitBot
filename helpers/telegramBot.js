@@ -42,9 +42,10 @@ if (config.should_use_webhooks) {
   });
 
   const pathToCertificate = path.join(__dirname, '/../certificates/crt.pem');
-  console.log(pathToCertificate);
-  console.log(`${config.webhook_callback_url}${config.webhook_token}`);
-  bot.setWebhook(`${config.webhook_callback_url}${config.webhook_token}`);
+  bot.setWebhook({
+    url: `${config.webhook_callback_url}${config.webhook_token}`, 
+    certificate: pathToCertificate
+  });
 }
 
 module.exports = bot;
