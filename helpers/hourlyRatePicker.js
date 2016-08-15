@@ -42,28 +42,20 @@ function editHourlyRate(bot, msg) {
   let command = msg.data.split(strings.inlineSeparator)[1];
 
   function getUserCallback(user) {
-    let send = {
-      chat_id: msg.message.chat.id,
-      message_id: msg.message.message_id,
-      reply_markup: {
-        inline_keyboard: hourlyRateKeyboard(user, strings.hourlyRateOptions)
-      },
-      disable_web_page_preview: 'true'
-    };
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageReplyMarkup(send)
-    .catch(err => console.log(err));
+
   }
 
   dbmanager.findUser({ id: msg.message.chat.id })
     .then(user => {
       let needCongrats = !user.hourly_rate;
       user.hourly_rate = command;
-      user.save((err, user) => {
-        if (err) {
-          // todo: handle error
-        } else if (user) {
-          getUserCallback(user);
+      user.save()
+        .then(user => {
+          keyboards.editInline(
+            bot,
+            msg.message.chat.id,
+            msg.message.message_id,
+            hourlyRateKeyboard(user, strings.hourlyRateOptions));
           if (needCongrats && user.bio && user.categories.length > 0) {
             keyboards.sendKeyboard(
               bot,
@@ -71,9 +63,6 @@ function editHourlyRate(bot, msg) {
               strings.filledEverythingMessage, 
               keyboards.freelancerKeyboard(user));
           }
-        } else {
-          // todo: handle if user wasn't returned
-        }
       });
     });
 }

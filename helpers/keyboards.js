@@ -220,6 +220,47 @@ function sendInline(bot, chatId, text, keyboard, then) {
     .catch(err => console.log(err));
 }
 
+/**
+ * Method to edit message with inline
+ * @param  {Telegram:Bot} bot       Bot that should edit msg
+ * @param  {Number} chatId    Id of chat where to edit msg
+ * @param  {Number} messageId Id of message to edit
+ * @param  {Telegram:InlineKeyboard} keyboard  Inline keyboard to appear in message
+ */
+function editInline(bot, chatId, messageId, keyboard) {
+  let send = {
+    chat_id: chatId,
+    message_id: messageId,
+    reply_markup: {
+      inline_keyboard: keyboard
+    },
+    disable_web_page_preview: 'true'
+  };
+  send.reply_markup = JSON.stringify(send.reply_markup);
+  bot.editMessageReplyMarkup(send)
+    .catch(err => console.log(err));
+}
+
+/**
+ * Method to edit message
+ * @param  {Telegram:Bot} bot       Bot that should edit msg
+ * @param  {Number} chatId    Id of chat where to edit msg
+ * @param  {Number} messageId Id of message to edit
+ * @param  {String} text      Text to appear in message
+ * @param  {Telegram:InlineKeyboard} keyboard  Inline keyboard to appear in message
+ */
+function editMessage(bot, chatId, messageId, text, keyboard) {
+  bot.editMessageText({
+    chat_id: chatId,
+    message_id: messageId,
+    reply_markup: JSON.stringify({
+      inline_keyboard: keyboard
+    }),
+    text: text,
+    disable_web_page_preview: 'true'
+  }).catch(err => console.log(err.error.description));
+}
+
 // Exports
 
 module.exports = {
@@ -233,5 +274,7 @@ module.exports = {
   sendFreelanceMenu,
   sendHelp,
   sendKeyboard,
-  sendInline
+  sendInline,
+  editInline,
+  editMessage
 };

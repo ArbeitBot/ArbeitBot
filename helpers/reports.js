@@ -1,10 +1,11 @@
-let mongoose = require('mongoose');
-let dbmanager = require('./dbmanager');
+const mongoose = require('mongoose');
+const dbmanager = require('./dbmanager');
+const keyboards = require('./keyboards');
 
-let Job = mongoose.model('job');
-let Report = mongoose.model('report');
-let strings = require('./strings');
-let admins = ['74169393', '-1001052392095'];
+const Job = mongoose.model('job');
+const Report = mongoose.model('report');
+const strings = require('./strings');
+const admins = ['74169393', '-1001052392095'];
 
 // Inlines
 
@@ -108,13 +109,11 @@ eventEmitter.on(strings.adminBanInline, ({ msg, bot }) => {
       inlineMessages.forEach(messageData => {
         let msgData = messageData.split('+');
         if (!(msgData.length === 2)) return;
-        bot.editMessageReplyMarkup({
-          message_id: msgData[0],
-          chat_id: msgData[1],
-          reply_markup: JSON.stringify({
-            inline_keyboard: []
-          })
-        }).catch(err => console.log(err));
+        keyboards.editInline(
+          bot,
+          msgData[0],
+          msgData[1],
+          []);
       })
     })
     .catch(err => console.log(err))

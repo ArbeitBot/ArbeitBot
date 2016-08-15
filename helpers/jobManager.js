@@ -288,17 +288,13 @@ function sendUsersJobOffer(bot, users, job) {
  * @param  {Telegram:Bot} bot Bot that should edit message
  */
 function showSelectFreelancers(msg, job, bot) {
-  bot.editMessageText({
-    chat_id: msg.message.chat.id,
-    message_id: msg.message.message_id,
-    reply_markup: JSON.stringify({
-      inline_keyboard: jobSelectCandidateKeyboard(job)
-    }),
-    text: 
-      strings.selectCandidateMessage + '\n\n' + 
+  keyboards.editMessage(
+    bot,
+    msg.message.chat.id,
+    msg.message.message_id,
+    strings.selectCandidateMessage + '\n\n' + 
       messageFromFreelancers(job.interestedCandidates),
-    disable_web_page_preview: 'true'
-  }).catch(err => console.log(err.error.description));
+    jobSelectCandidateKeyboard(job));
 }
 
 /**
@@ -448,18 +444,12 @@ function updateJobMessage(job, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function deprecateJobMessage(job, bot) {
-  let send = {
-    chat_id: job.current_inline_chat_id,
-    message_id: job.current_inline_message_id,
-    text: strings.deprecatedMessage,
-    reply_markup: {
-      inline_keyboard: []
-    },
-    disable_web_page_preview: 'true'
-  };
-  send.reply_markup = JSON.stringify(send.reply_markup);
-  bot.editMessageText(send)
-    .catch(err => console.log(err.error.description));
+  keybords.editMessage(
+    bot,
+    job.current_inline_chat_id,
+    job.current_inline_message_id,
+    strings.deprecatedMessage,
+    []);
 }
 
 /**
@@ -470,20 +460,13 @@ function deprecateJobMessage(job, bot) {
 function updateJobMessageForSearch(job, bot) {
   dbmanager.freelancersForJob(job)
     .then(users => {
-      let send = {
-        chat_id: job.current_inline_chat_id,
-        message_id: job.current_inline_message_id,
-        text: 
-          job.description + '\n\n' +
+      keyboards.editMessage(
+        bot,
+        job.current_inline_chat_id,
+        job.current_inline_message_id,
+        job.description + '\n\n' +
           messageFromFreelancers(users),
-        reply_markup: {
-          inline_keyboard: jobInlineKeyboard(users, job)
-        },
-        disable_web_page_preview: 'true'
-      };
-      send.reply_markup = JSON.stringify(send.reply_markup);
-      bot.editMessageText(send)
-        .catch(err => console.log(err.error.description));
+        jobInlineKeyboard(users, job));
     });
 }
 
@@ -499,27 +482,22 @@ function updateJobMessageForSelected(job, bot) {
     const specialSymbol = user.specialSymbol ? user.specialSymbol + ' ' : '';
     const userMessage = `{specialSymbol}@${user.username}${ratingMessage}\n${user.bio}`;
 
-    let send = {
-      chat_id: job.current_inline_chat_id,
-      message_id: job.current_inline_message_id,
-      text:
-        job.description + '\n\n' +
+    const keyboard = [[{
+        text: strings.jobSelectAnotherFreelancer,
+        callback_data:
+          strings.selectAnotherFreelancerInline +
+          strings.inlineSeparator +
+          job._id
+      }]];
+
+    keyboards.editMessage(
+      bot,
+      job.current_inline_chat_id,
+      job.current_inline_message_id,
+      job.description + '\n\n' +
         strings.waitContractorResponseMessage + '\n\n' +
         userMessage,
-      reply_markup: {
-        inline_keyboard: [[{
-          text: strings.jobSelectAnotherFreelancer,
-          callback_data:
-            strings.selectAnotherFreelancerInline +
-            strings.inlineSeparator +
-            job._id
-        }]]
-      },
-      disable_web_page_preview: 'true'
-    };
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageText(send)
-      .catch(err => console.log(err.error.description));
+      keyboard);
   });
 }
 
@@ -555,49 +533,31 @@ function updateJobMessageForFinished(job, bot) {
         });
       }
 
-      let send = {
-        chat_id: job.current_inline_chat_id,
-        message_id: job.current_inline_message_id,
-        text: `${ job.description }\n\n${ strings.contactWithFreelancerMessage }\n@${ user.username }`,
-        reply_markup: {
-          inline_keyboard: keyboard
-        },
-        disable_web_page_preview: 'true'
-      };
-      send.reply_markup = JSON.stringify(send.reply_markup);
-      bot.editMessageText(send)
-      .catch(err => console.log(err.error.description));
+      keyboards.editMessage(
+        bot,
+        job.current_inline_chat_id,
+        job.current_inline_message_id,
+        `${ job.description }\n\n${ strings.contactWithFreelancerMessage }\n@${ user.username }`,
+        keyboard);
     });
 }
 
 function updateJobMessageForRated(job, bot) {
-  let send = {
-    chat_id: job.current_inline_chat_id,
-    message_id: job.current_inline_message_id,
-    text: `${job.description}\n\n${strings.thanksReviewMessage}`,
-    reply_markup: {
-      inline_keyboard: []
-    },
-    disable_web_page_preview: 'true'
-  };
-  send.reply_markup = JSON.stringify(send.reply_markup);
-  bot.editMessageText(send)
-    .catch(err => console.log(err.error.description));
+  keyboards.editMessage(
+    bot,
+    job.current_inline_chat_id,
+    job.current_inline_message_id,
+    `${job.description}\n\n${strings.thanksReviewMessage}`,
+    []);
 }
 
 function updateJobMessageForRemoved(job, bot) {
-  let send = {
-    chat_id: job.current_inline_chat_id,
-    message_id: job.current_inline_message_id,
-    text: `${job.description}\n\n${strings.thisWorkIsRemoved}`,
-    reply_markup: {
-      inline_keyboard: []
-    },
-    disable_web_page_preview: 'true'
-  };
-  send.reply_markup = JSON.stringify(send.reply_markup);
-  bot.editMessageText(send)
-    .catch(err => console.log(err.error.description));
+  keyboards.editMessage(
+    bot,
+    job.current_inline_chat_id,
+    job.current_inline_message_id,
+    `${job.description}\n\n${strings.thisWorkIsRemoved}`,
+    []);
 }
 
 // Keyboards
@@ -746,18 +706,12 @@ function makeInterested(interested, bot, msg, job, user) {
   if (job.state === strings.jobStates.removed) {
     updateFreelancerMessage(bot, msg, user, job);
   } else if (job.state !== strings.jobStates.searchingForFreelancer) {
-    let send = {
-      chat_id: msg.from.id,
-      message_id: msg.message.message_id,
-      text: strings.clientHasChosenAnotherFreelancer,
-      reply_markup: {
-        inline_keyboard: []
-      },
-      disable_web_page_preview: 'true'
-    };
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageText(send)
-      .catch(err => console.log(err.error.description));
+    keyboards.editMessage(
+      bot,
+      msg.from.id,
+      msg.message.message_id,
+      strings.clientHasChosenAnotherFreelancer,
+      []);
   } else {
     // Remove user from candidates
     let candIndex = job.candidates.indexOf(user._id);
@@ -829,19 +783,13 @@ function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
 
   let chatId = (!!msg) ? msg.message.chat.id : chatInline.chat_id;
   let messageId = (!!msg) ? msg.message.message_id : chatInline.message_id;
-  let send = {
-    chat_id: chatId,
-    message_id: messageId,
-    text: `${ prefix }${ job.description }`,
-    reply_markup: {
-      inline_keyboard: []
-    },
-    disable_web_page_preview: 'true'
-  };
-  send.reply_markup = JSON.stringify(send.reply_markup);
 
-  bot.editMessageText(send)
-    .catch(err => console.log(err.error.description));
+  keyboards.editMessage(
+    bot,
+    chatId,
+    messageId,
+    `${ prefix }${ job.description }`,
+    []);
 }
 
 /**
@@ -872,18 +820,12 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
         }]);
       });
 
-      let message = {
-        chat_id: chatInline.chat_id,
-        message_id: chatInline.message_id,
-        text: `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n@${job.client.username}\n${ job.description }\n\n${ strings.acceptOrRejectMessage }`,
-        reply_markup: {
-          inline_keyboard: keyboard
-        },
-        disable_web_page_preview: 'true'
-      };
-      message.reply_markup = JSON.stringify(message.reply_markup);
-      bot.editMessageText(message)
-        .catch(err => console.log(err.error.description))
+      keyboards.editMessage(
+        bot,
+        chatInline.chat_id,
+        chatInline.message_id,
+        `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n@${job.client.username}\n${ job.description }\n\n${ strings.acceptOrRejectMessage }`,
+        keyboard);
     });
   });
 }
@@ -921,49 +863,31 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
   }
   
   job.populate('client', (err, job) => {
-    let send = {
-      chat_id: msg.message.chat.id,
-      message_id: msg.message.message_id,
-      text: `${ strings.contactWithClientMessage }\n\n@${ job.client.username }\n${job.description}`,
-      reply_markup: {
-        inline_keyboard: keyboard
-      },
-      disable_web_page_preview: 'true'
-    };
-
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageText(send)
-      .catch(err => console.log(err.error.description));
+    keyboards.editMessage(
+      bot,
+      msg.message.chat.id,
+      msg.message.message_id,
+      `${ strings.contactWithClientMessage }\n\n@${ job.client.username }\n${job.description}`,
+      keyboard);
   });
 }
 
 function updateFreelancerMessageForRated(bot, msg, user, job) {
-  let send = {
-    chat_id: msg.message.chat.id,
-    message_id: msg.message.message_id,
-    text: `${job.description}\n\n${strings.thanksReviewMessage}`,
-    reply_markup: {
-      inline_keyboard: []
-    },
-    disable_web_page_preview: 'true'
-  };
-  send.reply_markup = JSON.stringify(send.reply_markup);
-  bot.editMessageText(send)
-    .catch(err => console.log(err.error.description));
+  keyboards.editMessage(
+    bot,
+    msg.message.chat.id,
+    msg.message.message_id,
+    `${job.description}\n\n${strings.thanksReviewMessage}`,
+    []);
 }
 
 function updateFreelancerMessageRemoved(bot, msg, user, job) {
-  let send = {
-    chat_id: msg.message.chat.id,
-    message_id: msg.message.message_id,
-    text: `${job.description}\n\n${strings.thisWorkIsRemoved}`,
-    reply_markup: {
-      inline_keyboard: []
-    }
-  };
-  send.reply_markup = JSON.stringify(send.reply_markup);
-  bot.editMessageText(send)
-    .catch(err => console.log(err.error.description));
+  keyboards.editMessage(
+    bot,
+    msg.message.chat.id,
+    msg.message.message_id,
+    `${job.description}\n\n${strings.thisWorkIsRemoved}`,
+    []);
 }
 
 /**

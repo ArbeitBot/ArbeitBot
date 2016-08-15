@@ -51,19 +51,12 @@ function sendRateKeyboard(msg, bot, type) {
 
   dbmanager.findJobById(jobId)
     .then(job => {
-      let keyboard = keyboards.rateKeyboard(type, job._id);
-      let send = {
-        chat_id: msg.message.chat.id,
-        message_id: msg.message.message_id,
-        text: strings.rateClientMessage,
-        reply_markup: {
-          inline_keyboard: keyboard
-        },
-        disable_web_page_preview: 'true'
-      };
-      send.reply_markup = JSON.stringify(send.reply_markup);
-      bot.editMessageText(send)
-        .catch(err => console.log(err.error.description));
+      keyboards.editMessage(
+        bot,
+        msg.message.chat.id,
+        msg.message.message_id,
+        strings.rateClientMessage,
+        keyboards.rateKeyboard(type, job._id));
     });
 }
 
@@ -132,18 +125,12 @@ function writeReview(bot, jobId, rating, reviewType) {
               byUser.writeReview.push(dbReviewObject._id);
               byUser.save()
                 .then(byUser => {
-                  let send = {
-                    chat_id: chat_id,
-                    message_id: message_id,
-                    text: `${job.description}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`,
-                    reply_markup: {
-                      inline_keyboard: []
-                    },
-                    disable_web_page_preview: 'true'
-                  };
-                  send.reply_markup = JSON.stringify(send.reply_markup);
-                  bot.editMessageText(send)
-                    .catch(err => console.log(err.error.description));
+                  keyboards.editMessage(
+                    bot,
+                    chat_id,
+                    message_id,
+                    `${job.description}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`,
+                    []);
                 });
             });
         });

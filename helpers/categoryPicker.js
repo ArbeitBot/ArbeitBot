@@ -60,7 +60,6 @@ function sendCategories(bot, chatId) {
  */
 function getCategoriesCallback(categories, user, bot) {
   const keyboard = categoriesKeyboard(categories, user, 0);
-
   keyboards.sendInline(
     bot, 
     user.id,
@@ -75,25 +74,15 @@ function getCategoriesCallback(categories, user, bot) {
  * @param  {Number} page Page of the list of categories that should be displayed
  */
 function editPage(bot, msg, page) {
-  function getCategoriesCallback(categories, user) {
-    const send = {
-      chat_id: msg.message.chat.id,
-      message_id: msg.message.message_id,
-      reply_markup: {
-        inline_keyboard: categoriesKeyboard(categories, user, page)
-      },
-      disable_web_page_preview: 'true'
-    };
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageReplyMarkup(send)
-      .catch(err => console.log(err));
-  }
-
   dbmanager.findUser({ id: msg.message.chat.id })
     .then(user => {
       dbmanager.getCategories()
         .then(categories => {
-          getCategoriesCallback(categories, user);
+          keyboards.editInline(
+            bot,
+            msg.message.chat.id,
+            msg.message.message_id,
+            categoriesKeyboard(categories, user, page));
         });
     });
 }
