@@ -118,6 +118,21 @@ function toggleCategoryForUser(chatId, categoryId) {
   });
 }
 
+/**
+ * Returns number of users registered
+ */
+function userCount() {
+  return new Promise((fullfill, reject) => {
+    User.count({}, (err, c) => {
+      if (err) {
+        throw err;
+      } else {
+        fullfill(c);
+      }
+    });
+  });
+}
+
 // Categories
 
 /**
@@ -341,6 +356,7 @@ module.exports = {
   addUser,
   toggleUserAvailability,
   toggleCategoryForUser,
+  userCount,
   // Categories
   getCategory,
   getCategories,

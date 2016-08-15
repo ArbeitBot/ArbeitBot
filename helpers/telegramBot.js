@@ -64,7 +64,7 @@ if (config.should_use_webhooks) {
       res.end('404');
     }
   }).listen(8443, () => {
-    console.log('Server listening on: 8443');
+    console.log('Server for Telegram web hooks listening on: 8443');
   });
   const pathToCertificate = path.join(config.ssl_certificate_path);
   bot.setWebhook({
