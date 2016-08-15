@@ -11,6 +11,10 @@ var userSchema = new Schema({
   hourly_rate: String,
   input_state: String,
   input_state_data: String,
+  ban_state: {
+    type: Boolean,
+    default: false
+  },
   rate: {
     type: Number,
     default: 0
@@ -59,7 +63,8 @@ var userSchema = new Schema({
   report_draft: {
     type: Schema.ObjectId,
     ref: 'job'
-  }
+  },
+  specialSymbol: String
 });
 
 

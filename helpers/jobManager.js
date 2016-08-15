@@ -7,8 +7,9 @@
 const keyboards = require('./keyboards');
 const dbmanager = require('./dbmanager');
 const strings = require('./strings');
-const review = require('./review');
-const reports = require('./reports');
+require('./reviews');
+require('./reports');
+
 /** Main functions */
 
 /**
@@ -137,9 +138,6 @@ eventEmitter.on(strings.freelancerJobInline, ({ msg, bot }) => {
                 makeInterested(true, bot, msg, job, user);
               } else if (answer === strings.freelancerOptions.notInterested) {
                 makeInterested(false, bot, msg, job, user);
-              } else if (answer === strings.freelancerOptions.report) {
-                makeInterested(false, bot, msg, job, user);
-                reports.reportJob(bot, msg, job, user);
               }
             });
         });
@@ -178,8 +176,8 @@ eventEmitter.on(strings.selectAnotherFreelancerInline, ({ msg, bot }) => {
 
 /**
  * Handles case when freelancer accepts or rejects job offer
- * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Messager} msg Message received
+ * @param  {Telegram:Bot} bot Bot that should respond
  */
 eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
@@ -211,65 +209,38 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
     });
 });
 
-// Reports
+// Connectors
 
 /**
- * Handles case when freelancer is reported
- * @param  {Telegram:Bot} bot Bot that should respond
- * @param  {Telegram:Messager} msg Message received
+ * Handles case when job message should be updated from outside
+ * @param  {Mongoose:Job} job Job that should be updated
+ * @param  {Telegram:Bot} bot Bot that should update message
  */
-eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
-  const freelancerId = msg.data.split(strings.inlineSeparator)[2];
-  // todo: handle report
-  dbmanager.findJobById(jobId)
-    .then(job => {
-      dbmanager.findUserById(freelancerId)
-        .then(user => {
-          reports.reportFreelancer(bot, msg, job, user);
-        })
-    });
-  console.log(jobId, freelancerId);
+eventEmitter.on(strings.shouldUpdateJobMessage, ({ job, bot }) => {
+  updateJobMessage(job, bot);
 });
 
 /**
- * Handles case when client is reported
- * @param  {Telegram:Bot} bot Bot that should respond
- * @param  {Telegram:Messager} msg Message received
+ * Handles case when freelancer message should be updated from outside
+ * @param  {Telegram:Bot} bot  Bot that should edit message
+ * @param  {Telegram:Message} msg  Message that came along with action
+ * @param  {Mongoose:User} user Freelancer whos message should be editted
+ * @param  {Mongoose:Job} job  Relevant job
  */
-eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
-  const freelancerIdReported = msg.data.split(strings.inlineSeparator)[2];
-  // todo: handle report
-  dbmanager.findJobById(jobId)
-    .then(job => {
-      dbmanager.findUserById(freelancerIdReported)
-        .then(user => {
-          reports.reportJob(bot, msg, job, user);
-        })
-    });
-  console.log(jobId, freelancerIdReported);
+eventEmitter.on(strings.shouldUpdateFreelancerMessage, ({ bot, msg, user, job }) => {
+  updateFreelancerMessage(bot, msg, user, job);
 });
 
 /**
- * Handles case when job is reported
- * @param  {Telegram:Bot} bot Bot that should respond
- * @param  {Telegram:Messager} msg Message received
+ * Handles case when user should be added to interested or not interested candidates from the outside
+ * @param  {Boolean} interested If true, adds candidate to the list of interested candidates, otherwise to list of not interested candidates
+ * @param  {Telegram:Bot} bot        Bot that should respond
+ * @param  {Telegram:Message} msg        Message that came along with inline action
+ * @param  {Mongoose:Job} job        Job where to add freelancer
+ * @param  {Mongoose:User} user       Freelancer object to add to job list
  */
-eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
-  const freelancerUsernameReported = msg.data.split(strings.inlineSeparator)[3];
-  // todo: handle report
-  
-  dbmanager.findJobById(jobId)
-    .then(job => {
-      dbmanager.findUser({username: freelancerUsernameReported})
-        .then(user => {
-          makeInterested(false, bot, msg, job, user);
-          reports.reportJob(bot, msg, job, user);
-        })
-    });
-  console.log(jobId, freelancerUsernameReported);
+eventEmitter.on(strings.shouldMakeInterested, ({ interested, bot, msg, job, user }) => {
+  makeInterested(interested, bot, msg, job, user);
 });
 
 /**
@@ -522,12 +493,18 @@ function updateJobMessageForSearch(job, bot) {
  * @param  {Telegram:Bot} bot Bot that should update message
  */
 function updateJobMessageForSelected(job, bot) {
+  const user = job.selectedCandidate;
+  const ratingMessage = user.reviews.length === 0 ? '' : ` ${user.GetRateStars()} (${user.reviews.length})`
+  const specialSymbol = user.specialSymbol ? user.specialSymbol + ' ' : '';
+  const userMessage = `{specialSymbol}@${user.username}${ratingMessage}\n${user.bio}`;
+
   let send = {
     chat_id: job.current_inline_chat_id,
     message_id: job.current_inline_message_id,
     text: 
       job.description + '\n\n' +
-      strings.waitContractorResponseMessage,
+      strings.waitContractorResponseMessage + '\n\n' +
+      userMessage,
     reply_markup: {
       inline_keyboard: [[{
         text: strings.jobSelectAnotherFreelancer,
@@ -557,9 +534,15 @@ function updateJobMessageForFinished(job, bot) {
           callback_data: 
             strings.askRateFreelancerInline + 
             strings.inlineSeparator + 
-            job._id
-        },
-        {
+            job._id +
+            strings.inlineSeparator +
+            user._id
+        }
+      ]];
+
+      // todo: not to show report if this freelancer has already been reported by this user
+      if (!String(user.reportedBy).includes(String(job.client))) {
+        keyboard[0].push({
           text: strings.jobFinishedOptions.report,
           callback_data: 
             strings.reportFreelancerInline + 
@@ -567,8 +550,8 @@ function updateJobMessageForFinished(job, bot) {
             job._id + 
             strings.inlineSeparator + 
             user._id
-        }
-      ]];
+        });
+      }
 
       let send = {
         chat_id: job.current_inline_chat_id,
@@ -728,7 +711,9 @@ function messageFromFreelancers(users) {
     const user = users[i];
     const lineBreak = i == 0 ? '' : '\n';
     if (user.username) {
-      message = `${message}${lineBreak}@${user.username}\n${user.GetRateStars()}(${user.GetRate()}) ${strings.bioReviews}${user.reviews.length}\n${user.bio}`;
+      const ratingMessage = user.reviews.length === 0 ? '' : ` ${user.GetRateStars()} (${user.reviews.length})`
+      const specialSymbol = user.specialSymbol ? user.specialSymbol + ' ' : '';
+      message = `${message}${lineBreak}${specialSymbol}@${user.username}${ratingMessage}\n${user.bio}`;
     }
   }
   if (message.length <= 0) {
@@ -832,7 +817,8 @@ function updateFreelancerMessage(bot, msg, user, job, chatInline) {
  */
 function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
   let prefix = '';
-  //job.interestedCandidates.find(userId => { userId == user._id })
+  // todo: get rid of unefficient check towards the line below
+  // job.interestedCandidates.find(userId => { userId == user._id })
   if (job.interestedCandidates.map(o => String(o)).includes(String(user._id))) {
     prefix = `${ strings.interestedOption } ${ strings.freelancerOptions.interested }\n\n`;
   } else if (job.notInterestedCandidates.map(o => String(o)).includes(String(user._id))) {
@@ -909,22 +895,29 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
  */
 function updateFreelancerMessageForFinished(bot, msg, user, job) {
   let keyboard = [[{
-      text: strings.jobFinishedOptions.rate,
-      callback_data: 
-        strings.askRateClientInline +
-        strings.inlineSeparator +
-        job._id
-    },
-    {
-      text: strings.jobFinishedOptions.report,
-      callback_data: 
-        strings.reportClientInline + 
-        strings.inlineSeparator + 
-        job._id + 
-        strings.inlineSeparator + 
-        user._id
+    text: strings.jobFinishedOptions.rate,
+    callback_data:
+      strings.askRateClientInline +
+      strings.inlineSeparator +
+      job._id +
+      strings.inlineSeparator +
+      user._id
     }
   ]];
+
+  // todo: not to show reports if job has already been reported by this freelancer
+  if (!String(job.reportedBy).includes(String(user._id))) {
+    keyboard[0].push({
+      text: strings.jobFinishedOptions.report,
+      callback_data:
+        strings.reportClientInline +
+        strings.inlineSeparator +
+        job._id +
+        strings.inlineSeparator +
+        user._id
+    });
+  }
+  
   job.populate('client', (err, job) => {
     let send = {
       chat_id: msg.message.chat.id,

@@ -131,7 +131,7 @@ function categoriesKeyboard(categories, user, page) {
     const currentCategory = allCategories[i];
 
     const text = user.categories.indexOf(currentCategory) > -1 ?
-      currentCategory.title+strings.selectedCategory :
+      strings.selectedCategory+currentCategory.title :
       currentCategory.title;
 
     tempRow.push({

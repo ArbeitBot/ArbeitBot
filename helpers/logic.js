@@ -11,7 +11,7 @@ const categoryPicker = require('./categoryPicker');
 const hourlyRatePicker = require('./hourlyRatePicker');
 const textInput = require('./textInput');
 const jobManager = require('./jobManager');
-
+const adminPanel = require('./adminPanel');
 // Handle messages
 
 /**
@@ -20,9 +20,14 @@ const jobManager = require('./jobManager');
  */
 bot.on('message', msg => {
   if (!msg) return;
-
+  else if (!msg.from.username) {
+    sendAskForUsername(msg);
+    return;
+  }
   textInput.check(msg, (isTextInput, user) => {
-    if (isTextInput) {
+    if (user && user.ban_state) {
+      sendBanMessage(msg);
+    } else if (isTextInput) {
       textInput.handle(msg, user, bot);
     } else {
       if (check.botCommandStart(msg)) {
@@ -30,6 +35,8 @@ bot.on('message', msg => {
           .then(user => {
             keyboards.sendMainMenu(bot, msg.chat.id, true);
           });
+      } else if (check.adminCommand(msg)) {
+        adminPanel.handleAdminCommand(msg, bot);
       } else if (check.replyMarkup(msg)) {
         handleKeyboard(msg);
       } else {
@@ -44,10 +51,21 @@ bot.on('message', msg => {
  * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
  */
 bot.on('inline.callback.query', msg => {
-  let options = msg.data.split(strings.inlineSeparator);
-  let inlineQuerry = options[0];
+  if (!msg.from.username) {
+    sendAskForUsername(msg);
+    return;
+  }
+  dbmanager.findUser({id: msg.from.id})
+    .then(user => {
+      if (user.ban_state) {
+        sendBanMessage(msg);
+        return;
+      }
+      let options = msg.data.split(strings.inlineSeparator);
+      let inlineQuerry = options[0];
 
-  eventEmitter.emit(inlineQuerry, { msg, bot })
+      eventEmitter.emit(inlineQuerry, { msg, bot })
+    });
 });
 
 // Helpers
@@ -157,6 +175,18 @@ function sendHelp(chatId) {
     keyboards.helpKeyboard);
 }
 
+function sendAskForUsername(msg) {
+  bot.sendMessage({
+    chat_id: msg.from.id,
+    text: strings.askForUsername
+  })
+}
+function sendBanMessage(msg) {
+  bot.sendMessage({
+    chat_id: msg.from.id,
+    text: strings.banMessage
+  })
+}
 // Helpers
 
 /**

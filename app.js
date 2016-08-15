@@ -21,5 +21,8 @@ fs.readdirSync(path.join(__dirname, '/models')).forEach(filename => {
 // start bot
 require('./helpers/logic');
 
+// start stat server
+require('./helpers/statServer');
+
 // print a message to assure that bot is up and running
-console.log('Bot is up and running!');
+console.log('Bot is up and running');

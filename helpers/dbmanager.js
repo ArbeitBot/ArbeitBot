@@ -16,6 +16,22 @@ const UserChatInline = mongoose.model('userChatInline');
 // User
 
 /**
+ * Makes no population. To save memory
+ */
+function getAllUsers() {
+  return new Promise(fullfill => {
+    User.find({})
+      .exec((err, users) => {
+        if (err) {
+          throw err;
+        } else {
+          fullfill(users);
+        }
+      });
+  });
+}
+
+/**
  * Getting a user with search querry from mongo db, populates 'categories', 'jobs' and 'job_draft'
  * @param  {Mongo:SearchQuery} query Search query to find user
  */
@@ -118,6 +134,21 @@ function toggleCategoryForUser(chatId, categoryId) {
   });
 }
 
+/**
+ * Returns number of users registered
+ */
+function userCount() {
+  return new Promise((fullfill, reject) => {
+    User.count({}, (err, c) => {
+      if (err) {
+        throw err;
+      } else {
+        fullfill(c);
+      }
+    });
+  });
+}
+
 // Categories
 
 /**
@@ -193,7 +224,7 @@ function findJobById(id, populate) {
       .populate(populate || '')
       .exec((err, job) => {
         if (err) {
-          throw error;
+          throw err;
         } else {
           fullfill(job);
         }
@@ -311,16 +342,38 @@ function chatInline(job, user) {
   });
   return chatInline;
 }
+// Report
+
+/**
+ * Get report by id
+ * @param  {Mongo:ObjectId}   id       Id of review to retrieve
+ * @param  {JS Object or String}   populate Option to populate fields in query result
+ */
+function findReportById(id, populate) {
+  return new Promise(fullfill => {
+    Report.findById(id)
+      .populate(populate || '')
+      .exec((err, review) => {
+        if (err) {
+          throw err;
+        } else {
+          fullfill(review);
+        }
+      })
+  });
+}
 
 // Export
 
 module.exports = {
   // User
+  getAllUsers,
   findUser,
   findUserById,
   addUser,
   toggleUserAvailability,
   toggleCategoryForUser,
+  userCount,
   // Categories
   getCategory,
   getCategories,
@@ -333,5 +386,7 @@ module.exports = {
   findReviewById,
   addReview,
   // Helpers
-  chatInline
+  chatInline,
+  // Reports
+  findReportById
 };

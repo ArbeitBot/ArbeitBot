@@ -3,7 +3,10 @@
  */
 
 module.exports = {
+  reportThankYouMessage: 'Thank you a lot for this report! Our moderators have received it and will take immediate actions to prevent reported behaviour in future.',
+  banMessage: 'It looks like somebody reported you and our moderators decided that there is a reason to ban you. If this was a mistake, please let my creator @borodutch know – we will see what we can do ;)',
   loadingMessage: '🦄 Loading...',
+  askForUsername: 'Hi there! It looks like you don\'t have an username. Please, set it to which you want in Telegram settings.',
   deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ;)',
   initialMessage: 'Welcome to @arbeit_bot! This is a completelly free Telegram based freelance market. If you are searching for contractors please proceed to "Find contractors". In case if you are looking for job please go to your "Profile" and fill it so that clients are able to find you. Also do not hesitate to click "Help" if you have any questions at all. Thank you for joining our @arbeit_bot family!',
   mainMenuMessage: 'Please select if you are looking for contractors or add your profile if you are looking for job.',
@@ -41,7 +44,7 @@ module.exports = {
   reviewFreelancerMessage: 'reviewFreelancerMessage',
   reviewClientMessage: 'reviewClientMessage',
   thanksReviewMessage: 'Thank you a lot for the review!',
-  youWereRated: 'You were rated',
+  youWereRated: 'You have received new rating:',
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
   noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
   thisWorkIsRemoved: 'This work is removed.',
@@ -72,13 +75,14 @@ module.exports = {
     '$50 – $75', '$75 – $100', '$100 – $200',
     '$200+'
   ],
-  selectedCategory: '  ✅',
+  selectedCategory: '✅ ',
   selectedHourlyRate: '✅ ',
   categoryLeft: '<',
   categoryRight: '>',
   inlineSeparator: '~',
   categoryInline: 'cI',
   hourlyRateInline: 'hRI',
+  adminBanInline: 'abI',
   freelancerInline: 'fI',
   jobManageInline: 'jMI',
   freelancerJobInline: 'fJI',
@@ -118,6 +122,7 @@ module.exports = {
     searchingForFreelancer: 'searchingForFreelancer',
     freelancerChosen: 'freelancerChosen',
     finished: 'finished',
+    // todo: need to delete this later
     frozen: 'frozen',
     banned: 'banned',
     rated: 'rated',
@@ -151,5 +156,11 @@ module.exports = {
     threeStars: '⭐⭐⭐',
     fourStars: '⭐⭐⭐⭐',
     fiveStars: '⭐⭐⭐⭐⭐'
-  }
+  },
+  rateOptionsArray: [
+    '⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'
+  ],
+  shouldUpdateJobMessage: 'shouldUpdateJobMessage',
+  shouldUpdateFreelancerMessage: 'shouldUpdateFreelancerMessage',
+  shouldMakeInterested: 'shouldMakeInterested'
 };

@@ -125,11 +125,34 @@ function sendFreelanceMenu(bot, chatId) {
       let text = user.busy ? 
         strings.fullFreelancerMessageBusy :
         strings.fullFreelancerMessageAvailable;
+
       if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
         text = strings.emptyFreelancerMessage;
       } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
         text = strings.missingFreelancerMessage;
       }
+
+      if (user.bio || user.categories.length > 0 || user.hourly_rate) {
+        text = `${text}\n`;
+        if (user.hourly_rate) {
+          text = `${text}\n${user.hourly_rate}`
+        }
+        if (user.reviews.length > 0) {
+          text = `${text}\n${user.GetRateStars()} (${user.reviews.length})`;
+        }
+        if (user.bio) {
+          text = `${text}\n${user.bio}`
+        }
+        if (user.categories.length > 0) {
+          if (user.bio || user.hourly_rate) {
+            text = `${text}\n`;
+          }
+          user.categories.forEach(cat => {
+            text = `${text}[${cat.title}]`;
+          });
+        }
+      }
+
       sendKeyboard(
         bot,
         chatId,
