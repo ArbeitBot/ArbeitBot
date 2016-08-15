@@ -493,32 +493,34 @@ function updateJobMessageForSearch(job, bot) {
  * @param  {Telegram:Bot} bot Bot that should update message
  */
 function updateJobMessageForSelected(job, bot) {
-  const user = job.selectedCandidate;
-  const ratingMessage = user.reviews.length === 0 ? '' : ` ${user.GetRateStars()} (${user.reviews.length})`
-  const specialSymbol = user.specialSymbol ? user.specialSymbol + ' ' : '';
-  const userMessage = `{specialSymbol}@${user.username}${ratingMessage}\n${user.bio}`;
+  job.populate('selectedCandidate', (err, job) => {
+    const user = job.selectedCandidate;
+    const ratingMessage = user.reviews.length === 0 ? '' : ` ${user.GetRateStars()} (${user.reviews.length})`;
+    const specialSymbol = user.specialSymbol ? user.specialSymbol + ' ' : '';
+    const userMessage = `{specialSymbol}@${user.username}${ratingMessage}\n${user.bio}`;
 
-  let send = {
-    chat_id: job.current_inline_chat_id,
-    message_id: job.current_inline_message_id,
-    text: 
-      job.description + '\n\n' +
-      strings.waitContractorResponseMessage + '\n\n' +
-      userMessage,
-    reply_markup: {
-      inline_keyboard: [[{
-        text: strings.jobSelectAnotherFreelancer,
-        callback_data:
-          strings.selectAnotherFreelancerInline +
-          strings.inlineSeparator +
-          job._id
-      }]]
-    },
-    disable_web_page_preview: 'true'
-  };
-  send.reply_markup = JSON.stringify(send.reply_markup);
-  bot.editMessageText(send)
-    .catch(err => console.log(err.error.description));
+    let send = {
+      chat_id: job.current_inline_chat_id,
+      message_id: job.current_inline_message_id,
+      text:
+        job.description + '\n\n' +
+        strings.waitContractorResponseMessage + '\n\n' +
+        userMessage,
+      reply_markup: {
+        inline_keyboard: [[{
+          text: strings.jobSelectAnotherFreelancer,
+          callback_data:
+            strings.selectAnotherFreelancerInline +
+            strings.inlineSeparator +
+            job._id
+        }]]
+      },
+      disable_web_page_preview: 'true'
+    };
+    send.reply_markup = JSON.stringify(send.reply_markup);
+    bot.editMessageText(send)
+      .catch(err => console.log(err.error.description));
+  });
 }
 
 /**
