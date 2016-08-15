@@ -7,7 +7,7 @@ const config = require('../config');
 const fs = require('fs');
 const https = require('https');
 const path = require('path');
-const body = require("body/json")
+const body = require('body/json');
 
 const bot = new Telegram({
   token: config.telegram_api_key,

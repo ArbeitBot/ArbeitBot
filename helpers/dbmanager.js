@@ -16,6 +16,22 @@ const UserChatInline = mongoose.model('userChatInline');
 // User
 
 /**
+ * Makes no population. To save memory
+ */
+function getAllUsers() {
+  return new Promise(fullfill => {
+    User.find({})
+      .exec((err, users) => {
+        if (err) {
+          throw err;
+        } else {
+          fullfill(users);
+        }
+      });
+  });
+}
+
+/**
  * Getting a user with search querry from mongo db, populates 'categories', 'jobs' and 'job_draft'
  * @param  {Mongo:SearchQuery} query Search query to find user
  */
@@ -351,6 +367,7 @@ function findReportById(id, populate) {
 
 module.exports = {
   // User
+  getAllUsers,
   findUser,
   findUserById,
   addUser,
