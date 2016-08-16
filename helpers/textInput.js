@@ -43,9 +43,7 @@ function handle(msg, user, bot) {
     user.input_state = undefined;
     user.save()
       .then(user => {
-        bot.sendMessage({
-          chat_id: msg.chat.id,
-          text: strings.changedBioMessage+user.bio,
+        bot.sendMessage(msg.chat.id, strings.changedBioMessage+user.bio, {
           reply_markup: JSON.stringify({
             keyboard: keyboards.freelancerKeyboard(user),
             resize_keyboard: true 
@@ -107,9 +105,7 @@ function askForBio(msg, bot) {
           let message = user.bio ?
             strings.editBioMessage+'\n\n'+strings.yourCurrentBio+'\n\n'+user.bio :
             strings.editBioMessage;
-          bot.sendMessage({
-            chat_id: msg.chat.id,
-            text: message,
+          bot.sendMessage(msg.chat.id, message, {
             reply_markup: JSON.stringify({
               hide_keyboard: true
             }),
@@ -206,9 +202,7 @@ function askForNewJobDescription(msg, bot, user) {
     if (err) {
       // todo: handle error
     } else {
-      bot.sendMessage({
-        chat_id: msg.chat.id,
-        text: strings.addJobDescriptionMessage,
+      bot.sendMessage(msg.chat.id, strings.addJobDescriptionMessage, {
         reply_markup: JSON.stringify({
           hide_keyboard: true
         }),
@@ -360,9 +354,7 @@ function completeReport(reportMessage, msg, user, bot) {
           client.reportedBy.push(user._id);
           client.save();
         });
-      bot.sendMessage({
-        chat_id: msg.from.id,
-        text: strings.report.thanks,
+      bot.sendMessage(msg.from.id, strings.report.thanks, {
         disable_web_page_preview: 'true'
       });
     });

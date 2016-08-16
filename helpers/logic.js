@@ -50,7 +50,7 @@ bot.on('message', msg => {
  * Fired when user clicks button on inlline keyboard
  * @param {Telegram:Message} msg Message that gets passed from user and info about button clicked
  */
-bot.on('inline.callback.query', msg => {
+bot.on('callback_query', msg => {
   if (!msg.from.username) {
     sendAskForUsername(msg);
     return;
@@ -176,17 +176,13 @@ function sendHelp(chatId) {
 }
 
 function sendAskForUsername(msg) {
-  bot.sendMessage({
-    chat_id: msg.from.id,
-    text: strings.askForUsername
-  })
+  bot.sendMessage(msg.from.id, strings.askForUsername);
 }
+
 function sendBanMessage(msg) {
-  bot.sendMessage({
-    chat_id: msg.from.id,
-    text: strings.banMessage
-  })
+  bot.sendMessage(msg.from.id, strings.banMessage);
 }
+
 // Helpers
 
 /**

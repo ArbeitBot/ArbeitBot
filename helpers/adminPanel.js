@@ -33,13 +33,10 @@ function handleGodVoiceCommand(msg, bot) {
   let message = /^\/godvoice@?[^ ]* +(.*)$/.exec(msg.text)[1];
   dbmanager.getAllUsers()
     .then(users => {
-      users.forEach(user =>
-        bot.sendMessage({
-          chat_id: user.id,
-          text: message
-        })
-          .catch(err => console.log(err.description))
-      )
+      users.forEach(user => {
+        bot.sendMessage(user.id, message)
+          .catch(err => console.log(err.description));
+      });
     })
 }
 
@@ -65,10 +62,7 @@ function handleUnbanCommand(msg, bot) {
 }
 
 function sendConfirmed(msg, bot) {
-  bot.sendMessage({
-    chat_id: msg.chat.id,
-    text: 'confirmed.'
-  })
+  bot.sendMessage(msg.chat.id, 'confirmed.');
 }
 
 module.exports = {

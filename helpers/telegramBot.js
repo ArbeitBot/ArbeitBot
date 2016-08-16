@@ -2,18 +2,15 @@
  * Used to initialize Telegam bot
  */
 
-const Telegram = require('telegram-bot-api');
+const Telegram = require('node-telegram-bot-api');
 const config = require('../config');
 const fs = require('fs');
 const https = require('https');
 const path = require('path');
 const body = require('body/json');
 
-const bot = new Telegram({
-  token: config.telegram_api_key,
-  updates: {
-    enabled: !config.should_use_webhooks
-  }
+const bot = new Telegram(config.telegram_api_key, { 
+  polling: !config.should_use_webhooks 
 });
 
 function handleBotMessage(item) {
@@ -67,12 +64,12 @@ if (config.should_use_webhooks) {
     console.log('Server for Telegram web hooks listening on: 8443');
   });
   const pathToCertificate = path.join(config.ssl_certificate_path);
-  bot.setWebhook({
+  bot.setWebHook({
     url: `${config.webhook_callback_url}${config.webhook_token}`, 
     certificate: pathToCertificate
   }).then(data => console.log('Telegram webhook is active'))
 } else {
-  bot.setWebhook({
+  bot.setWebHook({
     url: ''
   })
   console.log('Telegram is using updates instead of webhooks')

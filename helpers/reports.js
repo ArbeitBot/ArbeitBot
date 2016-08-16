@@ -149,9 +149,7 @@ function sendReportAlert(bot, report) {
     .then(message => {
       admins.forEach(admin => {
         let keyboard = adminKeyboard(admin, report._id);
-        bot.sendMessage({
-          chat_id: admin,
-          text: message,
+        bot.sendMessage(admin, message, {
           reply_markup: JSON.stringify({
             inline_keyboard: keyboard
           })
@@ -192,11 +190,9 @@ function formReportMessage(report) {
 }
 
 function sendResponseToUser(bot, msg) {
-  bot.sendMessage({
-    chat_id: msg.from.id,
-    text: strings.reportThankYouMessage,
+  bot.sendMessage(msg.from.id, strings.reportThankYouMessage, {
     disable_web_page_preview: 'true'
-  })
+  });
 }
 
 /**

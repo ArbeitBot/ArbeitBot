@@ -100,12 +100,12 @@ function writeReview(bot, jobId, rating, reviewType) {
                 toUser.rate += parseInt(rating);
                 toUser.save()
                   .then(toUser => {
-                    let message = {
-                      chat_id: toUser.id,
-                      text: `${strings.youWereRated}\n${ratingEmoji}`,
+                    let options = {
                       disable_web_page_preview: 'true'
                     };
-                    bot.sendMessage(message)
+                    bot.sendMessage(toUser.id,
+                      `${strings.youWereRated}\n${ratingEmoji}`,
+                      options)
                       .catch(err => console.log(err.error.description));
                   });
               });

@@ -183,19 +183,17 @@ function sendHelp(bot, chatId) {
  * @param  {Function} then     Function that should be executed when message is delivered
  */
 function sendKeyboard(bot, chatId, text, keyboard, then) {
-  let message = {
-    chat_id: chatId,
-    text: text,
+  let options = {
     reply_markup: {
       keyboard: keyboard,
       resize_keyboard: true
     },
     disable_web_page_preview: 'true'
   };
-  message.reply_markup = JSON.stringify(message.reply_markup);
-  bot.sendMessage(message)
-  .then(then)
-  .catch(err => console.log(err));
+  options.reply_markup = JSON.stringify(options.reply_markup);
+  bot.sendMessage(chatId, text, options)
+    .then(then)
+    .catch(err => console.log(err));
 }
 
 /**
@@ -206,16 +204,14 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
  * @param  {Telegram:Inline} keyboard Inline keyboard to send
  */
 function sendInline(bot, chatId, text, keyboard, then) {
-  let message = {
-    chat_id: chatId,
-    text: text,
+  let options = {
     reply_markup: {
       inline_keyboard: keyboard
     },
     disable_web_page_preview: 'true'
   };
-  message.reply_markup = JSON.stringify(message.reply_markup);
-  bot.sendMessage(message)
+  options.reply_markup = JSON.stringify(options.reply_markup);
+  bot.sendMessage(chatId, text, options)
     .then(then)
     .catch(err => console.log(err));
 }
@@ -228,16 +224,15 @@ function sendInline(bot, chatId, text, keyboard, then) {
  * @param  {Telegram:InlineKeyboard} keyboard  Inline keyboard to appear in message
  */
 function editInline(bot, chatId, messageId, keyboard) {
-  let send = {
+  const inlineMarkup = JSON.stringify({
+    inline_keyboard: keyboard
+  });
+  let options = {
     chat_id: chatId,
     message_id: messageId,
-    reply_markup: {
-      inline_keyboard: keyboard
-    },
     disable_web_page_preview: 'true'
   };
-  send.reply_markup = JSON.stringify(send.reply_markup);
-  bot.editMessageReplyMarkup(send)
+  bot.editMessageReplyMarkup(inlineMarkup, options)
     .catch(err => console.log(err));
 }
 
@@ -250,13 +245,12 @@ function editInline(bot, chatId, messageId, keyboard) {
  * @param  {Telegram:InlineKeyboard} keyboard  Inline keyboard to appear in message
  */
 function editMessage(bot, chatId, messageId, text, keyboard) {
-  bot.editMessageText({
+  bot.editMessageText(text, {
     chat_id: chatId,
     message_id: messageId,
     reply_markup: JSON.stringify({
       inline_keyboard: keyboard
     }),
-    text: text,
     disable_web_page_preview: 'true'
   }).catch(err => console.log(err.error.description));
 }
