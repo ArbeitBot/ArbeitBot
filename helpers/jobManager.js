@@ -444,7 +444,7 @@ function updateJobMessage(job, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function deprecateJobMessage(job, bot) {
-  keybords.editMessage(
+  keyboards.editMessage(
     bot,
     job.current_inline_chat_id,
     job.current_inline_message_id,
