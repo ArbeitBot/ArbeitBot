@@ -14,11 +14,11 @@ if (config.should_use_webhooks) {
   bot = new Telegram(config.telegram_api_key, { 
       webHook: {
         port: 8443,
-        key: config.ssl_key_path,
-        cert: config.ssl_certificate_path
+        key: path.join(config.ssl_key_path),
+        cert: path.join(config.ssl_certificate_path)
       }
   });
-  bot.setWebHook(`${config.webhook_callback_url}${config.webhook_token}`, config.ssl_certificate_path)
+  bot.setWebHook(`${config.webhook_callback_url}${config.webhook_token}`, path.join(config.ssl_certificate_path))
     .then(data => console.log('Telegram webhook is active'))
 } else {
   bot = new Telegram(config.telegram_api_key, { 
