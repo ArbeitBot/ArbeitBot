@@ -10,7 +10,7 @@ const body = require('body/json');
 
 let bot;
 
-if (config.should_use_webhooks) {
+if (!!config.should_use_webhooks) {
   const options = { 
       webHook: {
         port: 8443,
