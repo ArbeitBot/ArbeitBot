@@ -11,13 +11,15 @@ const body = require('body/json');
 let bot;
 
 if (config.should_use_webhooks) {
-  bot = new Telegram(config.telegram_api_key, { 
+  const options = { 
       webHook: {
         port: 443,
         key: path.join(config.ssl_key_path),
         cert: path.join(config.ssl_certificate_path)
       }
-  });
+  };
+  console.log(options);
+  bot = new Telegram(config.telegram_api_key, options);
   console.log(`${config.webhook_callback_url}${config.webhook_token}`);
   console.log(path.join(config.ssl_key_path));
   console.log(path.join(config.ssl_certificate_path));
