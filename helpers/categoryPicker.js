@@ -22,18 +22,18 @@ eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
     editPage(bot, msg, page+1);
   } else {
     dbmanager.toggleCategoryForUser(msg.message.chat.id, command)
-    .then(({ user, isAdded }) => {
-      if (isAdded) {
-        if (user.bio && user.hourly_rate && user.categories.length === 1) {
-          keyboards.sendKeyboard(
-            bot,
-            user.id, 
-            strings.filledEverythingMessage, 
-            keyboards.freelancerKeyboard(user));
+      .then(({ user, isAdded }) => {
+        if (isAdded) {
+          if (user.bio && user.hourly_rate && user.categories.length === 1) {
+            keyboards.sendKeyboard(
+              bot,
+              user.id, 
+              strings.filledEverythingMessage, 
+              keyboards.freelancerKeyboard(user));
+          }
         }
-      }
-      editPage(bot, msg, page);
-    });
+        editPage(bot, msg, page);
+      });
   }
 });
 
@@ -110,13 +110,14 @@ function categoriesKeyboard(categories, user, page) {
     }
   }
   let allCategories = user.categories.concat(categoriesLeft);
+  console.log(allCategories.length);
   allCategories = allCategories.slice(page*pageSize,page*pageSize+pageSize);
 
   let keyboard = [];
   let tempRow = [];
   for (let i in allCategories) {
     const isOdd = i % 2 === 1;
-    const isLast = i === allCategories.length - 1;
+    const isLast = i == allCategories.length - 1;
     const currentCategory = allCategories[i];
 
     const text = user.categories.indexOf(currentCategory) > -1 ?
