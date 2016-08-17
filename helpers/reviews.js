@@ -106,7 +106,7 @@ function writeReview(bot, jobId, rating, reviewType) {
                     bot.sendMessage(toUser.id,
                       `${strings.youWereRated}\n${ratingEmoji}`,
                       options)
-                      .catch(err => console.log(err.error.description));
+                      .catch(err => console.error(err.message));
                   });
               });
 

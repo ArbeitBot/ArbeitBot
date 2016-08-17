@@ -51,7 +51,7 @@ function sendAllJobs(bot, msg) {
     .then(user => {
       if (user.jobs.length <= 0) {
         keyboards.sendInline(bot, user.id, strings.noJobsExistMessage, [])
-          .catch(err => console.log(err.error.description));
+          .catch(err => console.error(err.message));
       } else {
         sendJobMessages(user, bot);
       }
@@ -98,7 +98,7 @@ eventEmitter.on(strings.jobManageInline, ({ msg, bot }) => {
   let jobId = options[2];
 
   if (answer === strings.jobRefresh) {
-    dbmanager.findJobById(jobId, 'interestedCandidates')
+    dbmanager.findJobById(jobId)
       .then(job => {
         updateJobMessage(job, bot);
       });
@@ -107,7 +107,6 @@ eventEmitter.on(strings.jobManageInline, ({ msg, bot }) => {
   } else if (answer === strings.jobDelete) {
     dbmanager.findJobById(jobId, 'interestedCandidates')
       .then(job => {
-        //job.remove();
         job.state = strings.jobStates.removed;
         job.save()
           .then(job => {
@@ -312,7 +311,7 @@ function sendJobMessages(user, bot) {
   });
   if (tCount === 0) {
     keyboards.sendInline(bot, user.id, strings.noJobsExistMessage, [])
-      .catch(err => console.log(err.error.description));
+      .catch(err => console.error(err.message));
   }
 }
 

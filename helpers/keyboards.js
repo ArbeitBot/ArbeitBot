@@ -193,7 +193,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
   options.reply_markup = JSON.stringify(options.reply_markup);
   bot.sendMessage(chatId, text, options)
     .then(then)
-    .catch(err => console.log(err));
+    .catch(err => console.error(err.message));
 }
 
 /**
@@ -213,7 +213,7 @@ function sendInline(bot, chatId, text, keyboard, then) {
   options.reply_markup = JSON.stringify(options.reply_markup);
   bot.sendMessage(chatId, text, options)
     .then(then)
-    .catch(err => console.log(err));
+    .catch(err => console.error(err.message));
 }
 
 /**
@@ -233,7 +233,7 @@ function editInline(bot, chatId, messageId, keyboard) {
     disable_web_page_preview: 'true'
   };
   bot.editMessageReplyMarkup(inlineMarkup, options)
-    .catch(err => console.log(err));
+    .catch(err => console.error(err.message));
 }
 
 /**
@@ -252,7 +252,7 @@ function editMessage(bot, chatId, messageId, text, keyboard) {
       inline_keyboard: keyboard
     }),
     disable_web_page_preview: 'true'
-  }).catch(err => console.log(err.error.description));
+  }).catch(err => console.error(err.message));
 }
 
 // Exports

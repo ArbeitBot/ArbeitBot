@@ -59,7 +59,7 @@ function handle(msg, user, bot) {
                 keyboards.freelancerKeyboard(user));
             }
           })
-          .catch(err => console.log(err));
+          .catch(err => console.error(err.message));
       });
   } else if (user.input_state == strings.inputCategoryNameState) {
     if (msg.text == strings.jobCreateCancel) {
@@ -110,7 +110,7 @@ function askForBio(msg, bot) {
               hide_keyboard: true
             }),
             disable_web_page_preview: 'true'
-          }).catch(err => console.log(err.error.description));
+          }).catch(err => console.error(err.message));
         });
     });
 }
@@ -210,7 +210,7 @@ function askForNewJobDescription(msg, bot, user) {
       })
       .catch(function(err)
       {
-        console.log(err);
+        console.error(err.message);
       });
     }
   });

@@ -116,7 +116,7 @@ eventEmitter.on(strings.adminBanInline, ({ msg, bot }) => {
           []);
       })
     })
-    .catch(err => console.log(err))
+    .catch(err => console.error(err.message))
 
 });
 
