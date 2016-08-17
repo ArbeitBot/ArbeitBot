@@ -12,6 +12,23 @@ let Job = mongoose.model('job');
 let Report = mongoose.model('report');
 
 /**
+ * Handles inline when job creation needs to be cancelled
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.cancelJobCreationInline, ({ msg, bot }) => {
+  // Get essential info
+  let options = msg.data.split(strings.inlineSeparator);
+  let userId = options[1];
+
+  dbmanager.findUser({ id: userId })
+    .then(user => {
+      keyboards.editInline(bot, msg.message.chat.id, msg.message.message_id, []);
+      cancelJobCreation(msg.message, user, bot);
+    });
+});
+
+/**
  * Checks if state of user that sent message is one of input ones 
  * @param  {Telegram:Messahe}   msg      Message received
  * @param  {Function} callback Callback(input_state, user) that is called when check is done
@@ -200,7 +217,9 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
           bot,
           msg.chat.id,
           strings.selectJobHourlyRateMessage,
-          keyboard);
+          keyboard,
+          null,
+          true);
     });
 }
 
@@ -212,13 +231,19 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
  */
 function askForNewJobDescription(msg, bot, user) {
   user.input_state = strings.inputJobDescriptionState;
-  user.save((err, user) => {
-    if (err) {
-      // todo: handle error
-    } else {
+  user.save()
+    .then(user => {
       bot.sendMessage(msg.chat.id, strings.addJobDescriptionMessage, {
         reply_markup: JSON.stringify({
-          hide_keyboard: true
+          hide_keyboard: true,
+          inline_keyboard: [
+            [{
+              text: strings.jobCreateCancel,
+              callback_data: strings.cancelJobCreationInline + 
+                strings.inlineSeparator + 
+                user.id
+            }]
+          ]
         }),
         disable_web_page_preview: 'true'
       })
@@ -226,8 +251,7 @@ function askForNewJobDescription(msg, bot, user) {
       {
         console.error(err.message);
       });
-    }
-  });
+    });
 }
 
 /**
@@ -239,17 +263,14 @@ function askForNewJobDescription(msg, bot, user) {
 function cancelJobCreation(msg, user, bot) {
   user.input_state = undefined;
   user.job_draft = undefined;
-  user.save((err, user) => {
-    if (err) {
-      // todo: handle error
-    } else {
+  user.save()
+    .then(user => {
       keyboards.sendKeyboard(
         bot,
         msg.chat.id, 
         strings.clientMenuMessage, 
         keyboards.clientKeyboard);
-    }
-  });
+    });
 }
 
 /**
