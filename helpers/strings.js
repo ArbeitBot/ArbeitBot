@@ -98,6 +98,7 @@ module.exports = {
   reportFreelancerInline: 'rpFI',
   reportClientInline: 'rpCI',
   cancelJobCreationInline: 'cJCI',
+  cancelBioEnterInline: 'cBEI',
   inputBioState: 'inputBioState',
   inputCategoryNameState: 'inputCategoryNameState',
   inputHourlyRateState: 'inputHourlyRateState',

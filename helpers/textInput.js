@@ -288,8 +288,7 @@ function startJobDraft(categoryTitle, msg, user, bot) {
         category: category,
         client: user,
         // todo: we shouldn't add user to list of not interested candidates initially, this hack should be addressed in future
-        // debug: uncomment this line to production
-        // notInterestedCandidates: [user]
+        notInterestedCandidates: [user]
       });
       draft.save()
         .then(draft => {
