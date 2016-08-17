@@ -251,7 +251,10 @@ function startJobDraft(categoryTitle, msg, user, bot) {
       if (!category) return;
       let draft = new Job({
         category: category,
-        client: user
+        client: user,
+        // todo: we shouldn't add user to list of not interested candidates initially, this hack should be addressed in future
+        // debug: uncomment this line to production
+        // notInterestedCandidates: [user]
       });
       draft.save()
         .then(draft => {
