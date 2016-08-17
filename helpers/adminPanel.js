@@ -30,12 +30,18 @@ function isGodVoiceCommand(messageText) {
 }
 
 function handleGodVoiceCommand(msg, bot) {
-  let message = /^\/godvoice@?[^ ]* +(.*)$/.exec(msg.text)[1];
+  // todo: change to regex
+  // let message = /^\/godvoice@?[^ ]* +(.*)$/.exec(msg.text)[1];
+  let message = msg.text.split('/godvoice@arbeit_bot ')[1];
+  if (!message || message.length <= 0) {
+    return;
+  }
   dbmanager.getAllUsers()
     .then(users => {
       users.forEach(user => {
-        bot.sendMessage(user.id, message)
-          .catch(err => console.log(err.description));
+        bot.sendMessage(user.id, message, {
+          disable_web_page_preview: 'true'
+        }).catch(err => console.log(err.message));
       });
     })
 }
