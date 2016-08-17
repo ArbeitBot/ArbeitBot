@@ -66,17 +66,33 @@ function handle(msg, user, bot) {
       cancelJobCreation(msg, user, bot);
     } else if (msg.text.indexOf(' [') > -1) {
       let categoryTitle = msg.text.split(' [')[0];
-      startJobDraft(categoryTitle, msg, user, bot);
+      dbmanager.findUser({ id: msg.chat.id })
+        .then(user => {
+            dbmanager.getCategories()
+              .then(categories => {
+                let filteredCategories = categories
+                  .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
+                for (let i = 0; i < filteredCategories.length; i++) {
+                  const cat = filteredCategories[i];
+                  if (cat.title === categoryTitle) {
+                    startJobDraft(categoryTitle, msg, user, bot);
+                    break;
+                  }
+                }
+              });
+        });
     } else {
       console.log(msg);
     }
-    
   } else if (user.input_state == strings.inputHourlyRateState) {
     if (msg.text == strings.jobCreateCancel) {
       cancelJobCreation(msg, user, bot);
     } else if (msg.text.indexOf(' [') > -1) {
-      let hourlyRate = msg.text.split(' [')[0];
-      addHourlyRateToJobDraft(hourlyRate, msg, user, bot);
+      const hourlyRate = msg.text.split(' [')[0];
+      const options = strings.hourlyRateOptions;
+      if (options.includes(hourlyRate)) {
+        addHourlyRateToJobDraft(hourlyRate, msg, user, bot);
+      }
     } else {
       console.log(msg);
     }
@@ -122,30 +138,27 @@ function askForBio(msg, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function askForNewJobCategory(msg, bot) {
-  function saveUserCallback(user) {
-    dbmanager.getCategories()
-      .then(categories => {
-        let categoryButtons = categories
-        .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
-        .map(category => {
-          return [{
-            text: category.title + ' [' + (category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0)) + ']'
-          }];
-        });
-        categoryButtons.unshift([{text:strings.jobCreateCancel}]);
-        keyboards.sendKeyboard(
-          bot,
-          msg.chat.id,
-          strings.selectCategoryMessage,
-          categoryButtons);
-      });
-  }
   dbmanager.findUser({ id: msg.chat.id })
     .then(user => {
       user.input_state = strings.inputCategoryNameState;
       user.save()
         .then(user => {
-            saveUserCallback(user);
+            dbmanager.getCategories()
+              .then(categories => {
+                let categoryButtons = categories
+                .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
+                .map(category => {
+                  return [{
+                    text: category.title + ' [' + (category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0)) + ']'
+                  }];
+                });
+                categoryButtons.unshift([{text:strings.jobCreateCancel}]);
+                keyboards.sendKeyboard(
+                  bot,
+                  msg.chat.id,
+                  strings.selectCategoryMessage,
+                  categoryButtons);
+              });
         });
     });
 }
@@ -161,33 +174,34 @@ function askForNewJobCategory(msg, bot) {
  */
 function askForNewJobPriceRange(msg, user, bot, job, category) {
   user.input_state = strings.inputHourlyRateState;
-  user.save((err, user) => {
-    var keyboard = [];
-    let options = strings.hourlyRateOptions;
-    for (var i in options) {
-      let option = options[i];
+  user.save()
+    .then(user => {
+      var keyboard = [];
+      let options = strings.hourlyRateOptions;
+      for (var i in options) {
+        let option = options[i];
 
-      var count = 0;
-      for (var j in category.freelancers) {
-        let freelancer = category.freelancers[j];
-        if (freelancer.hourly_rate === option && String(freelancer._id) !== String(user._id)) {
-          count += 1;
+        var count = 0;
+        for (var j in category.freelancers) {
+          let freelancer = category.freelancers[j];
+          if (freelancer.hourly_rate === option && String(freelancer._id) !== String(user._id)) {
+            count += 1;
+          }
+        }
+
+        if (count > 0) {
+          keyboard.push([{
+            text: option + ' [' + count + ']'
+          }])
         }
       }
-
-      if (count > 0) {
-        keyboard.push([{
-          text: option + ' [' + count + ']'
-        }])
-      }
-    }
-    keyboard.unshift([{text:strings.jobCreateCancel}]);
-    keyboards.sendKeyboard(
-        bot,
-        msg.chat.id,
-        strings.selectJobHourlyRateMessage,
-        keyboard);
-  });
+      keyboard.unshift([{text:strings.jobCreateCancel}]);
+      keyboards.sendKeyboard(
+          bot,
+          msg.chat.id,
+          strings.selectJobHourlyRateMessage,
+          keyboard);
+    });
 }
 
 /**

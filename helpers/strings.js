@@ -46,7 +46,7 @@ module.exports = {
   thanksReviewMessage: 'Thank you a lot for the review!',
   youWereRated: 'You have received new rating from ',
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
-  noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
+  noCandidatesMessage: 'There are no available candidates right now 😥 Please check back later or create a new job.',
   thisWorkIsRemoved: 'This job has been deleted ✌️',
   mainMenuOptions: {
     findJobs: '👤 Profile',
