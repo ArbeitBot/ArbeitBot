@@ -49,21 +49,27 @@ eventEmitter.on(strings.rateClientInline, ({ msg, bot }) => {
 function sendRateKeyboard(msg, bot, type) {
   const jobId = msg.data.split(strings.inlineSeparator)[1];
 
-  dbmanager.findJobById(jobId)
+  dbmanager.findJobById(jobId, 'selectedCandidate')
     .then(job => {
-      let keyboard = keyboards.rateKeyboard(type, job._id);
-      let send = {
-        chat_id: msg.message.chat.id,
-        message_id: msg.message.message_id,
-        text: strings.rateClientMessage,
-        reply_markup: {
-          inline_keyboard: keyboard
-        },
-        disable_web_page_preview: 'true'
-      };
-      send.reply_markup = JSON.stringify(send.reply_markup);
-      bot.editMessageText(send)
-        .catch(err => console.log(err.error.description));
+      const user = job.selectedCandidate;
+      const ratingMessage = user.reviews.length === 0 ? '' : ` ${user.GetRateStars()} (${user.reviews.length})`
+      const specialSymbol = user.specialSymbol ? user.specialSymbol + ' ' : '';
+
+      const rateClient = type !== strings.rateFreelancerInline;
+      let message = rateClient ? strings.rateFreelancerMessage : strings.rateClientMessage;
+
+      if (rateClient) {
+        message = `${message}\n\n${specialSymbol}@${user.username}${ratingMessage}\n${user.bio}`;
+      } else {
+        message = `${message}\n\n${specialSymbol}@${user.username}${ratingMessage}\n[${job.category.title}]\n${job.description}`;
+      }
+
+      keyboards.editMessage(
+        bot,
+        msg.message.chat.id,
+        msg.message.message_id,
+        message,
+        keyboards.rateKeyboard(type, job._id));
     });
 }
 
@@ -77,7 +83,7 @@ function sendRateKeyboard(msg, bot, type) {
  * @param  {String} reviewType Type of review (client-freelancer or freelancer-client)
  */
 function writeReview(bot, jobId, rating, reviewType) {
-  dbmanager.findJobById(jobId, 'client freelancer_chat_inlines')
+  dbmanager.findJobById(jobId, 'client freelancer_chat_inlines selectedCandidate')
     .then(job => {
       dbmanager.findUserById(job.selectedCandidate)
         .then(freelancer => {
@@ -107,13 +113,13 @@ function writeReview(bot, jobId, rating, reviewType) {
                 toUser.rate += parseInt(rating);
                 toUser.save()
                   .then(toUser => {
-                    let message = {
-                      chat_id: toUser.id,
-                      text: `${strings.youWereRated}\n${ratingEmoji}`,
+                    let options = {
                       disable_web_page_preview: 'true'
                     };
-                    bot.sendMessage(message)
-                      .catch(err => console.log(err.error.description));
+                    bot.sendMessage(toUser.id,
+                      `${strings.youWereRated}@${byUser.username}\n${ratingEmoji}`,
+                      options)
+                      .catch(err => console.error(err.message));
                   });
               });
 
@@ -132,18 +138,23 @@ function writeReview(bot, jobId, rating, reviewType) {
               byUser.writeReview.push(dbReviewObject._id);
               byUser.save()
                 .then(byUser => {
-                  let send = {
-                    chat_id: chat_id,
-                    message_id: message_id,
-                    text: `${job.description}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`,
-                    reply_markup: {
-                      inline_keyboard: []
-                    },
-                    disable_web_page_preview: 'true'
-                  };
-                  send.reply_markup = JSON.stringify(send.reply_markup);
-                  bot.editMessageText(send)
-                    .catch(err => console.log(err.error.description));
+                  let message;
+
+                  if (byClient) {
+                    const freelancer = job.selectedCandidate;
+                    const ratingMessage = freelancer.reviews.length === 0 ? '' : ` ${freelancer.GetRateStars()} (${freelancer.reviews.length})`
+                    const specialSymbol = freelancer.specialSymbol ? freelancer.specialSymbol + ' ' : '';
+                    message = `[${job.category.title}]\n${job.description}\n\n${specialSymbol}@${freelancer.username}${ratingMessage}\n${freelancer.bio}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`;
+                  } else {
+                    message = `@${toUser.username}\n[${job.category.title}]\n${job.description}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`;
+                  }
+
+                  keyboards.editMessage(
+                    bot,
+                    chat_id,
+                    message_id,
+                    message,
+                    []);
                 });
             });
         });

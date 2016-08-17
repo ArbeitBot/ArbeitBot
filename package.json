@@ -10,7 +10,7 @@
     "body": "^5.1.0",
     "chai": "^3.5.0",
     "mongoose": "^4.5.3",
-    "telegram-bot-api": "^1.1.0"
+    "node-telegram-bot-api": "^0.23.3"
   },
   "devDependencies": {
     "flightplan": "^0.6.14",

@@ -12,6 +12,23 @@ let Job = mongoose.model('job');
 let Report = mongoose.model('report');
 
 /**
+ * Handles inline when job creation needs to be cancelled
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.cancelJobCreationInline, ({ msg, bot }) => {
+  // Get essential info
+  let options = msg.data.split(strings.inlineSeparator);
+  let userId = options[1];
+
+  dbmanager.findUser({ id: userId })
+    .then(user => {
+      keyboards.editInline(bot, msg.message.chat.id, msg.message.message_id, []);
+      cancelJobCreation(msg.message, user, bot);
+    });
+});
+
+/**
  * Checks if state of user that sent message is one of input ones 
  * @param  {Telegram:Messahe}   msg      Message received
  * @param  {Function} callback Callback(input_state, user) that is called when check is done
@@ -43,9 +60,7 @@ function handle(msg, user, bot) {
     user.input_state = undefined;
     user.save()
       .then(user => {
-        bot.sendMessage({
-          chat_id: msg.chat.id,
-          text: strings.changedBioMessage+user.bio,
+        bot.sendMessage(msg.chat.id, strings.changedBioMessage+user.bio, {
           reply_markup: JSON.stringify({
             keyboard: keyboards.freelancerKeyboard(user),
             resize_keyboard: true 
@@ -61,24 +76,40 @@ function handle(msg, user, bot) {
                 keyboards.freelancerKeyboard(user));
             }
           })
-          .catch(err => console.log(err));
+          .catch(err => console.error(err.message));
       });
   } else if (user.input_state == strings.inputCategoryNameState) {
     if (msg.text == strings.jobCreateCancel) {
       cancelJobCreation(msg, user, bot);
     } else if (msg.text.indexOf(' [') > -1) {
       let categoryTitle = msg.text.split(' [')[0];
-      startJobDraft(categoryTitle, msg, user, bot);
+      dbmanager.findUser({ id: msg.chat.id })
+        .then(user => {
+            dbmanager.getCategories()
+              .then(categories => {
+                let filteredCategories = categories
+                  .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
+                for (let i = 0; i < filteredCategories.length; i++) {
+                  const cat = filteredCategories[i];
+                  if (cat.title === categoryTitle) {
+                    startJobDraft(categoryTitle, msg, user, bot);
+                    break;
+                  }
+                }
+              });
+        });
     } else {
       console.log(msg);
     }
-    
   } else if (user.input_state == strings.inputHourlyRateState) {
     if (msg.text == strings.jobCreateCancel) {
       cancelJobCreation(msg, user, bot);
     } else if (msg.text.indexOf(' [') > -1) {
-      let hourlyRate = msg.text.split(' [')[0];
-      addHourlyRateToJobDraft(hourlyRate, msg, user, bot);
+      const hourlyRate = msg.text.split(' [')[0];
+      const options = strings.hourlyRateOptions;
+      if (options.includes(hourlyRate)) {
+        addHourlyRateToJobDraft(hourlyRate, msg, user, bot);
+      }
     } else {
       console.log(msg);
     }
@@ -107,14 +138,12 @@ function askForBio(msg, bot) {
           let message = user.bio ?
             strings.editBioMessage+'\n\n'+strings.yourCurrentBio+'\n\n'+user.bio :
             strings.editBioMessage;
-          bot.sendMessage({
-            chat_id: msg.chat.id,
-            text: message,
+          bot.sendMessage(msg.chat.id, message, {
             reply_markup: JSON.stringify({
               hide_keyboard: true
             }),
             disable_web_page_preview: 'true'
-          }).catch(err => console.log(err.error.description));
+          }).catch(err => console.error(err.message));
         });
     });
 }
@@ -126,30 +155,27 @@ function askForBio(msg, bot) {
  * @param  {Telegram:Bot} bot Bot that should respond
  */
 function askForNewJobCategory(msg, bot) {
-  function saveUserCallback(user) {
-    dbmanager.getCategories()
-      .then(categories => {
-        let categoryButtons = categories
-        .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
-        .map(category => {
-          return [{
-            text: category.title + ' [' + (category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0)) + ']'
-          }];
-        });
-        categoryButtons.unshift([{text:strings.jobCreateCancel}]);
-        keyboards.sendKeyboard(
-          bot,
-          msg.chat.id,
-          strings.selectCategoryMessage,
-          categoryButtons);
-      });
-  }
   dbmanager.findUser({ id: msg.chat.id })
     .then(user => {
       user.input_state = strings.inputCategoryNameState;
       user.save()
         .then(user => {
-            saveUserCallback(user);
+            dbmanager.getCategories()
+              .then(categories => {
+                let categoryButtons = categories
+                .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
+                .map(category => {
+                  return [{
+                    text: category.title + ' [' + (category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0)) + ']'
+                  }];
+                });
+                categoryButtons.unshift([{text:strings.jobCreateCancel}]);
+                keyboards.sendKeyboard(
+                  bot,
+                  msg.chat.id,
+                  strings.selectCategoryMessage,
+                  categoryButtons);
+              });
         });
     });
 }
@@ -165,33 +191,36 @@ function askForNewJobCategory(msg, bot) {
  */
 function askForNewJobPriceRange(msg, user, bot, job, category) {
   user.input_state = strings.inputHourlyRateState;
-  user.save((err, user) => {
-    var keyboard = [];
-    let options = strings.hourlyRateOptions;
-    for (var i in options) {
-      let option = options[i];
+  user.save()
+    .then(user => {
+      var keyboard = [];
+      let options = strings.hourlyRateOptions;
+      for (var i in options) {
+        let option = options[i];
 
-      var count = 0;
-      for (var j in category.freelancers) {
-        let freelancer = category.freelancers[j];
-        if (freelancer.hourly_rate === option && String(freelancer._id) !== String(user._id)) {
-          count += 1;
+        var count = 0;
+        for (var j in category.freelancers) {
+          let freelancer = category.freelancers[j];
+          if (freelancer.hourly_rate === option && String(freelancer._id) !== String(user._id)) {
+            count += 1;
+          }
+        }
+
+        if (count > 0) {
+          keyboard.push([{
+            text: option + ' [' + count + ']'
+          }])
         }
       }
-
-      if (count > 0) {
-        keyboard.push([{
-          text: option + ' [' + count + ']'
-        }])
-      }
-    }
-    keyboard.unshift([{text:strings.jobCreateCancel}]);
-    keyboards.sendKeyboard(
-        bot,
-        msg.chat.id,
-        strings.selectJobHourlyRateMessage,
-        keyboard);
-  });
+      keyboard.unshift([{text:strings.jobCreateCancel}]);
+      keyboards.sendKeyboard(
+          bot,
+          msg.chat.id,
+          strings.selectJobHourlyRateMessage,
+          keyboard,
+          null,
+          true);
+    });
 }
 
 /**
@@ -202,24 +231,27 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
  */
 function askForNewJobDescription(msg, bot, user) {
   user.input_state = strings.inputJobDescriptionState;
-  user.save((err, user) => {
-    if (err) {
-      // todo: handle error
-    } else {
-      bot.sendMessage({
-        chat_id: msg.chat.id,
-        text: strings.addJobDescriptionMessage,
+  user.save()
+    .then(user => {
+      bot.sendMessage(msg.chat.id, strings.addJobDescriptionMessage, {
         reply_markup: JSON.stringify({
-          hide_keyboard: true
+          hide_keyboard: true,
+          inline_keyboard: [
+            [{
+              text: strings.jobCreateCancel,
+              callback_data: strings.cancelJobCreationInline + 
+                strings.inlineSeparator + 
+                user.id
+            }]
+          ]
         }),
         disable_web_page_preview: 'true'
       })
       .catch(function(err)
       {
-        console.log(err);
+        console.error(err.message);
       });
-    }
-  });
+    });
 }
 
 /**
@@ -231,17 +263,14 @@ function askForNewJobDescription(msg, bot, user) {
 function cancelJobCreation(msg, user, bot) {
   user.input_state = undefined;
   user.job_draft = undefined;
-  user.save((err, user) => {
-    if (err) {
-      // todo: handle error
-    } else {
+  user.save()
+    .then(user => {
       keyboards.sendKeyboard(
         bot,
         msg.chat.id, 
         strings.clientMenuMessage, 
         keyboards.clientKeyboard);
-    }
-  });
+    });
 }
 
 /**
@@ -257,7 +286,9 @@ function startJobDraft(categoryTitle, msg, user, bot) {
       if (!category) return;
       let draft = new Job({
         category: category,
-        client: user
+        client: user,
+        // todo: we shouldn't add user to list of not interested candidates initially, this hack should be addressed in future
+        notInterestedCandidates: [user]
       });
       draft.save()
         .then(draft => {
@@ -304,15 +335,15 @@ function addDescriptionToJobDraft(description, msg, user, bot) {
   user.job_draft = undefined;
   user.jobs.push(jobDraft);
   user.input_state = undefined;
-  jobDraft.save((err, draft) => {
-    if (err) {
-      // todo: handle error
-    } else {
-      user.save((err, user) => {
-        jobManager.sendJobCreatedMessage(user, bot, draft);
-      });
-    }
-  })
+  jobDraft.save()
+   .then(draft => {
+      user.save()
+        .then(user => {
+          draft.populate('category', (err, job) => {
+            jobManager.sendJobCreatedMessage(user, bot, job);
+          });
+        });
+  });
 }
 
 //
@@ -360,9 +391,7 @@ function completeReport(reportMessage, msg, user, bot) {
           client.reportedBy.push(user._id);
           client.save();
         });
-      bot.sendMessage({
-        chat_id: msg.from.id,
-        text: strings.report.thanks,
+      bot.sendMessage(msg.from.id, strings.report.thanks, {
         disable_web_page_preview: 'true'
       });
     });

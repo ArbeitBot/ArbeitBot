@@ -22,18 +22,18 @@ eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
     editPage(bot, msg, page+1);
   } else {
     dbmanager.toggleCategoryForUser(msg.message.chat.id, command)
-    .then(({ user, isAdded }) => {
-      if (isAdded) {
-        if (user.bio && user.hourly_rate && user.categories.length === 1) {
-          keyboards.sendKeyboard(
-            bot,
-            user.id, 
-            strings.filledEverythingMessage, 
-            keyboards.freelancerKeyboard(user));
+      .then(({ user, isAdded }) => {
+        if (isAdded) {
+          if (user.bio && user.hourly_rate && user.categories.length === 1) {
+            keyboards.sendKeyboard(
+              bot,
+              user.id, 
+              strings.filledEverythingMessage, 
+              keyboards.freelancerKeyboard(user));
+          }
         }
-      }
-      editPage(bot, msg, page);
-    });
+        editPage(bot, msg, page);
+      });
   }
 });
 
@@ -60,7 +60,6 @@ function sendCategories(bot, chatId) {
  */
 function getCategoriesCallback(categories, user, bot) {
   const keyboard = categoriesKeyboard(categories, user, 0);
-
   keyboards.sendInline(
     bot, 
     user.id,
@@ -75,25 +74,15 @@ function getCategoriesCallback(categories, user, bot) {
  * @param  {Number} page Page of the list of categories that should be displayed
  */
 function editPage(bot, msg, page) {
-  function getCategoriesCallback(categories, user) {
-    const send = {
-      chat_id: msg.message.chat.id,
-      message_id: msg.message.message_id,
-      reply_markup: {
-        inline_keyboard: categoriesKeyboard(categories, user, page)
-      },
-      disable_web_page_preview: 'true'
-    };
-    send.reply_markup = JSON.stringify(send.reply_markup);
-    bot.editMessageReplyMarkup(send)
-      .catch(err => console.log(err));
-  }
-
   dbmanager.findUser({ id: msg.message.chat.id })
     .then(user => {
       dbmanager.getCategories()
         .then(categories => {
-          getCategoriesCallback(categories, user);
+          keyboards.editInline(
+            bot,
+            msg.message.chat.id,
+            msg.message.message_id,
+            categoriesKeyboard(categories, user, page));
         });
     });
 }
@@ -121,13 +110,14 @@ function categoriesKeyboard(categories, user, page) {
     }
   }
   let allCategories = user.categories.concat(categoriesLeft);
+  console.log(allCategories.length);
   allCategories = allCategories.slice(page*pageSize,page*pageSize+pageSize);
 
   let keyboard = [];
   let tempRow = [];
   for (let i in allCategories) {
     const isOdd = i % 2 === 1;
-    const isLast = i === allCategories.length - 1;
+    const isLast = i == allCategories.length - 1;
     const currentCategory = allCategories[i];
 
     const text = user.categories.indexOf(currentCategory) > -1 ?

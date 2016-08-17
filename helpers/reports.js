@@ -1,10 +1,11 @@
-let mongoose = require('mongoose');
-let dbmanager = require('./dbmanager');
+const mongoose = require('mongoose');
+const dbmanager = require('./dbmanager');
+const keyboards = require('./keyboards');
 
-let Job = mongoose.model('job');
-let Report = mongoose.model('report');
-let strings = require('./strings');
-let admins = ['74169393', '-1001052392095'];
+const Job = mongoose.model('job');
+const Report = mongoose.model('report');
+const strings = require('./strings');
+const admins = ['74169393', '-1001052392095'];
 
 // Inlines
 
@@ -108,16 +109,14 @@ eventEmitter.on(strings.adminBanInline, ({ msg, bot }) => {
       inlineMessages.forEach(messageData => {
         let msgData = messageData.split('+');
         if (!(msgData.length === 2)) return;
-        bot.editMessageReplyMarkup({
-          message_id: msgData[0],
-          chat_id: msgData[1],
-          reply_markup: JSON.stringify({
-            inline_keyboard: []
-          })
-        }).catch(err => console.log(err));
+        keyboards.editInline(
+          bot,
+          msgData[0],
+          msgData[1],
+          []);
       })
     })
-    .catch(err => console.log(err))
+    .catch(err => console.error(err.message))
 
 });
 
@@ -150,9 +149,7 @@ function sendReportAlert(bot, report) {
     .then(message => {
       admins.forEach(admin => {
         let keyboard = adminKeyboard(admin, report._id);
-        bot.sendMessage({
-          chat_id: admin,
-          text: message,
+        bot.sendMessage(admin, message, {
           reply_markup: JSON.stringify({
             inline_keyboard: keyboard
           })
@@ -193,11 +190,9 @@ function formReportMessage(report) {
 }
 
 function sendResponseToUser(bot, msg) {
-  bot.sendMessage({
-    chat_id: msg.from.id,
-    text: strings.reportThankYouMessage,
+  bot.sendMessage(msg.from.id, strings.reportThankYouMessage, {
     disable_web_page_preview: 'true'
-  })
+  });
 }
 
 /**
