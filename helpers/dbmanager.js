@@ -38,7 +38,7 @@ function getAllUsers() {
 function findUser(query) {
   return new Promise(fullfill => {
     User.findOne(query)
-      .populate(['categories', 'jobs', 'job_draft', 'reviews'])
+      .populate(['categories', 'jobs', 'job_draft', 'reviews', { path: 'jobs', populate: { path: 'category', model: 'category' } }])
       .exec((err, user) => {
         if (err) {
           throw err;
@@ -221,7 +221,7 @@ function getCategories() {
 function findJobById(id, populate) {
   return new Promise(fullfill => {
     Job.findById(id)
-      .populate(populate || '')
+      .populate(!populate ? 'category' : 'category ' + populate)
       .exec((err, job) => {
         if (err) {
           throw err;

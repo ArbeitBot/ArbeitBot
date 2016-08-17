@@ -301,15 +301,15 @@ function addDescriptionToJobDraft(description, msg, user, bot) {
   user.job_draft = undefined;
   user.jobs.push(jobDraft);
   user.input_state = undefined;
-  jobDraft.save((err, draft) => {
-    if (err) {
-      // todo: handle error
-    } else {
-      user.save((err, user) => {
-        jobManager.sendJobCreatedMessage(user, bot, draft);
-      });
-    }
-  })
+  jobDraft.save()
+   .then(draft => {
+      user.save()
+        .then(user => {
+          draft.populate('category', (err, job) => {
+            jobManager.sendJobCreatedMessage(user, bot, job);
+          });
+        });
+  });
 }
 
 //

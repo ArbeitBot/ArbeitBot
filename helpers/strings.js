@@ -44,10 +44,10 @@ module.exports = {
   reviewFreelancerMessage: 'reviewFreelancerMessage',
   reviewClientMessage: 'reviewClientMessage',
   thanksReviewMessage: 'Thank you a lot for the review!',
-  youWereRated: 'You have received new rating:',
+  youWereRated: 'You have received new rating from ',
   clientHasChosenAnotherFreelancer: 'Client has chosen another freelancer.',
   noCandidatesMessage: 'There are no available candidates right now :( Please check back later or create a new job.',
-  thisWorkIsRemoved: 'This work is removed.',
+  thisWorkIsRemoved: 'This job has been deleted ✌️',
   mainMenuOptions: {
     findJobs: '👤 Profile',
     findContractors: '⛑ Find contractors',
