@@ -17,6 +17,8 @@ var reportSchema = new Schema({
     ref: 'job',
     required: true
   },
+  //has the format of message_id+chat.id
+  //like this: '1233+333455'
   inlineMessages: [{
     type: String
   }],

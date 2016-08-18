@@ -515,8 +515,14 @@ function updateJobMessageForFinished(job, bot) {
             user._id
         }
       ]];
-
-      if (!String(user.reportedBy).includes(String(job.client))) {
+      
+      //detect if freelancer already was reported by this client
+      let isAlreadyReportedInThisJob = !!user.reports.find(report => {
+        return String(report.job) == String(job._id);
+      });
+      
+      // !String(user.reportedBy).includes(String(job.client))
+      if (!isAlreadyReportedInThisJob) {
         keyboard[0].push({
           text: strings.jobFinishedOptions.report,
           callback_data: 

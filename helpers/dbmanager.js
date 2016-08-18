@@ -56,7 +56,7 @@ function findUser(query) {
 function findUserById(id) {
   return new Promise(fullfill => {
     User.findById(id)
-      .populate(['categories', 'jobs', 'job_draft', 'reviews'])
+      .populate(['categories', 'jobs', 'job_draft', 'reviews', 'reports'])
       .exec((err, user) => {
         if (err) {
           throw err;

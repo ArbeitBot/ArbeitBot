@@ -32,6 +32,7 @@ function adminCommand(message) {
   }
   return false;
 }
+
 /**
  * Checks if message is answer to any keyboard buttons
  * @param  {Telegram:Message} message Message to check
@@ -51,4 +52,4 @@ module.exports = {
   botCommandStart: botCommandStart,
   replyMarkup: replyMarkup,
   adminCommand: adminCommand
-}
+};

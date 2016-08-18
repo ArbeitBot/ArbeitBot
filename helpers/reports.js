@@ -94,10 +94,10 @@ eventEmitter.on(strings.adminBanInline, ({ msg, bot }) => {
 
   dbmanager.findReportById(reportId)
     .then(report => {
-      //ban the job
+      //mark report as already viewed by admin
       report.resolved = true;
       report.save();
-
+      //ban the user
       dbmanager.findUserById(report.sendTo)
         .then(user => {
           user.ban_state = true;
@@ -111,8 +111,8 @@ eventEmitter.on(strings.adminBanInline, ({ msg, bot }) => {
         if (!(msgData.length === 2)) return;
         keyboards.editInline(
           bot,
-          msgData[0],
           msgData[1],
+          msgData[0],
           []);
       })
     })
@@ -279,11 +279,16 @@ function reportFreelancer(bot, msg, job, user) {
       .then(report => {
         user.reports.push(report._id);
         user.reportedBy.push(clientId);
-        user.save();
-
-        sendReportAlert(bot, report);
-        sendResponseToUser(bot, msg);
-        fullfill();
+        user.save()
+          .then(() => {
+            sendReportAlert(bot, report);
+            sendResponseToUser(bot, msg);
+            fullfill();
+          })
+          .catch(err => {
+            console.log('Error in reportFreelancer(...) in reports.js file. 289.');
+            console.log(err);
+          })
     });
   })
 }
