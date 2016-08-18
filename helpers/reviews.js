@@ -111,6 +111,9 @@ function writeReview(bot, jobId, rating, reviewType) {
               .then(toUser => {
                 toUser.reviews.push(dbReviewObject._id);
                 toUser.rate += parseInt(rating);
+                if (parseInt(rating) > 3) toUser.positiveRate += 1;
+                toUser.UpdateSortRate();
+
                 toUser.save()
                   .then(toUser => {
                     let options = {
