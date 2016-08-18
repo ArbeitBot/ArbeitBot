@@ -241,6 +241,7 @@ function freelancersForJob(job) {
     User.find({ $and: [
       { categories: job.category },
       { busy: false },
+      { ban_state: { $nin: true }  },
       { bio: { $exists: true } },
       { hourly_rate: job.hourly_rate },
       { _id: { $nin: job.notInterestedCandidates } }
