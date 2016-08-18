@@ -246,6 +246,7 @@ function freelancersForJob(job) {
       { hourly_rate: job.hourly_rate },
       { _id: { $nin: job.notInterestedCandidates } }
     ]})
+      .sort({ rate: -1})
       .limit(10)
       .exec((err, users) => {
         if (err) {
