@@ -21,6 +21,7 @@ const UserChatInline = mongoose.model('userChatInline');
 function getAllUsers() {
   return new Promise(fullfill => {
     User.find({})
+      .populate(['reviews'])
       .exec((err, users) => {
         if (err) {
           throw err;
@@ -246,7 +247,7 @@ function freelancersForJob(job) {
       { hourly_rate: job.hourly_rate },
       { _id: { $nin: job.notInterestedCandidates } }
     ]})
-      .sort({ rate: -1})
+      .sort({ sortRate: -1})
       .limit(10)
       .exec((err, users) => {
         if (err) {

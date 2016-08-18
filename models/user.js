@@ -17,6 +17,17 @@ var userSchema = new Schema({
   },
   rate: {
     type: Number,
+    required: true,
+    default: 0
+  },
+  positiveRate: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  sortRate: {
+    type: Number,
+    required: true,
     default: 0
   },
   reports: [{
@@ -87,11 +98,24 @@ userSchema.methods = {
   },
   UpdateRate: function() {
     let tRate = 0;
+    let tPRate = 0;
     this.reviews.forEach(review => {
+      if (review.rate > 3) tPRate += 1;
       tRate += review.rate;
     });
-    console.log('tr', tRate);
     this.rate = tRate;
+    this.positiveRate = tPRate;
+    this.save();
+    this.UpdateSortRate();
+  },
+  UpdateSortRate: function() {
+    if (this.reviews.length === 0) return;
+
+    const rCount = this.reviews.length;
+    //const confidence = 0.95;
+    const z = 1.96;//for 0.95 //pnormaldist(1-(1-confidence)/2)
+    const phat = 1.0*this.positiveRate/rCount;
+    this.sortRate = ((phat + z*z/(2*rCount) - z * Math.sqrt((phat*(1-phat)+z*z/(4*rCount))/rCount))/(1+z*z/rCount)).toFixed(4);
     this.save();
   }
 };

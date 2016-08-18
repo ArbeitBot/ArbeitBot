@@ -12,11 +12,13 @@ function handleAdminCommand(msg, bot) {
     handleBanCommand(msg, bot);
   } else if (isGodVoiceCommand(messageText)) {
     handleGodVoiceCommand(msg, bot);
+  } else if (isUpdateRatingsCommand(messageText)) {
+    handleUpdateRatingsCommand(msg, bot);
   } else {
     console.log('Admin sent command which we dont have');
   }
 }
-
+handleUpdateRatingsCommand(0,0);
 function isUnbanCommand(messageText) {
   return messageText.indexOf('/unban') == 0;
 }
@@ -27,6 +29,19 @@ function isBanCommand(messageText) {
 
 function isGodVoiceCommand(messageText) {
   return messageText.indexOf('/godvoice') == 0;
+}
+
+function isUpdateRatingsCommand(messageText) {
+  return messageText.indexOf('/updateratings') == 0;
+}
+
+function handleUpdateRatingsCommand(msg, bot) {
+  dbmanager.getAllUsers()
+    .then(users => {
+      users.forEach(user => {
+        user.UpdateRate();
+      });
+    })
 }
 
 function handleGodVoiceCommand(msg, bot) {
