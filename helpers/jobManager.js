@@ -709,7 +709,7 @@ function messageFromFreelancers(users) {
 function makeInterested(interested, bot, msg, job, user) {
   if (job.state === strings.jobStates.removed) {
     updateFreelancerMessage(bot, msg, user, job);
-  } else if (job.state !== strings.jobStates.searchingForFreelancer) {
+  } else if (job.state !== strings.jobStates.searchingForFreelancer && interested) {
     keyboards.editMessage(
       bot,
       msg.from.id,
