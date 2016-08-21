@@ -107,6 +107,7 @@ function writeReview(bot, jobId, rating, reviewType) {
             reviewType: reviewType
           })
             .then(dbReviewObject => {
+              eventEmitter.emit(strings.newReview, { bot, dbReviewObject });
               dbmanager.findUserById(toUser)
               .then(toUser => {
                 toUser.reviews.push(dbReviewObject._id);
@@ -116,6 +117,7 @@ function writeReview(bot, jobId, rating, reviewType) {
                     let options = {
                       disable_web_page_preview: 'true'
                     };
+                    
                     bot.sendMessage(toUser.id,
                       `${strings.youWereRated}@${byUser.username}\n${ratingEmoji}`,
                       options)
@@ -148,13 +150,12 @@ function writeReview(bot, jobId, rating, reviewType) {
                   } else {
                     message = `@${toUser.username}\n[${job.category.title}]\n${job.description}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`;
                   }
-
                   keyboards.editMessage(
                     bot,
                     chat_id,
                     message_id,
                     message,
-                    []);
+                    []).catch(err => console.log(err));
                 });
             });
         });

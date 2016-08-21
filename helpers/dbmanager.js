@@ -3,6 +3,7 @@
  */
 
 const mongoose = require('mongoose');
+const strings  = require('./strings');
 
 // Get schemas
 const User = mongoose.model('user');
@@ -320,7 +321,7 @@ function addReview(review) {
   return new Promise(fullfill => {
     const reviewObject = new Review(review);
     reviewObject.save()
-      .then(fullfill);
+      .then(fullfill)
   });
 }
 

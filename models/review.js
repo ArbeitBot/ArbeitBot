@@ -21,7 +21,16 @@ var reviewSchema = new Schema({
   reviewType: {
     type: String,
     required: true
-  }
+  },
+  // OK Delete Ban
+  resolveWay: {
+    type: String
+  },
+  //has the format of message_id+chat.id
+  //like this: '1233+333455'
+  inlineMessages: [{
+    type: String
+  }]
 });
 
 mongoose.model('review', reviewSchema);

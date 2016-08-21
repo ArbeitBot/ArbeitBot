@@ -11,7 +11,7 @@ const categoryPicker = require('./categoryPicker');
 const hourlyRatePicker = require('./hourlyRatePicker');
 const textInput = require('./textInput');
 const jobManager = require('./jobManager');
-const adminPanel = require('./adminPanel');
+const adminPanel = require('./adminCommands');
 // Handle messages
 
 /**
@@ -24,6 +24,7 @@ bot.on('message', msg => {
     sendAskForUsername(msg);
     return;
   }
+
   textInput.check(msg, (isTextInput, user) => {
     if (user && user.ban_state) {
       sendBanMessage(msg);
@@ -63,7 +64,6 @@ bot.on('callback_query', msg => {
       }
       let options = msg.data.split(strings.inlineSeparator);
       let inlineQuerry = options[0];
-
       eventEmitter.emit(inlineQuerry, { msg, bot })
     });
 });
