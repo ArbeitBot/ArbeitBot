@@ -120,6 +120,12 @@ module.exports = {
   star: '⭐',
   bioReviews: 'Reviews:',
   saveReviewOption: 'saveReview',
+  adminNotifications: {
+    adminBanReviewInline: 'aBRI',
+    adminDeleteReviewInline: 'aDRI',
+    adminOkReviewInline: 'aORI',
+    adminReviewDecision: 'Admin made a decision about review.'
+  },
   jobStates: {
     searchingForFreelancer: 'searchingForFreelancer',
     freelancerChosen: 'freelancerChosen',
@@ -164,5 +170,6 @@ module.exports = {
   ],
   shouldUpdateJobMessage: 'shouldUpdateJobMessage',
   shouldUpdateFreelancerMessage: 'shouldUpdateFreelancerMessage',
-  shouldMakeInterested: 'shouldMakeInterested'
+  shouldMakeInterested: 'shouldMakeInterested',
+  newReview: 'newReview'
 };

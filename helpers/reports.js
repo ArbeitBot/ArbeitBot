@@ -10,7 +10,6 @@ const admins = ['74169393', '-1001052392095'];
 // Inlines
 
 // Reports
-
 /**
  * Handles case when freelancer is reported
  * @param  {Telegram:Bot} bot Bot that should respond
@@ -105,22 +104,32 @@ eventEmitter.on(strings.adminBanInline, ({ msg, bot }) => {
         });
 
       //delete BAN button from all inline messages
-      let inlineMessages = report.inlineMessages;
-      inlineMessages.forEach(messageData => {
-        let msgData = messageData.split('+');
-        if (!(msgData.length === 2)) return;
-        keyboards.editInline(
-          bot,
-          msgData[1],
-          msgData[0],
-          []);
-      })
+      deleteAllAdminMessages(report, bot);
     })
     .catch(err => console.error(err.message))
 
 });
 
-function adminKeyboard(adminChatId, reportId) {
+function deleteAllAdminMessages(report, bot) {
+  let inlineMessages = report.inlineMessages;
+  inlineMessages.forEach(messageData => {
+    let msgData = messageData.split('+');
+    if (!(msgData.length === 2)) {
+      console.log('Fatal with report object from database. No + sign in its messages');
+      console.log('Report id: ' + report._id);
+      return;
+    }
+    bot.editMessageText('Resolved report.', {chat_id: msgData[1], message_id: msgData[0]})
+      .catch(err => console.log('lol', err));
+
+    keyboards.editInline(
+      bot,
+      msgData[1],
+      msgData[0],
+      []);
+  })
+}
+function adminBanKeyboard(adminChatId, reportId) {
   let keyboard = [[
     {
       text: 'Ban',
@@ -138,7 +147,7 @@ function adminKeyboard(adminChatId, reportId) {
 /**
  *
  * @param bot which responds
- * @param report mongoose object
+ * @param report mongoose object ! Not and ObjectId !
  */
 function sendReportAlert(bot, report) {
   // Сформировать текст сообщения
@@ -148,7 +157,7 @@ function sendReportAlert(bot, report) {
   formReportMessage(report)
     .then(message => {
       admins.forEach(admin => {
-        let keyboard = adminKeyboard(admin, report._id);
+        let keyboard = adminBanKeyboard(admin, report._id);
         bot.sendMessage(admin, message, {
           reply_markup: JSON.stringify({
             inline_keyboard: keyboard
