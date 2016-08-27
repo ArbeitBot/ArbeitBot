@@ -151,6 +151,28 @@ function userCount() {
   });
 }
 
+/**
+ * Returns number of freelancers registered
+ */
+function freelancerCount() {
+  const options = { 
+    busy: false,
+    ban_state: false,
+    categories: { $exists: true, $ne: [] },
+    bio: { $exists: true },
+    hourly_rate: { $exists: true }
+  };
+  return new Promise((fullfill, reject) => {
+    User.count(options, (err, c) => {
+      if (err) {
+        throw err;
+      } else {
+        fullfill(c);
+      }
+    });
+  });
+}
+
 // Categories
 
 /**
@@ -295,6 +317,21 @@ function saveFreelancerMessageToJob(msg, job, user) {
   });
 }
 
+/**
+ * Returns number of active jobs
+ */
+function jobCount() {
+  return new Promise((fullfill, reject) => {
+    Job.count({ state: strings.jobStates.searchingForFreelancer }, (err, c) => {
+      if (err) {
+        throw err;
+      } else {
+        fullfill(c);
+      }
+    });
+  });
+}
+
 // Review
 
 /**
@@ -377,6 +414,7 @@ module.exports = {
   toggleUserAvailability,
   toggleCategoryForUser,
   userCount,
+  freelancerCount,
   // Categories
   getCategory,
   getCategories,
@@ -385,6 +423,7 @@ module.exports = {
   freelancersForJob,
   freelancersForJobId,
   saveFreelancerMessageToJob,
+  jobCount,
   // Review
   findReviewById,
   addReview,

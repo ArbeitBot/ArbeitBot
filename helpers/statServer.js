@@ -6,11 +6,17 @@ const http = require('http');
 const dbmanager = require('./dbmanager');
 
 http.createServer((req, res) => {
-if (String(req.url) === `/getUserCount`) {
+if (String(req.url) === `/getStats`) {
   dbmanager.userCount()
   	.then(c => {
-  		res.writeHead(200);
-  		res.end(`{ "count": ${c} }`);
+      return dbmanager.jobCount()
+        .then(j => {
+          return dbmanager.freelancerCount()
+            .then(f => {
+              res.writeHead(200);
+              res.end(`{ "userCount": ${c}, "jobCount": ${j}, "freelancerCount": ${f} }`);
+            });
+        });
   	})
   	.catch(err => {
   		res.writeHead(500);
