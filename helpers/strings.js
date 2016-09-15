@@ -51,12 +51,12 @@ module.exports = {
   mainMenuOptions: {
     findJobs: '👤 Profile',
     findContractors: '⛑ Find contractors',
-    help: '❔ Help'
+    help: '❔ Help',
   },
   clientMenuOptions: {
     postNewJob: '🔨 Post new job',
     myJobs: '🛠 My jobs',
-    back: '🔙 Back'
+    back: '🔙 Back',
   },
   freelanceMenuOptions: {
     editBio: '🖊 Edit bio',
@@ -73,7 +73,7 @@ module.exports = {
     '$0 – $5', '$5 – $10', '$10 – $20',
     '$20 – $30', '$30 – $40', '$40 – $50',
     '$50 – $75', '$75 – $100', '$100 – $200',
-    '$200+'
+    '$200+',
   ],
   selectedCategory: '✅ ',
   selectedHourlyRate: '✅ ',
@@ -124,7 +124,7 @@ module.exports = {
     adminBanReviewInline: 'aBRI',
     adminDeleteReviewInline: 'aDRI',
     adminOkReviewInline: 'aORI',
-    adminReviewDecision: 'Admin made a decision about review.'
+    adminReviewDecision: 'Admin made a decision about review.',
   },
   jobStates: {
     searchingForFreelancer: 'searchingForFreelancer',
@@ -134,28 +134,28 @@ module.exports = {
     frozen: 'frozen',
     banned: 'banned',
     rated: 'rated',
-    removed: 'removed'
+    removed: 'removed',
   },
   reviewTypes: {
     byClient: 'byCl',
-    byFreelancer: 'byFl'
+    byFreelancer: 'byFl',
   },
   freelancerOptions: {
     interested: 'Interested',
     notInterested: 'Not interested',
-    report: '❗️ Report'
+    report: '❗️ Report',
   },
   freelancerAcceptOptions: {
     accept: '✅ Accept',
-    refuse: '❌ Refuse'
+    refuse: '❌ Refuse',
   },
   jobFinishedOptions: {
     rate: '⭐ Rate',
-    report: '❗️ Report'
+    report: '❗️ Report',
   },
   report: {
     thanks: 'Thanks you for your alertness!',
-    reason: 'What is the report reason?'
+    reason: 'What is the report reason?',
   },
   rateOptions: {
     back: '🔙 Back',
@@ -163,13 +163,13 @@ module.exports = {
     twoStars: '⭐⭐',
     threeStars: '⭐⭐⭐',
     fourStars: '⭐⭐⭐⭐',
-    fiveStars: '⭐⭐⭐⭐⭐'
+    fiveStars: '⭐⭐⭐⭐⭐',
   },
   rateOptionsArray: [
-    '⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'
+    '⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐',
   ],
   shouldUpdateJobMessage: 'shouldUpdateJobMessage',
   shouldUpdateFreelancerMessage: 'shouldUpdateFreelancerMessage',
   shouldMakeInterested: 'shouldMakeInterested',
-  newReview: 'newReview'
+  newReview: 'newReview',
 };
