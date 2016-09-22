@@ -3,7 +3,8 @@
  */
 
 const mongoose = require('mongoose');
-const strings  = require('./strings');
+const strings = require('./strings');
+
 
 // Get schemas
 const User = mongoose.model('user');
@@ -80,11 +81,13 @@ function addUser(user) {
     findUser({ id: user.id })
       .then(dbuserObject => {
         if (dbuserObject) {
-          fullfill(dbuserObject);
+          fullfill(dbuserObject, false);
         } else {
           let userObject = new User(user);
           userObject.save()
-            .then(fullfill);
+            .then(user => {
+              fullfill(user, true);
+            });
         }
       });
   });

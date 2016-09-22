@@ -12,6 +12,8 @@ const hourlyRatePicker = require('./hourlyRatePicker');
 const textInput = require('./textInput');
 const jobManager = require('./jobManager');
 const adminPanel = require('./adminCommands');
+const adminReports = require('./adminReports');
+
 // Handle messages
 
 /**
@@ -33,7 +35,10 @@ bot.on('message', msg => {
     } else {
       if (check.botCommandStart(msg)) {
         dbmanager.addUser(msg.from)
-          .then(user => {
+          .then((user, created) => {
+            if (created) {
+              adminReports.userRegistered(bot, user);
+            }
             keyboards.sendMainMenu(bot, msg.chat.id, true);
           });
       } else if (check.adminCommand(msg)) {

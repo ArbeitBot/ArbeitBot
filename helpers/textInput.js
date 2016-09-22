@@ -5,7 +5,8 @@
 let dbmanager = require('./dbmanager');
 let strings = require('./strings');
 let keyboards = require('./keyboards');
-let jobManager = require('./jobManager'); 
+let jobManager = require('./jobManager');
+const adminReports = require('./adminReports');
 
 let mongoose = require('mongoose');
 let Job = mongoose.model('job');
@@ -352,6 +353,7 @@ function addDescriptionToJobDraft(description, msg, user, bot) {
       user.save()
         .then(user => {
           draft.populate('category', (err, job) => {
+            adminReports.jobCreated(bot, job);
             jobManager.sendJobCreatedMessage(user, bot, job);
           });
         });
