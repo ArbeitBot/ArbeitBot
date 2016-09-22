@@ -262,14 +262,26 @@ function askForNewJobDescription(msg, bot, user) {
  */
 function cancelJobCreation(msg, user, bot) {
   user.input_state = undefined;
+  const tempJob = user.job_draft;
   user.job_draft = undefined;
   user.save()
     .then(user => {
-      keyboards.sendKeyboard(
-        bot,
-        msg.chat.id, 
-        strings.clientMenuMessage, 
-        keyboards.clientKeyboard);
+      if (!!tempJob) {
+        tempJob.remove((err, removed) => {
+          keyboards.sendKeyboard(
+            bot,
+            msg.chat.id, 
+            strings.clientMenuMessage, 
+            keyboards.clientKeyboard);
+        });
+      } else {
+        keyboards.sendKeyboard(
+          bot,
+          msg.chat.id, 
+          strings.clientMenuMessage, 
+          keyboards.clientKeyboard);
+      }
+      
     });
 }
 
