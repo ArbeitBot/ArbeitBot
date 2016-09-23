@@ -35,8 +35,10 @@ bot.on('message', msg => {
     } else {
       if (check.botCommandStart(msg)) {
         dbmanager.addUser(msg.from)
-          .then((user, created) => {
-            if (created) {
+          .then(obj => {
+            const user = obj.user;
+            const isNew = obj.new;
+            if (isNew) {
               adminReports.userRegistered(bot, user);
             }
             keyboards.sendMainMenu(bot, msg.chat.id, true);

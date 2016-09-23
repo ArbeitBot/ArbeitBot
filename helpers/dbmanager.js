@@ -81,12 +81,12 @@ function addUser(user) {
     findUser({ id: user.id })
       .then(dbuserObject => {
         if (dbuserObject) {
-          fullfill(dbuserObject, false);
+          fullfill({ user: dbuserObject, new: false });
         } else {
           let userObject = new User(user);
           userObject.save()
             .then(user => {
-              fullfill(user, true);
+              fullfill({ user, new: true });
             });
         }
       });
