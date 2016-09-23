@@ -325,7 +325,7 @@ function saveFreelancerMessageToJob(msg, job, user) {
  */
 function jobCount() {
   return new Promise((fullfill, reject) => {
-    Job.count({ state: strings.jobStates.searchingForFreelancer }, (err, c) => {
+    Job.count({ state: strings.jobStates.searchingForFreelancer, description: { $exists: true } }, (err, c) => {
       if (err) {
         throw err;
       } else {
