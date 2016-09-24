@@ -9,7 +9,7 @@ const check = require('./messageParser');
 const bot = require('./telegramBot');
 const categoryPicker = require('./categoryPicker');
 const hourlyRatePicker = require('./hourlyRatePicker');
-const textInput = require('./textInput');
+const profile = require('./profile');
 const jobManager = require('./jobManager');
 const adminPanel = require('./adminCommands');
 const adminReports = require('./adminReports');
@@ -27,11 +27,12 @@ bot.on('message', msg => {
     return;
   }
 
-  textInput.check(msg, (isTextInput, user) => {
+  textInputCheck(msg, (isTextInput, user) => {
     if (user && user.ban_state) {
       sendBanMessage(msg);
     } else if (isTextInput) {
-      textInput.handle(msg, user, bot);
+      eventEmitter.emit(((msg.text === strings.cancel) ? 'cancel' : '') + isTextInput, { msg, user, bot });
+      //textInput.handle(msg, user, bot);
     } else {
       if (check.botCommandStart(msg)) {
         dbmanager.addUser(msg.from)
@@ -71,11 +72,27 @@ bot.on('callback_query', msg => {
       }
       let options = msg.data.split(strings.inlineSeparator);
       let inlineQuerry = options[0];
-      eventEmitter.emit(inlineQuerry, { msg, bot })
+      eventEmitter.emit(inlineQuerry, { msg, bot });
     });
 });
 
 // Helpers
+
+/**
+ * Checks if state of user that sent message is one of input ones
+ * @param  {Telegram:Messahe}   msg      Message received
+ * @param  {Function} callback Callback(input_state, user) that is called when check is done
+ */
+function textInputCheck(msg, callback) {
+  dbmanager.findUser({ id: msg.chat.id })
+  .then(user => {
+    if (user) {
+      callback(user.input_state, user);
+    } else {
+      callback();
+    }
+  })
+}
 
 /**
  * Handler for custom keyboard button clicks
@@ -97,13 +114,13 @@ function handleKeyboard(msg) {
   }
   // Check client menu
   else if (text === clientOptions.postNewJob) {
-    textInput.askForNewJobCategory(msg, bot);
+    jobManager.askForNewJobCategory(msg, bot);
   } else if (text === clientOptions.myJobs) {
     jobManager.sendAllJobs(bot, msg);
   }
   // Check freelance menu
   else if (text === freelanceMenuOptions.editBio || text === freelanceMenuOptions.addBio) {
-    textInput.askForBio(msg, bot);
+    profile.askForBio(msg, bot);
   } else if (text === freelanceMenuOptions.editCategories || text === freelanceMenuOptions.addCategories) {
     categoryPicker.sendCategories(bot, msg.chat.id);
   } else if (text === freelanceMenuOptions.editHourlyRate || text === freelanceMenuOptions.addHourlyRate) {
@@ -115,7 +132,7 @@ function handleKeyboard(msg) {
   else if (text === freelanceMenuOptions.back) {
     keyboards.sendMainMenu(bot, msg.chat.id);
   }
-};
+}
 
 /**
  * Sends main menu keyboard to user with chat id

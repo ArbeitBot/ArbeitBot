@@ -7,9 +7,13 @@
 const keyboards = require('./keyboards');
 const dbmanager = require('./dbmanager');
 const strings = require('./strings');
+const adminReports = require('./adminReports');
 require('./reviews');
 require('./reports');
 require('./adminNotifications');
+
+const mongoose = require('mongoose');
+const Job = mongoose.model('job');
 
 const eventEmitter = global.eventEmitter;
 
@@ -213,6 +217,67 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
     });
 });
 
+eventEmitter.on(strings.inputCategoryNameState, ({ msg, user, bot }) => {
+  if (msg.text.indexOf(' [') > -1) {
+    let categoryTitle = msg.text.split(' [')[0];
+    dbmanager.getCategories()
+    .then(categories => {
+      let filteredCategories = categories
+      .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
+      for (let i = 0; i < filteredCategories.length; i++) {
+        const cat = filteredCategories[i];
+        if (cat.title === categoryTitle) {
+          startJobDraft(categoryTitle, msg, user, bot);
+          break;
+        }
+      }
+    });
+  } else { console.log(msg); }
+});
+
+eventEmitter.on(strings.inputHourlyRateState, ({ msg, user, bot }) => {
+  if (msg.text.indexOf(' [') > -1) {
+    const hourlyRate = msg.text.split(' [')[0];
+    const options = strings.hourlyRateOptions;
+    if (options.includes(hourlyRate)) {
+      addHourlyRateToJobDraft(hourlyRate, msg, user, bot);
+    }
+  } else { console.log(msg); }
+});
+
+eventEmitter.on(strings.inputJobDescriptionState, ({ msg, user, bot }) => {
+  let description = msg.text.substring(0, 500);
+  addDescriptionToJobDraft(description, msg, user, bot);
+});
+
+
+/**
+ * Handles inline when job creation needs to be cancelled
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Telegram:Messager} msg Message received
+ */
+eventEmitter.on(strings.cancelJobCreationInline, ({ msg, bot }) => {
+  // Get essential info
+  let options = msg.data.split(strings.inlineSeparator);
+  let userId = options[1];
+
+  dbmanager.findUser({ id: userId })
+  .then(user => {
+    keyboards.editInline(bot, msg.message.chat.id, msg.message.message_id, []);
+    cancelJobCreation(msg.message, user, bot);
+  });
+});
+
+eventEmitter.on('cancel' + strings.inputCategoryNameState, ({ msg, user, bot }) => {
+  cancelJobCreation(msg, user, bot);
+});
+eventEmitter.on('cancel' + strings.inputHourlyRateState, ({ msg, user, bot }) => {
+  cancelJobCreation(msg, user, bot);
+});
+eventEmitter.on('cancel' + strings.inputJobDescriptionState, ({ msg, user, bot }) => {
+  cancelJobCreation(msg, user, bot);
+});
+
 // Connectors
 
 /**
@@ -252,6 +317,111 @@ eventEmitter.on(strings.shouldMakeInterested, ({ interested, bot, msg, job, user
 */
 
 // Functions
+
+/**
+ * Creates job draft for user
+ * @param  {String} categoryTitle Title of job's category
+ * @param  {Telegram:message} msg Message received
+ * @param  {Mongoose:User} user Owner of job
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
+function startJobDraft(categoryTitle, msg, user, bot) {
+  dbmanager.getCategory(categoryTitle)
+  .then(category => {
+    if (!category) return;
+    let draft = new Job({
+      category: category,
+      client: user,
+      // todo: we shouldn't add user to list of not interested candidates initially, this hack should be addressed in future
+      notInterestedCandidates: [user]
+    });
+    draft.save()
+    .then(draft => {
+      user.job_draft = draft;
+      draft.save()
+      .then(job => {
+        askForNewJobPriceRange(msg, user, bot, job, category);
+      });
+    });
+  })
+}
+
+/**
+ * Cancels job creation, removes job draft and resets user's input state
+ * @param  {Telegram:Message} msg  Message received
+ * @param  {Mongoose:User} user Owner of job
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
+function cancelJobCreation(msg, user, bot) {
+  user.input_state = undefined;
+  const tempJob = user.job_draft;
+  user.job_draft = undefined;
+  user.save()
+  .then(user => {
+    if (!!tempJob) {
+      tempJob.remove((err, removed) => {
+        keyboards.sendKeyboard(
+            bot,
+            msg.chat.id,
+            strings.clientMenuMessage,
+            keyboards.clientKeyboard);
+      });
+    } else {
+      keyboards.sendKeyboard(
+          bot,
+          msg.chat.id,
+          strings.clientMenuMessage,
+          keyboards.clientKeyboard);
+    }
+
+  });
+}
+
+/**
+ * Adds hourly rate to job draft and sends next step
+ * @param {String} hourlyRate Picked hourly rate
+ * @param {Telegram:Message} msg        Message received
+ * @param {Mongoose:User} user       Job owner
+ * @param {Telegram:Bot} bot        Bot that should respond
+ */
+function addHourlyRateToJobDraft(hourlyRate, msg, user, bot) {
+  if (!strings.hourlyRateOptions.includes(hourlyRate)) return;
+
+  user.job_draft.hourly_rate = hourlyRate;
+  user.job_draft.save((err, draft) => {
+    if (err) {
+      // todo: handle error
+    } else {
+      askForNewJobDescription(msg, bot, user);
+    }
+  })
+}
+
+/**
+ * Adds desctiption to job draft and sends next step
+ * @param {String} description Description of job
+ * @param {Telegram:Message} msg        Message received
+ * @param {Mongoose:User} user       Job owner
+ * @param {Telegram:Bot} bot        Bot that should respond
+ */
+function addDescriptionToJobDraft(description, msg, user, bot) {
+  let jobDraft = user.job_draft;
+  jobDraft.description = description;
+
+  user.job_draft = undefined;
+  user.jobs.push(jobDraft);
+  user.input_state = undefined;
+  jobDraft.save()
+  .then(draft => {
+    user.save()
+    .then(user => {
+      draft.populate('category', (err, job) => {
+        adminReports.jobCreated(bot, job);
+        sendJobCreatedMessage(user, bot, job);
+      });
+    });
+  });
+}
 
 /**
  * Sends freelancers job offer (description; inlines: interested, not interested, report);
@@ -343,6 +513,103 @@ function sendNewJobMessage(job, user, bot) {
           updateJobMessage(job, bot);
         });
     });
+}
+
+/**
+ * Sends message asking for job hourly rate of job that is being created, saves relevant flag to db for user
+ * @param  {Telegram:Message} msg Message received
+ * @param  {Mongoose:User} user Owner of job
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Mongoose:Job} job Job that should be altered
+ * @param  {Mongoose:Category} category Job's current category
+ */
+function askForNewJobPriceRange(msg, user, bot, job, category) {
+  user.input_state = strings.inputHourlyRateState;
+  user.save()
+  .then(user => {
+    var keyboard = [];
+    let options = strings.hourlyRateOptions;
+    for (var i in options) {
+      let option = options[i];
+
+      var count = 0;
+      for (var j in category.freelancers) {
+        let freelancer = category.freelancers[j];
+        if (freelancer.hourly_rate === option && String(freelancer._id) !== String(user._id)) {
+          count += 1;
+        }
+      }
+
+      if (count > 0) {
+        keyboard.push([{
+          text: option + ' [' + count + ']'
+        }])
+      }
+    }
+    keyboard.unshift([{text:strings.jobCreateCancel}]);
+    keyboards.sendKeyboard(
+        bot,
+        msg.chat.id,
+        strings.selectJobHourlyRateMessage,
+        keyboard,
+        null,
+        true);
+  });
+}
+
+/**
+ * Sends message asking for job description of job that is being created, saves relevant flag to db for user
+ * @param  {Telegram:Message} msg Message received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * * @param  {Mongoose:User} user Owner of job
+ */
+function askForNewJobDescription(msg, bot, user) {
+  user.input_state = strings.inputJobDescriptionState;
+  user.save()
+  .then(user => {
+    bot.sendMessage(msg.chat.id, strings.addJobDescriptionMessage, {
+      reply_markup: JSON.stringify({
+        keyboard: [[ strings.cancel ]],
+        resize_keyboard: true
+      }),
+      disable_web_page_preview: 'true'
+    })
+    .catch(function(err)
+    {
+      console.error(err.message);
+    });
+  });
+}
+
+/**
+ * Sends message asking for job category of job that is being created, saves relevant flag to db for user
+ * @param  {Telegram:Message} msg Message received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
+function askForNewJobCategory(msg, bot) {
+  dbmanager.findUser({ id: msg.chat.id })
+  .then(user => {
+    user.input_state = strings.inputCategoryNameState;
+    user.save()
+    .then(user => {
+      dbmanager.getCategories()
+      .then(categories => {
+        let categoryButtons = categories
+        .filter(category => category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0) > 0)
+        .map(category => {
+          return [{
+            text: category.title + ' [' + (category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0)) + ']'
+          }];
+        });
+        categoryButtons.unshift([{text:strings.jobCreateCancel}]);
+        keyboards.sendKeyboard(
+            bot,
+            msg.chat.id,
+            strings.selectCategoryMessage,
+            categoryButtons);
+      });
+    });
+  });
 }
 
 // Management freelancers
@@ -905,4 +1172,5 @@ function updateFreelancerMessageRemoved(bot, msg, user, job) {
 module.exports = {
   sendJobCreatedMessage,
   sendAllJobs,
+  askForNewJobCategory: askForNewJobCategory
 };
