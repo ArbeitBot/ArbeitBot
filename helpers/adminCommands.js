@@ -22,11 +22,9 @@ handleUpdateRatingsCommand(0,0);
 function isUnbanCommand(messageText) {
   return messageText.indexOf('/unban') == 0;
 }
-
 function isBanCommand(messageText) {
   return messageText.indexOf('/ban') == 0;
 }
-
 function isGodVoiceCommand(messageText) {
   return messageText.indexOf('/godvoice') == 0;
 }
@@ -60,7 +58,6 @@ function handleGodVoiceCommand(msg, bot) {
       });
     })
 }
-
 function handleBanCommand(msg, bot) {
   let username = /^\/ban@?.* @(.*)$/.exec(msg.text)[1];
   console.log(username);
@@ -71,7 +68,6 @@ function handleBanCommand(msg, bot) {
         .then(sendConfirmed(msg, bot));
     })
 }
-
 function handleUnbanCommand(msg, bot) {
   let username = /^\/unban@?.* @(.*)$/.exec(msg.text)[1];
   dbmanager.findUser({username: username})

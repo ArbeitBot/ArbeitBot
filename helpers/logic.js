@@ -11,7 +11,9 @@ const categoryPicker = require('./categoryPicker');
 const hourlyRatePicker = require('./hourlyRatePicker');
 const textInput = require('./textInput');
 const jobManager = require('./jobManager');
-const adminPanel = require('./adminPanel');
+const adminPanel = require('./adminCommands');
+const adminReports = require('./adminReports');
+
 // Handle messages
 
 /**
@@ -24,6 +26,7 @@ bot.on('message', msg => {
     sendAskForUsername(msg);
     return;
   }
+
   textInput.check(msg, (isTextInput, user) => {
     if (user && user.ban_state) {
       sendBanMessage(msg);
@@ -32,7 +35,12 @@ bot.on('message', msg => {
     } else {
       if (check.botCommandStart(msg)) {
         dbmanager.addUser(msg.from)
-          .then(user => {
+          .then(obj => {
+            const user = obj.user;
+            const isNew = obj.new;
+            if (isNew) {
+              adminReports.userRegistered(bot, user);
+            }
             keyboards.sendMainMenu(bot, msg.chat.id, true);
           });
       } else if (check.adminCommand(msg)) {
@@ -63,7 +71,6 @@ bot.on('callback_query', msg => {
       }
       let options = msg.data.split(strings.inlineSeparator);
       let inlineQuerry = options[0];
-
       eventEmitter.emit(inlineQuerry, { msg, bot })
     });
 });

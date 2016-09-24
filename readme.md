@@ -6,10 +6,11 @@ This is the source code of [@arbeit_bot](https://telegram.me/arbeit_bot) – fir
 * `MONGO_DB_URL` – url of your mongo database
 * `ARBEIT_BOT_STAGING_URL` – url of your staging server for flightplan
 * `ARBEIT_BOT_PRODUCTION_URL` – url of your production server for flightplan
+* `ARBEIT_BOT_PRODUCTION_URL` – url of your production server for flightplan
 * *(Optional)* `USE_WEBHOOKS` – flag identifying if bot should use webhooks or should fetch updates every 1000 seconds, `false` if isn't set
 * *(Optional)* `WEBHOOK_CALLBACK_URL` – url that should be used by Telegram servers for webhooks, should be `https`
 * *(Optional)* `SSL_CERTIFICATE_PATH` – path to ssl certificate
-* *(Optional)* `SSL_KEY_PATH` – path to ssl key
+* *(Optional)* `SSH_RSA_PATH` – path to ssh private certificate (should not be password encrypted)
 
 # How to get ssl certificate and key
 You can use this command on server to create self-signed ssl key that can be accepted by Telegram servers:

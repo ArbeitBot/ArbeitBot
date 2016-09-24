@@ -3,6 +3,8 @@
  */
 
 const mongoose = require('mongoose');
+const strings = require('./strings');
+
 
 // Get schemas
 const User = mongoose.model('user');
@@ -79,11 +81,13 @@ function addUser(user) {
     findUser({ id: user.id })
       .then(dbuserObject => {
         if (dbuserObject) {
-          fullfill(dbuserObject);
+          fullfill({ user: dbuserObject, new: false });
         } else {
           let userObject = new User(user);
           userObject.save()
-            .then(fullfill);
+            .then(user => {
+              fullfill({ user, new: true });
+            });
         }
       });
   });
@@ -141,6 +145,28 @@ function toggleCategoryForUser(chatId, categoryId) {
 function userCount() {
   return new Promise((fullfill, reject) => {
     User.count({}, (err, c) => {
+      if (err) {
+        throw err;
+      } else {
+        fullfill(c);
+      }
+    });
+  });
+}
+
+/**
+ * Returns number of freelancers registered
+ */
+function freelancerCount() {
+  const options = { 
+    busy: false,
+    ban_state: false,
+    categories: { $exists: true, $ne: [] },
+    bio: { $exists: true },
+    hourly_rate: { $exists: true }
+  };
+  return new Promise((fullfill, reject) => {
+    User.count(options, (err, c) => {
       if (err) {
         throw err;
       } else {
@@ -294,6 +320,21 @@ function saveFreelancerMessageToJob(msg, job, user) {
   });
 }
 
+/**
+ * Returns number of active jobs
+ */
+function jobCount() {
+  return new Promise((fullfill, reject) => {
+    Job.count({ state: strings.jobStates.searchingForFreelancer, description: { $exists: true } }, (err, c) => {
+      if (err) {
+        throw err;
+      } else {
+        fullfill(c);
+      }
+    });
+  });
+}
+
 // Review
 
 /**
@@ -323,7 +364,7 @@ function addReview(review) {
   return new Promise(fullfill => {
     const reviewObject = new Review(review);
     reviewObject.save()
-      .then(fullfill);
+      .then(fullfill)
   });
 }
 
@@ -376,6 +417,7 @@ module.exports = {
   toggleUserAvailability,
   toggleCategoryForUser,
   userCount,
+  freelancerCount,
   // Categories
   getCategory,
   getCategories,
@@ -384,6 +426,7 @@ module.exports = {
   freelancersForJob,
   freelancersForJobId,
   saveFreelancerMessageToJob,
+  jobCount,
   // Review
   findReviewById,
   addReview,

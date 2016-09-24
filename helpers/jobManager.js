@@ -9,23 +9,27 @@ const dbmanager = require('./dbmanager');
 const strings = require('./strings');
 require('./reviews');
 require('./reports');
+require('./adminNotifications');
+
+const eventEmitter = global.eventEmitter;
 
 /** Main functions */
 
 /**
- * Sending a message to client after job has been created; message includes inline with freelancers available and suitalbe for this job
+ * Sending a message to client after job has been created; message includes inline with 
+ * freelancers available and suitalbe for this job
  * @param  {Mongoose:User} user Owner of this job
  * @param  {Telegram:Bot} bot  Bot that should send message
  * @param  {Mongoose:Job} job  Relevant job
  */
 function sendJobCreatedMessage(user, bot, job) {
   dbmanager.freelancersForJob(job)
-    .then(users => {
+    .then((users) => {
       keyboards.sendKeyboard(bot,
         user.id,
-        strings.pickFreelancersMessage, 
+        strings.pickFreelancersMessage,
         keyboards.clientKeyboard,
-        data => {
+        (data) => {
           keyboards.sendInline(
             bot,
             user.id,
@@ -33,7 +37,7 @@ function sendJobCreatedMessage(user, bot, job) {
               job.description + '\n\n' +
               messageFromFreelancers(users),
               jobInlineKeyboard(users, job),
-            data2 => {
+            (data2) => {
               job.current_inline_chat_id = data2.chat.id;
               job.current_inline_message_id = data2.message_id;
               job.save();
@@ -709,7 +713,7 @@ function messageFromFreelancers(users) {
 function makeInterested(interested, bot, msg, job, user) {
   if (job.state === strings.jobStates.removed) {
     updateFreelancerMessage(bot, msg, user, job);
-  } else if (job.state !== strings.jobStates.searchingForFreelancer) {
+  } else if (job.state !== strings.jobStates.searchingForFreelancer && interested) {
     keyboards.editMessage(
       bot,
       msg.from.id,
@@ -900,5 +904,5 @@ function updateFreelancerMessageRemoved(bot, msg, user, job) {
 // Exports
 module.exports = {
   sendJobCreatedMessage,
-  sendAllJobs
+  sendAllJobs,
 };

@@ -5,7 +5,8 @@
 let dbmanager = require('./dbmanager');
 let strings = require('./strings');
 let keyboards = require('./keyboards');
-let jobManager = require('./jobManager'); 
+let jobManager = require('./jobManager');
+const adminReports = require('./adminReports');
 
 let mongoose = require('mongoose');
 let Job = mongoose.model('job');
@@ -262,14 +263,26 @@ function askForNewJobDescription(msg, bot, user) {
  */
 function cancelJobCreation(msg, user, bot) {
   user.input_state = undefined;
+  const tempJob = user.job_draft;
   user.job_draft = undefined;
   user.save()
     .then(user => {
-      keyboards.sendKeyboard(
-        bot,
-        msg.chat.id, 
-        strings.clientMenuMessage, 
-        keyboards.clientKeyboard);
+      if (!!tempJob) {
+        tempJob.remove((err, removed) => {
+          keyboards.sendKeyboard(
+            bot,
+            msg.chat.id, 
+            strings.clientMenuMessage, 
+            keyboards.clientKeyboard);
+        });
+      } else {
+        keyboards.sendKeyboard(
+          bot,
+          msg.chat.id, 
+          strings.clientMenuMessage, 
+          keyboards.clientKeyboard);
+      }
+      
     });
 }
 
@@ -340,6 +353,7 @@ function addDescriptionToJobDraft(description, msg, user, bot) {
       user.save()
         .then(user => {
           draft.populate('category', (err, job) => {
+            adminReports.jobCreated(bot, job);
             jobManager.sendJobCreatedMessage(user, bot, job);
           });
         });

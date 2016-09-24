@@ -110,7 +110,6 @@ function categoriesKeyboard(categories, user, page) {
     }
   }
   let allCategories = user.categories.concat(categoriesLeft);
-  console.log(allCategories.length);
   allCategories = allCategories.slice(page*pageSize,page*pageSize+pageSize);
 
   let keyboard = [];
