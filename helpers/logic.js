@@ -23,34 +23,33 @@ const adminReports = require('./adminReports');
 bot.on('message', msg => {
   if (!msg) return;
   else if (!msg.from.username) {
+  
     sendAskForUsername(msg);
     return;
   }
 
   textInputCheck(msg, (isTextInput, user) => {
-    if (user && user.ban_state) {
-      sendBanMessage(msg);
-    } else if (isTextInput) {
-      eventEmitter.emit(((msg.text === strings.cancel) ? 'cancel' : '') + isTextInput, { msg, user, bot });
-      //textInput.handle(msg, user, bot);
-    } else {
-      if (check.botCommandStart(msg)) {
-        dbmanager.addUser(msg.from)
-          .then(obj => {
-            const user = obj.user;
-            const isNew = obj.new;
-            if (isNew) {
-              adminReports.userRegistered(bot, user);
-            }
-            keyboards.sendMainMenu(bot, msg.chat.id, true);
-          });
-      } else if (check.adminCommand(msg)) {
-        adminPanel.handleAdminCommand(msg, bot);
-      } else if (check.replyMarkup(msg)) {
-        handleKeyboard(msg);
-      } else {
-        console.log(msg);
+    if (user) {
+      if (user.ban_state) {
+        sendBanMessage(msg);
+        return;
       }
+      
+      profile.updateProfile(msg, user);
+      
+      if (isTextInput) {
+        eventEmitter.emit(((msg.text === strings.cancel) ? 'cancel' : '') + isTextInput, { msg, user, bot });
+      } else {
+        if (check.adminCommand(msg)) {
+          adminPanel.handleAdminCommand(msg, bot);
+        } else if (check.replyMarkup(msg)) {
+          handleKeyboard(msg);
+        } else {
+          console.log(msg);
+        }
+      }
+    } else if (check.botCommandStart(msg)) {
+      profile.createProfile(bot, msg);
     }
   });
 });
