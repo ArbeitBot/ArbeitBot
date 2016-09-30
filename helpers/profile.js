@@ -97,10 +97,58 @@ function updateProfile(msg, user) {
   }
 }
 
+/**
+ * Toggles user 'busy' status – if it was true, makes it false and vice versa; sends freelancer menu afterwards
+ * @param  {Telegram:Bot} bot Bot that should respond
+ * @param {Number} chatId Chat id of user who should have his busy status toggled
+ */
+function toggleAvailability(bot, chatId) {
+  dbmanager.toggleUserAvailability(chatId)
+    .then(user => {
+      let message = user.busy ? strings.becameBusyMessage : strings.becameAvailableMessage;
+     
+      if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
+        message = user.busy ? strings.missingBecameBusyMessage : strings.missingBecameAvailableMessage;
+      }
+      
+      keyboards.sendKeyboard(bot, chatId, message, keyboards.freelancerKeyboard(user));
+    });
+}
+
+
+// Helpers
+
+/**
+ * Checks if state of user that sent message is one of input ones
+ * @param  {Telegram:Messahe}   msg      Message received
+ * @param  {Function} callback Callback(input_state, user) that is called when check is done
+ */
+function textInputCheck(msg, callback) {
+  dbmanager.findUser({ id: msg.chat.id })
+    .then(user => {
+      if (user) {
+        callback(user.input_state, user);
+      } else {
+        callback();
+      }
+    })
+}
+
+function sendAskForUsername(bot, msg) {
+  bot.sendMessage(msg.from.id, strings.askForUsername);
+}
+
+function sendBanMessage(bot, msg) {
+  bot.sendMessage(msg.from.id, strings.banMessage);
+}
 
 // Exports
 module.exports = {
   createProfile,
   updateProfile,
-  askForBio
+  askForBio,
+  toggleAvailability,
+  textInputCheck,
+  sendAskForUsername,
+  sendBanMessage
 };

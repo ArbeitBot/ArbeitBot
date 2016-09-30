@@ -52,7 +52,7 @@ function sendRateKeyboard(msg, bot, type) {
   dbmanager.findJobById(jobId, 'selectedCandidate')
     .then(job => {
       const user = job.selectedCandidate;
-      const ratingMessage = user.reviews.length === 0 ? '' : ` ${user.GetRateStars()} (${user.reviews.length})`
+      const ratingMessage = user.reviews.length === 0 ? '' : ` ${user.GetRateStars()} (${user.reviews.length})`;
       const specialSymbol = user.specialSymbol ? user.specialSymbol + ' ' : '';
 
       const rateClient = type !== strings.rateFreelancerInline;
@@ -147,7 +147,7 @@ function writeReview(bot, jobId, rating, reviewType) {
 
                   if (byClient) {
                     const freelancer = job.selectedCandidate;
-                    const ratingMessage = freelancer.reviews.length === 0 ? '' : ` ${freelancer.GetRateStars()} (${freelancer.reviews.length})`
+                    const ratingMessage = freelancer.reviews.length === 0 ? '' : ` ${freelancer.GetRateStars()} (${freelancer.reviews.length})`;
                     const specialSymbol = freelancer.specialSymbol ? freelancer.specialSymbol + ' ' : '';
                     message = `[${job.category.title}]\n${job.description}\n\n${specialSymbol}@${freelancer.username}${ratingMessage}\n${freelancer.bio}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`;
                   } else {
