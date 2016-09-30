@@ -113,7 +113,7 @@ function writeReview(bot, jobId, rating, reviewType) {
                 toUser.reviews.push(dbReviewObject._id);
                 toUser.rate += parseInt(rating);
                 if (parseInt(rating) > 3) toUser.positiveRate += 1;
-                toUser.UpdateSortRate();
+                toUser.UpdateSortRate(false);
 
                 toUser.save()
                   .then(toUser => {
