@@ -1,7 +1,7 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-var categorySchema = new Schema({
+const categorySchema = new Schema({
   title: String,
   freelancers: [{
     type: Schema.ObjectId,

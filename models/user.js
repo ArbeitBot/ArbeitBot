@@ -1,8 +1,8 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-let strings = require('../helpers/strings');
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const strings = require('../helpers/strings');
 
-var userSchema = new Schema({
+const userSchema = new Schema({
   id: Number,
   first_name: String,
   last_name: String,

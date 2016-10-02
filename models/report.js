@@ -1,7 +1,7 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-var reportSchema = new Schema({
+const reportSchema = new Schema({
   sendBy: {
     type: Schema.ObjectId,
     ref: 'user',

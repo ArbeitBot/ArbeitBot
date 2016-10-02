@@ -1,9 +1,9 @@
-let mongoose = require('mongoose');
-let Schema = mongoose.Schema;
-let strings = require('../helpers/strings');
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const strings = require('../helpers/strings');
 
 // very basic variant
-var jobSchema = new Schema({
+const jobSchema = new Schema({
   state: {
     type: String,
     required: true,

@@ -7,6 +7,7 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 const config = require('./config');
 const events = require('events');
+//noinspection JSAnnotator
 global.eventEmitter = new events.EventEmitter();
 
 // setup mongoose and load all models

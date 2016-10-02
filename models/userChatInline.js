@@ -1,7 +1,7 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-var userChatInlineSchema = new Schema({
+const userChatInlineSchema = new Schema({
   user: {
     type: Schema.ObjectId,
     ref: 'user',
