@@ -73,6 +73,29 @@ bot.on('callback_query', msg => {
     });
 });
 
+bot.on('inline_query', (msg) => {
+  dbmanager.findUser({ id: msg.from.id })
+    .then(user => {
+      const results = [{
+        type: 'article',
+        id: `${GetRandomInt(1000000000000000, 999999999999999999)}`,
+        title: strings.shareProfile,
+        input_message_content : {
+          message_text: user.GetTextToShareProfile()
+        }
+      }];
+      const opts = {
+        cache_time: 60,
+        is_personal: true
+      };
+      
+      bot.answerInlineQuery(msg.id, results, opts)
+        .then((msg2) => { })
+        .catch((ex) => { console.error(ex); });
+    })
+    .catch(err => console.error(err.message));
+});
+
 
 /**
  * Handler for custom keyboard button clicks
@@ -112,4 +135,18 @@ function handleKeyboard(msg) {
   else if (text === freelanceMenuOptions.back) {
     keyboards.sendMainMenu(bot, msg.chat.id);
   }
+}
+
+
+// Helpers
+
+/**
+ * Get random int
+ * @method GetRandomInt
+ * @param {Number} min
+ * @param {Number} max
+ * @return {Number} Random number
+ */
+function GetRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

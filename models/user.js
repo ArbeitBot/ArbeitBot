@@ -117,6 +117,24 @@ userSchema.methods = {
     const phat = 1.0*this.positiveRate/rCount;
     this.sortRate = ((phat + z*z/(2*rCount) - z * Math.sqrt((phat*(1-phat)+z*z/(4*rCount))/rCount))/(1+z*z/rCount)).toFixed(4);
     if (save) this.save();
+  },
+  /**
+   * @return {string}
+   */
+  GetTextToShareProfile: function() {
+    let text = `Name: ${this.first_name} ${(this.last_name) ? this.last_name : ''}\n` +
+               `Rating: ${this.GetRateStars()}(${this.reviews.length})\n` +
+               `Bio: ${(this.bio) ? this.bio : ''}\n` +
+               `Hourly rate: ${(this.hourly_rate) ? this.hourly_rate : '0'}\n`;
+  
+    if (this.categories.length > 0) {
+      text += `Categories: `;
+  
+      this.categories.forEach(cat => {
+        text += `[${cat.title}]`;
+      });
+    }
+    return text;
   }
 };
 

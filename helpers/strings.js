@@ -47,6 +47,7 @@ module.exports = {
   clientHasChosenAnotherFreelancer: 'The client has chosen another freelancer.',
   noCandidatesMessage: 'There are no available candidates right now 😥 Please, check back later or create a new job.',
   thisWorkIsRemoved: 'This job has been deleted ✌️',
+  shareProfile: 'Share profile',
   mainMenuOptions: {
     findJobs: '👤 Profile',
     findContractors: '⛑ Find contractors',
