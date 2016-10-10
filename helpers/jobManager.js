@@ -27,24 +27,28 @@ const eventEmitter = global.eventEmitter;
  * @param  {Mongoose:Job} job  Relevant job
  */
 function sendJobCreatedMessage(user, bot, job) {
-  dbmanager.freelancersForJob(job)
-    .then((users) => {
-      keyboards.sendKeyboard(bot,
-        user.id,
-        strings.pickFreelancersMessage,
-        keyboards.clientKeyboard,
-        (data) => {
-          keyboards.sendInline(
-            bot,
+  dbmanager.checkAndFixJobPage(job)
+    .then(ret => {
+      job = ret.job;
+      dbmanager.freelancersForJob(job)
+        .then((users) => {
+          keyboards.sendKeyboard(bot,
             user.id,
-            '[' + job.category.title + ']' + '\n' +
-              job.description + '\n\n' +
-              messageFromFreelancers(users),
-              jobInlineKeyboard(users, job),
-            (data2) => {
-              job.current_inline_chat_id = data2.chat.id;
-              job.current_inline_message_id = data2.message_id;
-              job.save();
+            strings.pickFreelancersMessage,
+            keyboards.clientKeyboard,
+            (data) => {
+              keyboards.sendInline(
+                bot,
+                user.id,
+                '[' + job.category.title + ']' + '\n' +
+                  job.description + '\n\n' +
+                  messageFromFreelancers(users),
+                  jobInlineKeyboard(job, users, ret.count),
+                (data2) => {
+                  job.current_inline_chat_id = data2.chat.id;
+                  job.current_inline_message_id = data2.message_id;
+                  job.save();
+                });
             });
         });
     });
@@ -123,6 +127,26 @@ eventEmitter.on(strings.jobManageInline, ({ msg, bot }) => {
           });
       });
   }
+});
+
+eventEmitter.on(strings.freelancerPageInline, ({ msg, bot }) => {
+  // Get essential info
+  let options = msg.data.split(strings.inlineSeparator);
+  let answer = options[1];
+  let jobId = options[2];
+  
+  dbmanager.findJobById(jobId, 'interestedCandidates')
+    .then(job => {
+      if (answer === strings.jobBackPage) {
+        job.current_page -= 1;
+      } else if (answer === strings.jobNextPage) {
+        job.current_page += 1;
+      }
+      job.save()
+        .then(job => {
+          updateJobMessage(job, bot);
+        });
+    });
 });
 
 /**
@@ -725,14 +749,18 @@ function deprecateJobMessage(job, bot) {
  * @param  {Telegram:Bot} bot Bot that should update message
  */
 function updateJobMessageForSearch(job, bot) {
-  dbmanager.freelancersForJob(job)
-    .then(users => {
-      keyboards.editMessage(
-        bot,
-        job.current_inline_chat_id,
-        job.current_inline_message_id,
-        `[${job.category.title}]\n${job.description}\n\n${messageFromFreelancers(users)}`,
-        jobInlineKeyboard(users, job));
+  dbmanager.checkAndFixJobPage(job)
+    .then(ret => {
+      job = ret.job;
+      dbmanager.freelancersForJob(job)
+        .then(users => {
+          keyboards.editMessage(
+            bot,
+            job.current_inline_chat_id,
+            job.current_inline_message_id,
+            `[${job.category.title}]\n${job.description}\n\n${messageFromFreelancers(users)}`,
+            jobInlineKeyboard(job, users, ret.count));
+        });
     });
 }
 
@@ -843,8 +871,9 @@ function updateJobMessageForRemoved(job, bot) {
  * @param  {Mongoose:Job} job         Job for which this keyboard should be made
  * @return {Telegram:InlineKeyboard}             Keyboard ready to be shown
  */
-function jobInlineKeyboard(freelancers, job) {
+function jobInlineKeyboard(job, freelancers, count) {
   let keyboard = [];
+  
   if (job.interestedCandidates.length > 0) {
     keyboard.push([{
       text: strings.jobSelectFreelancer,
@@ -902,6 +931,36 @@ function jobInlineKeyboard(freelancers, job) {
         job._id
     }]);
   });
+  
+  let navKeyboard = [];
+  
+  let pages = Math.ceil(count / 4) - 1; //TODO:Move to one place
+  if (pages <= -1) pages = 0;
+  
+  if (job.current_page > 0) {
+    navKeyboard.push({
+      text: strings.jobBackPage,
+      callback_data: strings.freelancerPageInline +
+      strings.inlineSeparator +
+      strings.jobBackPage +
+      strings.inlineSeparator +
+      job._id
+    });
+  }
+  
+  if (job.current_page < pages) {
+    navKeyboard.push({
+      text: strings.jobNextPage,
+      callback_data: strings.freelancerPageInline +
+      strings.inlineSeparator +
+      strings.jobNextPage +
+      strings.inlineSeparator +
+      job._id
+    });
+  }
+  
+  keyboard.push(navKeyboard);
+  
   return keyboard;
 }
 

@@ -259,6 +259,7 @@ function findJobById(id, populate) {
   });
 }
 
+//TODO:Update doc
 /**
  * Gets a list of available freelancers for job
  * @param  {Mongo:Job} job Job object for which freelancers are returned
@@ -274,13 +275,53 @@ function freelancersForJob(job) {
       { _id: { $nin: job.notInterestedCandidates } }
     ]})
       .sort({ sortRate: -1})
-      .limit(10)
+      .limit(4)//TODO:Move to one place
+      .skip(4 * job.current_page)//TODO:Move to one place
       .exec((err, users) => {
         if (err) {
           throw err;
         } else {
           fullfill(users);
         }
+      });
+  });
+}
+
+//TODO:Update doc
+function freelancersForJobCount(job) {
+  return new Promise(fullfill => {
+    User.count({ $and: [
+      { categories: job.category },
+      { busy: false },
+      { ban_state: { $nin: true }  },
+      { bio: { $exists: true } },
+      { hourly_rate: job.hourly_rate },
+      { _id: { $nin: job.notInterestedCandidates } }
+    ]})
+      .exec((err, count) => {
+        if (err) {
+          throw err;
+        } else {
+          fullfill(count);
+        }
+      });
+  });
+}
+
+//TODO:Update doc
+function checkAndFixJobPage(job) {
+  return new Promise(fullfill => {
+    freelancersForJobCount(job)
+      .then((count) => {
+        let pages = Math.ceil(count / 4) - 1; //TODO:Move to one place
+        if (pages <= -1) pages = 0;
+        
+        if (job.current_page <= -1) job.current_page = 0;
+        if (job.current_page > pages) job.current_page = pages;
+        job.save()
+          .then(job => {
+            fullfill({job, count});
+          });
       });
   });
 }
@@ -425,6 +466,8 @@ module.exports = {
   findJobById,
   freelancersForJob,
   freelancersForJobId,
+  freelancersForJobCount,
+  checkAndFixJobPage,
   saveFreelancerMessageToJob,
   jobCount,
   // Review

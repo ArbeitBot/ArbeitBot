@@ -66,7 +66,11 @@ const jobSchema = new Schema({
   selectedCandidate: {
     type: Schema.ObjectId,
     ref: 'user'
-  }, 
+  },
+  current_page: {
+    type: Number,
+    default: 0
+  }
 });
 
 mongoose.model('job', jobSchema);
