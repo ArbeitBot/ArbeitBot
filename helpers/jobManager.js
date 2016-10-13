@@ -593,8 +593,12 @@ function askForNewJobDescription(msg, bot, user) {
   .then(user => {
     bot.sendMessage(msg.chat.id, strings.addJobDescriptionMessage, {
       reply_markup: JSON.stringify({
-        keyboard: [[ strings.cancel ]],
-        resize_keyboard: true
+        inline_keyboard: [
+          [{
+            text: strings.cancel,
+            callback_data: strings.cancelJobCreationInline + strings.inlineSeparator + user.id
+          }]
+        ]
       }),
       disable_web_page_preview: 'true'
     })
