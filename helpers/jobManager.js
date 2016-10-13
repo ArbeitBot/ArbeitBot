@@ -938,7 +938,7 @@ function jobInlineKeyboard(job, freelancers, count) {
   
   let navKeyboard = [];
   
-  let pages = Math.ceil(count / 4) - 1; //TODO:Move to one place
+  let pages = Math.ceil(count / 10) - 1; //TODO:Move to one place
   if (pages <= -1) pages = 0;
   
   if (job.current_page > 0) {

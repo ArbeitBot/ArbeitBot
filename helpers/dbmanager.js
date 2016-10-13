@@ -275,8 +275,8 @@ function freelancersForJob(job) {
       { _id: { $nin: job.notInterestedCandidates } }
     ]})
       .sort({ sortRate: -1})
-      .limit(4)//TODO:Move to one place
-      .skip(4 * job.current_page)//TODO:Move to one place
+      .limit(10)//TODO:Move to one place
+      .skip(10 * job.current_page)//TODO:Move to one place
       .exec((err, users) => {
         if (err) {
           throw err;
@@ -313,7 +313,7 @@ function checkAndFixJobPage(job) {
   return new Promise(fullfill => {
     freelancersForJobCount(job)
       .then((count) => {
-        let pages = Math.ceil(count / 4) - 1; //TODO:Move to one place
+        let pages = Math.ceil(count / 10) - 1; //TODO:Move to one place
         if (pages <= -1) pages = 0;
         
         if (job.current_page <= -1) job.current_page = 0;
