@@ -38,9 +38,7 @@ bot.on('message', msg => {
       if (isTextInput) {
         eventEmitter.emit(((msg.text === strings.cancel) ? 'cancel' : '') + isTextInput, { msg, user, bot });
       } else {
-        if (check.adminCommand(msg)) {
-          adminPanel.handleAdminCommand(msg, bot);
-        } else if (check.replyMarkup(msg)) {
+        if (check.replyMarkup(msg)) {
           handleKeyboard(msg);
         } else {
           console.log(msg);
@@ -48,6 +46,8 @@ bot.on('message', msg => {
       }
     } else if (check.botCommandStart(msg)) {
       profile.createProfile(bot, msg);
+    } else if (check.adminCommand(msg)) {
+      adminPanel.handleAdminCommand(msg, bot);
     }
   });
 });
