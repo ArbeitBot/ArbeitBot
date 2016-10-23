@@ -2,17 +2,10 @@
  * This file manages HTTP requests that give statistics about server and db
  */
 
-const https = require('https');
+const http = require('http');
 const dbmanager = require('./dbmanager');
-const fs = require('fs');
-const config = require('../config');
 
-const opts = {
-  key: fs.readFileSync(config.ssl_key_path),
-  cert: fs.readFileSync(config.ssh_rsa_path),
-};
-
-https.createServer(opts, (req, res) => {
+http.createServer((req, res) => {
   if (String(req.url) === '/getStats') {
     dbmanager.userCount()
       .then(c =>
