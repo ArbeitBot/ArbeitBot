@@ -41,7 +41,11 @@ bot.on('message', msg => {
         if (check.replyMarkup(msg)) {
           handleKeyboard(msg);
         } else {
-          console.log(msg);
+          if (check.botCommandStart(msg)) {
+            keyboards.sendMainMenu(bot, msg.chat.id, false);
+          } else {
+            console.log(msg);
+          }
         }
       }
     } else if (check.botCommandStart(msg)) {
