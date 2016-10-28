@@ -1,5 +1,5 @@
 /**
- * @module models/category
+ * @module models/job
  * @license MIT
  */
 
