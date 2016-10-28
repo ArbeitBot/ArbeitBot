@@ -1,3 +1,14 @@
+[![ArbeitBot](/docs/header.png?raw=true)](https://arbeitbot.com/)
+
+[![Product Hunt](/docs/ph.png?raw=true)](https://www.producthunt.com/tech/arbeitbot)
+[![Habrahabr](/docs/habr.png?raw=true)](https://habrahabr.ru/post/310434/)
+[![vc.ru](/docs/vc.png?raw=true)](https://vc.ru/p/arbeitbot)
+
+First free open-source Telegram freelance market. Built by people for people.
+
+# Attention!
+This readme page is under development. Also, the code in this repository is yet to be cleaned and documented. We will notify all users of [@arbeit_bot](https://telegram.me/arbeit_bot) on Telegram as soon as the code will be clean enough for general public.
+
 # Arbeit Bot
 This is the source code of [@arbeit_bot](https://telegram.me/arbeit_bot) – first Telegram-based open source freelance market.
 
@@ -23,3 +34,6 @@ After execution you will have `key.key` (your ssl key) and `crt.pem` (your ssl c
 
 # Where to seek help?
 Just bug our group on Telegram: [@borodutcher](https://telegram.me/borodutcher).
+
+#License
+ArbeitBot is released under the MIT license. See LICENSE for details.
