@@ -6,21 +6,23 @@
  */
 
 /** Dependencies */
+const mongoose = require('mongoose');
+const events = require('events');
 const path = require('path');
 const fs = require('fs');
-const mongoose = require('mongoose');
-const config = require('./config');
-const events = require('events');
 
 /** Noinspection JSAnnotator */
 global.eventEmitter = new events.EventEmitter();
 
+/** Configure a bot */
+const config = require('./config');
+
 /** Setup mongoose and load all models */
 mongoose.Promise = global.Promise;
 mongoose.connect(config.database);
-fs.readdirSync(path.join(__dirname, '/models')).forEach(filename => {
-  if (~filename.indexOf('.js')) {
-    require(path.join(__dirname, '/models/', filename))
+fs.readdirSync(path.join(__dirname, '/models')).forEach((filename) => {
+  if (filename.indexOf('.js') !== 1) {
+    require.call(global, path.join(__dirname, '/models/', filename));
   }
 });
 
