@@ -26,7 +26,7 @@ We've been talking about how bad are classic freelance markets for too long: the
 
 We are a completely non-profit organization driven by volunteer contributors who spend their spare time to make a difference in the freelancers' lives. We wanted to build a freelance market where the only person who matters is the client — not stockholders or greedy businessmen. But, if you found this text here, we would assume that you are aware of what ArbeitBot is and would want to help us out.
 
-Well, first, please check out our [development roadmap](https://github.com/orgs/ArbeitBot/projects/1) to be on track with all the current tasks that we are working on. Then, continue reading.
+Well, first, please check out our [development roadmap](https://github.com/ArbeitBot/ArbeitBot/issues) to be on track with all the current tasks that we are working on. Then, continue reading.
 
 # Want to contribute?
 ArbeitBot is a completely non-profit and community-driven project which really depends on it's contributors. If you feel adventurous or just want to help out the project — please do so either by fixing issues from [the list](https://github.com/ArbeitBot/ArbeitBot/issues) and creating a pull request or by submitting issues to our [bug tracker](https://github.com/ArbeitBot/ArbeitBot/issues).
