@@ -6,8 +6,8 @@
   "private": true,
   "scripts": {
     "start": "node ./app.js",
-    "test": "./node_modules/.bin/mocha --reporter spec",
-    "lint": "./node_modules/.bin/eslint ."
+    "test": "mocha --reporter spec",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
