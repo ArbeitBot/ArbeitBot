@@ -1,7 +1,13 @@
+/**
+ * @module models/user
+ * @license MIT
+ */
+
+/** Dependencies */
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const strings = require('../helpers/strings');
 
+const Schema = mongoose.Schema;
 const userSchema = new Schema({
   id: Number,
   first_name: String,
@@ -13,129 +19,137 @@ const userSchema = new Schema({
   input_state_data: String,
   ban_state: {
     type: Boolean,
-    default: false
+    default: false,
   },
   rate: {
     type: Number,
     required: true,
-    default: 0
+    default: 0,
   },
   positiveRate: {
     type: Number,
     required: true,
-    default: 0
+    default: 0,
   },
   sortRate: {
     type: Number,
     required: true,
-    default: 0
+    default: 0,
   },
   reports: [{
     type: Schema.ObjectId,
-    ref: 'report'
+    ref: 'report',
   }],
   reportedBy: [{
     type: Schema.ObjectId,
-    ref: 'user'
+    ref: 'user',
   }],
   reviews: [{
     type: Schema.ObjectId,
     ref: 'review',
     required: true,
-    default: []
+    default: [],
   }],
   writeReview: [{
     type: Schema.ObjectId,
     ref: 'review',
     required: true,
-    default: []
+    default: [],
   }],
   busy: {
     type: Boolean,
     required: true,
-    default: false
+    default: false,
   },
   categories: [{
     type: Schema.ObjectId,
     ref: 'category',
     required: true,
-    default: []
+    default: [],
   }],
   jobs: [{
     type: Schema.ObjectId,
     ref: 'job',
     required: true,
-    default: []
+    default: [],
   }],
   job_draft: {
     type: Schema.ObjectId,
-    ref: 'job'
+    ref: 'job',
   },
   report_draft: {
     type: Schema.ObjectId,
-    ref: 'job'
+    ref: 'job',
   },
-  specialSymbol: String
+  specialSymbol: String,
 });
 
 
 userSchema.methods = {
-  /**
-   * @return {string}
-   */
-  GetRate: function() {
+  /** @return {String} */
+  GetRate() {
     return this.rate ? (this.rate / this.reviews.length).toFixed(1) : 0;
   },
-  /**
-   * @return {string}
-   */
-  GetRateStars: function() {
+
+  /** @return {String} */
+  GetRateStars() {
     let ret = '';
-    for (let i = 0; i < Math.round(this.rate / this.reviews.length); i++) {
+
+    for (let i = 0; i < Math.round(this.rate / this.reviews.length); i += 1) {
       ret += strings.star;
     }
+
     return ret;
   },
-  UpdateRate: function() {
+
+  UpdateRate() {
     let tRate = 0;
     let tPRate = 0;
-    this.reviews.forEach(review => {
+
+    this.reviews.forEach((review) => {
       if (review.rate > 3) tPRate += 1;
       tRate += review.rate;
     });
+
     this.rate = tRate;
     this.positiveRate = tPRate;
     this.save();
     this.UpdateSortRate();
   },
-  UpdateSortRate: function(save = true) {
+
+  UpdateSortRate(save = true) {
     if (this.reviews.length === 0) return;
 
     const rCount = this.reviews.length;
-    //const confidence = 0.95;
-    const z = 1.96;//for 0.95 //pnormaldist(1-(1-confidence)/2)
-    const phat = 1.0*this.positiveRate/rCount;
-    this.sortRate = ((phat + z*z/(2*rCount) - z * Math.sqrt((phat*(1-phat)+z*z/(4*rCount))/rCount))/(1+z*z/rCount)).toFixed(4);
+    // const confidence = 0.95;
+    const z = 1.96;// for 0.95 // pnormaldist(1-(1-confidence)/2)
+    const phat = 1.0 * (this.positiveRate / rCount);
+
+    this.sortRate = ((
+      ((phat + (z * z)) / ((2 * rCount) - z)) * Math.sqrt(
+        ((phat * ((1 - phat) + (z * z))) / (4 * rCount)) / rCount
+      )
+    ) / (1 + ((z * z) / rCount))).toFixed(4);
+
     if (save) this.save();
   },
-  /**
-   * @return {string}
-   */
-  GetTextToShareProfile: function() {
+
+  /** @return {String} */
+  GetTextToShareProfile() {
     let text = `Name: ${this.first_name} ${(this.last_name) ? this.last_name : ''}\n` +
                `Rating: ${this.GetRateStars()}(${this.reviews.length})\n` +
                `Bio: ${(this.bio) ? this.bio : ''}\n` +
                `Hourly rate: ${(this.hourly_rate) ? this.hourly_rate : '0'}\n`;
-  
+
     if (this.categories.length > 0) {
-      text += `Categories: `;
-  
-      this.categories.forEach(cat => {
+      text += 'Categories: ';
+      this.categories.forEach((cat) => {
         text += `[${cat.title}]`;
       });
     }
+
     return text;
-  }
+  },
 };
 
 mongoose.model('user', userSchema);
