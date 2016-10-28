@@ -20,11 +20,11 @@
   "homepage": "https://arbeitbot.com/",
   "dependencies": {
     "body": "^5.1.0",
-    "chai": "^3.5.0",
     "mongoose": "^4.5.3",
     "node-telegram-bot-api": "^0.23.3"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "eslint": "^3.5.0",
     "eslint-config-airbnb-base": "^9.0.0",
     "eslint-plugin-import": "^2.0.1",
