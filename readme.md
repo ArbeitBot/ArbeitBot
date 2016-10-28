@@ -16,7 +16,13 @@ First free open-source Telegram freelance market. Built by people for people.
 - [License](#license)
 
 # About Arbeit Bot
-This is the source code of [@arbeit_bot](https://telegram.me/arbeit_bot) – first Telegram-based open source freelance market.
+We've been talking about how bad are classic freelance markets for too long: they are old, slow, expensive [(on average they take ~22% of your money)](https://support.upwork.com/hc/en-us/articles/211062538-Freelancer-Service-Fees), profit-oriented, not customer-oriented. Heck, [read this post about why upwork sucks](https://collegetimes.co/upwork-sucks/)! I mean, when I first started on Elance back in 2012 fees were around 10%, then they launched paid accounts, then raised fees to 15% and then finally raised them to the current figures when merging into Upwork.
+
+[@arbeit_bot](https://telegram.me/arbeit_bot) — is freelance market, redesigned. Imagine if you didn't have to pay a dime to get job offers or the list of the best freelancers on the market. Imagine if you didn't get spammed with amateur job bids from sketchy companies or freelancers. Imagine if you could always contribute to your favourite freelance market and if all freelancer ranking algorithms were transparent. Imagine if you didn't have to copy-paste the same job bid from client to client. Imagined? Good, because that's what ArbeitBot is offering to you.
+
+We are a completely non-profit organization driven by volunteer contributors who spend their spare time to make a difference in the freelancers' lives. We wanted to build a freelance market where the only person who matters is the client — not stockholders or greedy businessmen. But, if you found this text here, we would assume that you are aware of what ArbeitBot is and would want to help us out.
+
+Well, first, please check out our [development roadmap](https://github.com/orgs/ArbeitBot/projects/1) to be on track with all the current tasks that we are working on. Then, continue reading.
 
 # Want to contribute?
 ArbeitBot is a completely non-profit and community-driven project which really depends on it's contributors. If you feel adventurous or just want to help out the project — please do so either by fixing issues from [the list](https://github.com/ArbeitBot/ArbeitBot/issues) and creating a pull request or by submitting issues to our [bug tracker](https://github.com/ArbeitBot/ArbeitBot/issues).
@@ -35,14 +41,14 @@ By the way, did you know how [@isamsky](https://telegram.me/isamsky) got his spe
 # Installation
 So, you decided to help us out — good, good. First, ArbeitBot can be launched with the latest [LTS release of Node.js](https://nodejs.org) — so go ahead and install it if you didn't do that yet. Secondly, we use MongoDB as our database, so go ahead and [get it as well](https://www.mongodb.com/). The next step would obviously be to run `npm i` in the root folder of the project to install all the dependencies with [Node Package Manager](https://www.npmjs.com/). Then you would want to setup some [environment variables](https://en.wikipedia.org/wiki/Environment_variable) to support configuration abstraction.
 ### Necessary environment variables
-* `TELEGRAM_API_KEY` – api key for your telegram bot (obtained from [@BotFather](https://telegram.me/botfather))
-* `MONGO_DB_URL` – url of your mongo database (i.e. `mongodb://localhost:27017/`)
-* `USE_WEBHOOKS` – flag identifying if bot should use [webhooks](https://core.telegram.org/bots/api/#setwebhook) or should fetch updates every 1000 seconds (webhooks make bot faster but require custom server with SSL setup)
-* *(Optional)* `WEBHOOK_CALLBACK_URL` – url that should be used by Telegram servers for webhooks, should be `https`
-* *(Optional)* `SSL_CERTIFICATE_PATH` – path to ssl certificate for webhooks
-* *(Optional)* `SSH_RSA_PATH` – path to ssh private certificate for webhooks (should not be password encrypted)
-* *(Optional)* `ARBEIT_BOT_STAGING_URL` – url of your staging server for flightplan (if you use flightplan)
-* *(Optional)* `ARBEIT_BOT_PRODUCTION_URL` – url of your production server for flightplan (if you use flightplan)
+* `TELEGRAM_API_KEY` — api key for your telegram bot (obtained from [@BotFather](https://telegram.me/botfather))
+* `MONGO_DB_URL` — url of your mongo database (i.e. `mongodb://localhost:27017/`)
+* `USE_WEBHOOKS` — flag identifying if bot should use [webhooks](https://core.telegram.org/bots/api/#setwebhook) or should fetch updates every 1000 seconds (webhooks make bot faster but require custom server with SSL setup)
+* *(Optional)* `WEBHOOK_CALLBACK_URL` — url that should be used by Telegram servers for webhooks, should be `https`
+* *(Optional)* `SSL_CERTIFICATE_PATH` — path to ssl certificate for webhooks
+* *(Optional)* `SSH_RSA_PATH` — path to ssh private certificate for webhooks (should not be password encrypted)
+* *(Optional)* `ARBEIT_BOT_STAGING_URL` — url of your staging server for flightplan (if you use flightplan)
+* *(Optional)* `ARBEIT_BOT_PRODUCTION_URL` — url of your production server for flightplan (if you use flightplan)
 
 ### How to get ssl certificate and key
 Fortunately, Telegram webhooks support self-signed SSL certificates. You can use this command on server to create self-signed ssl key that can be accepted by Telegram servers:
