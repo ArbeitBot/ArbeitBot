@@ -5,5 +5,8 @@ module.exports = {
     "react",
     "jsx-a11y",
     "import"
-  ]
+  ],
+  "rules": {
+  	"no-use-before-define": false
+  }
 };

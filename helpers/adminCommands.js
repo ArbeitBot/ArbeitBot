@@ -1,11 +1,20 @@
-let dbmanager = require('./dbmanager');
+/**
+ * Admin Commands is used to perform various commands like ban, unban and godvoice on admin channels
+ */
 
-let admins = ['74169393', '-1001052392095'];
+const dbmanager = require('./dbmanager');
 
+const admins = ['74169393', '-1001052392095'];
+
+/**
+ * Handles admin command
+ * @param  {Telegram:Message} msg Message that was received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function handleAdminCommand(msg, bot) {
-  //check if the user is admin
   if (!admins.includes(String(msg.chat.id))) return;
-  let messageText = msg.text;
+
+  const messageText = msg.text;
   if (isUnbanCommand(messageText)) {
     handleUnbanCommand(msg, bot);
   } else if (isBanCommand(messageText)) {
@@ -18,21 +27,50 @@ function handleAdminCommand(msg, bot) {
     console.log('Admin sent command which we dont have');
   }
 }
-handleUpdateRatingsCommand(0,0);
+// Recalculate all ratings as soon as bot is launched
+handleUpdateRatingsCommand(0, 0);
+
+/**
+ * Check if command is unban
+ * @param  {String}  messageText Text of message to check
+ * @return {Boolean}  True if unban command, false otherwise 
+ */
 function isUnbanCommand(messageText) {
   return messageText.indexOf('/unban') == 0;
 }
+
+/**
+ * Check if command is ban
+ * @param  {String}  messageText Text of message to check
+ * @return {Boolean}  True if ban command, false otherwise 
+ */
 function isBanCommand(messageText) {
   return messageText.indexOf('/ban') == 0;
 }
+
+/**
+ * Check if command is godvoice
+ * @param  {String}  messageText Text of message to check
+ * @return {Boolean}  True if godvoice command, false otherwise 
+ */
 function isGodVoiceCommand(messageText) {
   return messageText.indexOf('/godvoice') == 0;
 }
 
+/**
+ * Check if command is update ratings
+ * @param  {String}  messageText Text of message to check
+ * @return {Boolean}  True if update ratings command, false otherwise 
+ */
 function isUpdateRatingsCommand(messageText) {
   return messageText.indexOf('/updateratings') == 0;
 }
 
+/**
+ * Used to update all users' ratings
+ * @param  {Telegram:Message} msg Message that was received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function handleUpdateRatingsCommand(msg, bot) {
   dbmanager.getAllUsers()
     .then(users => {
@@ -42,6 +80,11 @@ function handleUpdateRatingsCommand(msg, bot) {
     })
 }
 
+/**
+ * Handler for godvoice command, sends received message to all users registered
+ * @param  {Telegram:Message} msg Message that was received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function handleGodVoiceCommand(msg, bot) {
   // todo: change to regex
   // let message = /^\/godvoice@?[^ ]* +(.*)$/.exec(msg.text)[1];
@@ -58,6 +101,12 @@ function handleGodVoiceCommand(msg, bot) {
       });
     })
 }
+
+/**
+ * Handler for ban command, bans specified user
+ * @param  {Telegram:Message} msg Message that was received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function handleBanCommand(msg, bot) {
   let username = /^\/ban@?.* @(.*)$/.exec(msg.text)[1];
   console.log(username);
@@ -68,6 +117,12 @@ function handleBanCommand(msg, bot) {
         .then(sendConfirmed(msg, bot));
     })
 }
+
+/**
+ * Handler for godvoice command, unbans specified user
+ * @param  {Telegram:Message} msg Message that was received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function handleUnbanCommand(msg, bot) {
   let username = /^\/unban@?.* @(.*)$/.exec(msg.text)[1];
   dbmanager.findUser({username: username})
@@ -78,10 +133,15 @@ function handleUnbanCommand(msg, bot) {
     });
 }
 
+/**
+ * Sends 'confirmed.' string to specified chat id in msg
+ * @param  {Telegram:Message} msg Message that was received
+ * @param  {Telegram:Bot} bot Bot that should respond
+ */
 function sendConfirmed(msg, bot) {
   bot.sendMessage(msg.chat.id, 'confirmed.');
 }
 
 module.exports = {
-  handleAdminCommand
+  handleAdminCommand,
 };
