@@ -125,11 +125,7 @@ userSchema.methods = {
     const z = 1.96;// for 0.95 // pnormaldist(1-(1-confidence)/2)
     const phat = 1.0 * (this.positiveRate / rCount);
 
-    this.sortRate = ((
-      ((phat + (z * z)) / ((2 * rCount) - z)) * Math.sqrt(
-        ((phat * ((1 - phat) + (z * z))) / (4 * rCount)) / rCount
-      )
-    ) / (1 + ((z * z) / rCount))).toFixed(4);
+    this.sortRate = ((phat + z * z / (2 * rCount) - z * Math.sqrt((phat * ( 1 - phat) + z * z / (4 * rCount)) / rCount)) / (1 + z * z / rCount)).toFixed(4);
 
     if (save) this.save();
   },
