@@ -1,11 +1,22 @@
 {
   "name": "arbeit-bot",
   "version": "0.0.1",
+  "description": "First free open-source Telegram freelance market. Built by people for people.",
+  "main": "app.js",
   "private": true,
   "scripts": {
     "start": "node ./app.js",
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArbeitBot/ArbeitBot.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ArbeitBot/ArbeitBot/issues"
+  },
+  "homepage": "https://arbeitbot.com/",
   "dependencies": {
     "body": "^5.1.0",
     "chai": "^3.5.0",

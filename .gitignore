@@ -1,8 +1,9 @@
-node_modules
 .DS_Store
 *.swp
 *.swo
 config.js
-npm-debug.log
 .env
 .idea
+
+node_modules
+npm-debug.*
