@@ -1,13 +1,19 @@
+/**
+ * @module models/job
+ * @license MIT
+ */
+
+/** Dependencies */
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const strings = require('../helpers/strings');
 
-// very basic variant
+/** Very basic variant */
+const Schema = mongoose.Schema;
 const jobSchema = new Schema({
   state: {
     type: String,
     required: true,
-    default: strings.jobStates.searchingForFreelancer
+    default: strings.jobStates.searchingForFreelancer,
   },
   current_inline_message_id: String,
   current_inline_chat_id: String,
@@ -15,62 +21,62 @@ const jobSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'userChatInline',
     required: true,
-    default: []
+    default: [],
   }],
   description: String,
   hourly_rate: String,
   reviewByClient: {
     type: Schema.ObjectId,
-    ref: 'review'
+    ref: 'review',
   },
   reviewByFreelancer: {
     type: Schema.ObjectId,
-    ref: 'review'
+    ref: 'review',
   },
   reports: [{
     type: Schema.ObjectId,
-    ref: 'report'
+    ref: 'report',
   }],
   reportedBy: [{
     type: Schema.ObjectId,
-    ref: 'user'
+    ref: 'user',
   }],
   category: {
     type: Schema.ObjectId,
     ref: 'category',
-    required: true
+    required: true,
   },
   client: {
     type: Schema.ObjectId,
     ref: 'user',
-    required: true
+    required: true,
   },
   candidates: [{
     type: Schema.ObjectId,
     ref: 'user',
     required: true,
-    default: []
+    default: [],
   }],
   interestedCandidates: [{
     type: Schema.ObjectId,
     ref: 'user',
     required: true,
-    default: []
+    default: [],
   }],
   notInterestedCandidates: [{
     type: Schema.ObjectId,
     ref: 'user',
     required: false,
-    default: []
+    default: [],
   }],
   selectedCandidate: {
     type: Schema.ObjectId,
-    ref: 'user'
+    ref: 'user',
   },
   current_page: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 });
 
 mongoose.model('job', jobSchema);

@@ -1,29 +1,36 @@
 /**
  * Arbeit Telergam Bot executable file; loads all mongoose models and starts logic.js
+ *
+ * @module app
+ * @license MIT
  */
 
+/** Dependencies */
+const mongoose = require('mongoose');
+const events = require('events');
 const path = require('path');
 const fs = require('fs');
-const mongoose = require('mongoose');
-const config = require('./config');
-const events = require('events');
-//noinspection JSAnnotator
+
+/** Noinspection JSAnnotator */
 global.eventEmitter = new events.EventEmitter();
 
-// setup mongoose and load all models
+/** Configure a bot */
+const config = require('./config');
+
+/** Setup mongoose and load all models */
 mongoose.Promise = global.Promise;
 mongoose.connect(config.database);
-fs.readdirSync(path.join(__dirname, '/models')).forEach(filename => {
-  if (~filename.indexOf('.js')) {
-    require(path.join(__dirname, '/models/', filename))
+fs.readdirSync(path.join(__dirname, '/models')).forEach((filename) => {
+  if (filename.indexOf('.js') !== 1) {
+    require.call(global, path.join(__dirname, '/models/', filename));
   }
 });
 
-// start bot
+/** Start bot */
 require('./helpers/logic');
 
-// start stat server
+/** Start stat server */
 require('./helpers/statServer');
 
-// print a message to assure that bot is up and running
+/** Print a message to assure that bot is up and running */
 console.log('Bot is up and running');

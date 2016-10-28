@@ -1,23 +1,33 @@
 {
   "name": "arbeit-bot",
   "version": "0.0.1",
+  "description": "First free open-source Telegram freelance market. Built by people for people.",
+  "main": "app.js",
   "private": true,
   "scripts": {
     "start": "node ./app.js",
-    "test": "./node_modules/.bin/mocha --reporter spec"
+    "test": "./node_modules/.bin/mocha --reporter spec",
+    "lint": "./node_modules/.bin/eslint ."
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArbeitBot/ArbeitBot.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ArbeitBot/ArbeitBot/issues"
+  },
+  "homepage": "https://arbeitbot.com/",
   "dependencies": {
     "body": "^5.1.0",
-    "chai": "^3.5.0",
     "mongoose": "^4.5.3",
     "node-telegram-bot-api": "^0.23.3"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "eslint": "^3.5.0",
-    "eslint-config-airbnb": "^11.1.0",
-    "eslint-plugin-import": "^1.15.0",
-    "eslint-plugin-jsx-a11y": "^2.2.2",
-    "eslint-plugin-react": "^6.2.2",
+    "eslint-config-airbnb-base": "^9.0.0",
+    "eslint-plugin-import": "^2.0.1",
     "flightplan": "^0.6.14",
     "mocha": "^2.5.3",
     "rewire": "^2.5.2",

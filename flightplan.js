@@ -1,3 +1,4 @@
+/*eslint-disable */
 const plan = require('flightplan');
 const config = require('./config');
 
@@ -6,24 +7,20 @@ const username = 'deploy';
 
 const tmpDir = `${appName}-${new Date().getTime()}`;
 
-// configuration
-plan.target('staging', [
-  {
-    host: config.staging_url,
-    username,
-    privateKey: config.ssh_rsa_path,
-    agent: process.env.SSH_AUTH_SOCK,
-  },
-]);
+/** Configuration */
+plan.target('staging', [{
+  host: config.staging_url,
+  username,
+  privateKey: config.ssh_rsa_path,
+  agent: process.env.SSH_AUTH_SOCK,
+}]);
 
-plan.target('production', [
-  {
-    host: config.production_url,
-    username,
-    privateKey: config.ssh_rsa_path,
-    agent: process.env.SSH_AUTH_SOCK,
-  },
-]);
+plan.target('production', [{
+  host: config.production_url,
+  username,
+  privateKey: config.ssh_rsa_path,
+  agent: process.env.SSH_AUTH_SOCK,
+}]);
 
 plan.local((local) => {
   local.log('Copy files to remote hosts');
