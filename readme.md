@@ -1,7 +1,4 @@
 [![ArbeitBot](/docs/header.png?raw=true)](https://arbeitbot.com/)
-[![GitHub issues](https://img.shields.io/github/issues/ArbeitBot/ArbeitBot.svg)](https://github.com/ArbeitBot/ArbeitBot/issues)
-[![GitHub forks](https://img.shields.io/github/forks/ArbeitBot/ArbeitBot.svg)](https://github.com/ArbeitBot/ArbeitBot/network)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/ArbeitBot/ArbeitBot/master/LICENSE)
 
 [![Product Hunt](/docs/ph.png?raw=true)](https://www.producthunt.com/tech/arbeitbot)
 [![Habrahabr](/docs/habr.png?raw=true)](https://habrahabr.ru/post/310434/)
@@ -9,10 +6,7 @@
 
 First free open-source Telegram freelance market. Built by people for people.
 
-# Attention!
-This readme page is under development. Also, the code in this repository is yet to be cleaned and documented. We will notify all users of [@arbeit_bot](https://telegram.me/arbeit_bot) on Telegram as soon as the code will be clean enough for general public.
-
-- [Arbeit Bot](#arbeit-bot)
+- [About Arbeit Bot](#about-arbeit-bot)
 - [Want to contribute?](#want-to-contribute)
 - [Installation](#installation)
     - [Necessary environment variables](#necessary-environment-variables)
@@ -21,7 +15,7 @@ This readme page is under development. Also, the code in this repository is yet 
 - [Where to seek help](#where-to-seek-help)
 - [License](#license)
 
-# Arbeit Bot
+# About Arbeit Bot
 This is the source code of [@arbeit_bot](https://telegram.me/arbeit_bot) – first Telegram-based open source freelance market.
 
 # Want to contribute?
