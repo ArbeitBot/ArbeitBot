@@ -9,6 +9,15 @@ First free open-source Telegram freelance market. Built by people for people.
 # Attention!
 This readme page is under development. Also, the code in this repository is yet to be cleaned and documented. We will notify all users of [@arbeit_bot](https://telegram.me/arbeit_bot) on Telegram as soon as the code will be clean enough for general public.
 
+- [Arbeit Bot](#arbeit-bot)
+- [Want to contribute?](#want-to-contribute)
+- [Installation](#installation)
+    - [Necessary environment variables](#necessary-environment-variables)
+    - [How to get ssl certificate and key](#how-to-get-ssl-certificate-and-key)
+    - [I got it working, what's next?](#i-got-it-working-whats-next)
+- [Where to seek help](#where-to-seek-help)
+- [License](#license)
+
 # Arbeit Bot
 This is the source code of [@arbeit_bot](https://telegram.me/arbeit_bot) – first Telegram-based open source freelance market.
 
@@ -19,7 +28,7 @@ The best option to add a feature to the codebase is to first [open an issue](htt
 
 If you want to fix a bug from [the list of the issues](https://github.com/ArbeitBot/ArbeitBot/issues), please comment under the issue that you are working on it, then fork the repository and create a pull request.
 
-Please use [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) as the main tool to follow our project-wide codestyle.
+Please use [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) as the main tool to follow our project-wide code style.
 
 We highly appreciate any help and that's why the most active contributors will get a 🐝 emoji beside their freelancer profile to stand out among other freelancers of the same category, like that:
 
@@ -39,7 +48,7 @@ So, you decided to help us out — good, good. First, ArbeitBot can be launched 
 * *(Optional)* `ARBEIT_BOT_PRODUCTION_URL` – url of your production server for flightplan (if you use flightplan)
 
 ### How to get ssl certificate and key
-Fortunatelly, Telegram webhooks support self-signed SSL certificates. You can use this command on server to create self-signed ssl key that can be accepted by Telegram servers:
+Fortunately, Telegram webhooks support self-signed SSL certificates. You can use this command on server to create self-signed ssl key that can be accepted by Telegram servers:
 
 `openssl req -newkey rsa:2048 -sha256 -nodes -keyout key.key -x509 -days 365 -out crt.pem -subj "/C=US/ST=New York/L=Brooklyn/O=Arbeit_bot/CN={DOMAIN}"`
 
@@ -48,10 +57,10 @@ After execution you will have `key.key` (your ssl key) and `crt.pem` (your ssl c
 **Important:** please make sure to add your real server address instead of `{DOMAIN}` in this command. If you aren't using domain name, you can leave your IP there in the form of `1.1.1.1`. If you don't specify the correct address or domain here, you will not be able to receive any updates from Telegram servers.
 
 ### I got it working, what's next?
-Wonderful! After you got everything working well, please follow instructions from [Want to contribute?](#want-to-contribute) We all hope to see you with the 🐝 emojy someday!
+Wonderful! After you got everything working well, please follow instructions from [Want to contribute?](#want-to-contribute) We all hope to see you with the 🐝 emoji someday!
 
-#Where to seek help?
+# Where to seek help?
 In case you need a hand to figure something out, please feel free to [open an issue](https://github.com/ArbeitBot/ArbeitBot/issues) or chat with us on our [Telegram channel](https://telegram.me/borodutcher) (careful, channel is conquered by Russians) ❤️. Or bug the person responsible for the majority of bot's bugs — [@borodutch](https://telegram.me/borodutch).
 
-#License
+# License
 ArbeitBot is released under the MIT license. See LICENSE for details. ArbeitBot development would not be possible without help of [existing Node.js Telegram bot API](https://github.com/yagop/node-telegram-bot-api/) written by [@yagop](https://github.com/yagop). Thank you!
