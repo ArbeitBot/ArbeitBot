@@ -7,6 +7,6 @@ module.exports = {
     "import"
   ],
   "rules": {
-  	"no-use-before-define": false
+  	"no-use-before-define": "off"
   }
 };

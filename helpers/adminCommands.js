@@ -1,5 +1,5 @@
 /**
- * Admin Commands is used to perform various commands like ban, unban and godvoice on admin channels
+ * Used to perform various commands like ban, unban and godvoice on admin channels
  */
 
 const dbmanager = require('./dbmanager');

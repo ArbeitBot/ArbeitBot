@@ -1,10 +1,10 @@
 /**
- * Ты зашел сюда чтобы изменить дизайн сообщения о новом рейте для админов?
- * Тогда к 44 строчке проследуй.
+ * Used to send notifications about user actions to admin channels
  */
 
 const strings = require('./strings');
 const dbmanager = require('./dbmanager');
+
 const admins = ['74169393', '-1001052392095'];
 
 eventEmitter.on(strings.newReview, ({ bot, dbReviewObject }) => {
