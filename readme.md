@@ -1,4 +1,7 @@
 [![ArbeitBot](/docs/header.png?raw=true)](https://arbeitbot.com/)
+[![GitHub issues](https://img.shields.io/github/issues/ArbeitBot/ArbeitBot.svg)](https://github.com/ArbeitBot/ArbeitBot/issues)
+[![GitHub forks](https://img.shields.io/github/forks/ArbeitBot/ArbeitBot.svg)](https://github.com/ArbeitBot/ArbeitBot/network)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/ArbeitBot/ArbeitBot/master/LICENSE)
 
 [![Product Hunt](/docs/ph.png?raw=true)](https://www.producthunt.com/tech/arbeitbot)
 [![Habrahabr](/docs/habr.png?raw=true)](https://habrahabr.ru/post/310434/)
