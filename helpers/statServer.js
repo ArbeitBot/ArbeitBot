@@ -1,9 +1,13 @@
 /**
  * This file manages HTTP requests that give statistics about server and db
+ *
+ * @module helpers/statServer
+ * @license MIT
  */
 
-const http = require('http');
+/** Dependencies */
 const dbmanager = require('./dbmanager');
+const http = require('http');
 
 http.createServer((req, res) => {
   if (String(req.url) === '/getStats') {
