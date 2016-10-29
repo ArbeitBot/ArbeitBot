@@ -5,9 +5,6 @@
  * @license MIT
  */
 
-/** Eslint */
-/*eslint "no-underscore-dangle": "warn"*/
-
 /** Dependencies */
 const dbmanager = require('./dbmanager');
 const strings = require('./strings');
