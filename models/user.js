@@ -114,10 +114,10 @@ userSchema.methods = {
     this.rate = tRate;
     this.positiveRate = tPRate;
     this.save();
-    this.UpdateSortRate();
+    this.updateSortRate();
   },
 
-  UpdateSortRate(save = true) {
+  updateSortRate(save = true) {
     if (this.reviews.length === 0) return;
 
     const rCount = this.reviews.length;
