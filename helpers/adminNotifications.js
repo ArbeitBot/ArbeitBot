@@ -9,15 +9,22 @@
 const dbmanager = require('./dbmanager');
 const strings = require('./strings');
 
+/** Constants */
 const admins = ['74169393', '-1001052392095'];
 
-eventEmitter.on(strings.newReview, ({ bot, dbReviewObject }) => {
+global.eventEmitter.on(strings.newReview, ({ bot, dbReviewObject }) => {
   dbmanager.findReviewById(dbReviewObject._id, ['toUser', 'byUser', 'job'])
     .then((review) => {
       sendNewReviewAlerts(bot, review);
-    });
+    })
+    .catch(/** todo: handle error */);
 });
 
+/**
+ * Getting a keyboard with buttons to respond to new review
+ * @param  {Mongoose:Review}  review - Review to be reviewed
+ * @return {Telegram:Inline}  Inline keyboard with relevant buttons
+ */
 function adminNewReviewKeyboard(review) {
   const keyboard = [[
     {
@@ -46,83 +53,102 @@ function adminNewReviewKeyboard(review) {
   return keyboard;
 }
 
+/**
+ * Getting a text for review to show admins
+ * @param  {Mongoose:Review}  review - Review tfor which text is generated
+ * @return {String}  Text generated for admins from the given review
+ */
 function formNewReviewMessageText(review) {
-  function status(review, userId) {
-    return String(userId) === (String(review.job.client) ? 'client' : 'freelancer');
-  }
-
+  const status = String(review.toUser._id) === (String(review.job.client) ? 'client' : 'freelancer');
   const message =
     `${strings.rateOptionsArray[review.rate - 1]}\n` +
-    `@${review.byUser.username} (${status(review, review.byUser._id)}) rated @${review.toUser.username} (${status(review, review.toUser._id)})\n` +
+    `@${review.byUser.username} (${status(review, review.byUser._id)}) rated @${review.toUser.username} (${status})\n` +
     `${review.resolveWay || ''}\n` +
     `${review.job.description}`;
 
   return message;
 }
 
+/**
+ * Sending all admins a message about new review
+ * @param {Telegram:Bot} bot - Bot that should send message
+ * @param {Mongoose:Review} review - Review that should be reported
+ */
 function sendNewReviewAlerts(bot, review) {
   const message = formNewReviewMessageText(review);
 
   admins.forEach((admin) => {
     const keyboard = adminNewReviewKeyboard(review);
     bot.sendMessage(admin, message, { reply_markup: JSON.stringify({ inline_keyboard: keyboard }) })
-      .then((message) => {
-        review.inlineMessages.push(`${message.message_id}+${message.chat.id}`);
+      .then((sentMessage) => {
+        review.inlineMessages.push(`${sentMessage.message_id}+${sentMessage.chat.id}`);
       })
       .then(() => { review.save(); })
-      .catch((err) => { console.log(err.name); });
+      .catch(err => bot.sendMessage(admin, err.name));
   });
 }
 
-eventEmitter.on(strings.adminNotifications.adminBanReviewInline, ({ msg, bot }) => {
+global.eventEmitter.on(strings.adminNotifications.adminBanReviewInline, ({ msg, bot }) => {
   const reviewId = msg.data.split(strings.inlineSeparator)[1];
 
   dbmanager.findReviewById(reviewId, ['toUser', 'byUser', 'job'])
     .then((review) => {
-      review.resolveWay = 'Ban';
-      review.save();
-      banUser(review.byUser);
-      deleteReview(review);
-      refreshAllAdminReviewMessages(review, bot);
-    });
+      const reviewCopy = Object.create(review);
+      reviewCopy.resolveWay = 'Ban';
+      reviewCopy.save();
+      banUser(reviewCopy.byUser);
+      deleteReview(reviewCopy);
+      refreshAllAdminReviewMessages(reviewCopy, bot);
+    })
+    .catch(/** todo: handle error */);
 });
 
-eventEmitter.on(strings.adminNotifications.adminDeleteReviewInline, ({ msg, bot }) => {
+global.eventEmitter.on(strings.adminNotifications.adminDeleteReviewInline, ({ msg, bot }) => {
   // Ищем ревью в базе данных - удаляем
   const reviewId = msg.data.split(strings.inlineSeparator)[1];
   dbmanager.findReviewById(reviewId, ['toUser', 'byUser', 'job'])
     .then((review) => {
-      review.resolveWay = 'Delete';
-      review.save();
-      deleteReview(review);
-      refreshAllAdminReviewMessages(review, bot);
-    });
+      const reviewCopy = Object.create(review);
+      reviewCopy.resolveWay = 'Delete';
+      reviewCopy.save();
+      deleteReview(reviewCopy);
+      refreshAllAdminReviewMessages(reviewCopy, bot);
+    })
+    .catch(/** todo: handle error */);
 });
 
-eventEmitter.on(strings.adminNotifications.adminOkReviewInline, ({ msg, bot }) => {
+global.eventEmitter.on(strings.adminNotifications.adminOkReviewInline, ({ msg, bot }) => {
   const reviewId = msg.data.split(strings.inlineSeparator)[1];
 
   //  Everything is ok so we just clear all messages
   dbmanager.findReviewById(reviewId, ['toUser', 'byUser', 'job'])
     .then((review) => {
-      review.resolveWay = 'Ok';
-      review.save();
-      refreshAllAdminReviewMessages(review, bot);
-    });
+      const reviewCopy = Object.create(review);
+      reviewCopy.resolveWay = 'Ok';
+      reviewCopy.save();
+      refreshAllAdminReviewMessages(reviewCopy, bot);
+    })
+    .catch(/** todo: handle error */);
 });
 
 /**
- * This function should be called after any button pressed
+ * This function should be called after any button is pressed
  * [OK] [BAN] [DELETE] - anyone of those should hide all buttons
  *
  * @param review - Mongoose Object
  * @param bot
  */
+
+/**
+ * Function is called after any inline button is pressed
+ * @param {Mongoose:Review} review - Relevant review
+ * @param {Telegram:Bot} bot - Bot that should respond
+ */
 function refreshAllAdminReviewMessages(review, bot) {
   const messages = review.inlineMessages;
   const text = formNewReviewMessageText(review);
 
-  messages.forEach(messageInfo => {
+  messages.forEach((messageInfo) => {
     const data = messageInfo.split('+');
 
     bot.editMessageText(text, {
@@ -130,14 +156,17 @@ function refreshAllAdminReviewMessages(review, bot) {
       chat_id: data[1],
       keyboard: JSON.stringify({ inline_keyboard: [] }),
       disable_web_page_preview: 'true',
-    }).catch((err) => { console.error(err.message); });
+    })
+    .catch(/** todo: handle error */);
   });
 }
+
 /**
- * @param review - Mongoose Object
+ * Deleting a review
+ * @param {Mongoose:Review} review - Review to delete
  */
 function deleteReview(review) {
-  let user = review.toUser;
+  const user = review.toUser;
 
   user.reviews.remove(review._id);
   user.save();
@@ -145,17 +174,21 @@ function deleteReview(review) {
 }
 
 /**
- * @param user - mongoose Object or Id
+ * Used to ban a use
+ * @param {Mongoose:User} user - User to be banned
  */
 function banUser(user) {
   if (!user.username) {
     dbmanager.findUserById(user)
-      .then((user) => {
-        user.ban_state = true;
-        user.save();
-      });
+      .then((dbuser) => {
+        const dbuserCopy = Object.create(dbuser);
+        dbuserCopy.ban_state = true;
+        dbuserCopy.save();
+      })
+      .catch(/** todo: handle error */);
   } else {
-    user.ban_state = true;
-    user.save();
+    const userCopy = Object.create(user);
+    userCopy.ban_state = true;
+    userCopy.save();
   }
 }

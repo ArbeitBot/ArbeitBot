@@ -14,6 +14,7 @@
     "promise/catch-or-return": 2,
     "indent": [ "warn", 2 ],
     "no-underscore-dangle": [2, { "allow": ["_id"] }], /** Mongoose uses _id, we can't have control over it */
+    "no-use-before-define": 0,
     "linebreak-style": [ "warn", "unix" ],
     "quotes": [ "warn", "single" ],
     "semi": [ "warn", "always" ]
