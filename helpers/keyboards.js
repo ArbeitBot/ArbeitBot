@@ -163,7 +163,7 @@ function sendFreelanceMenu(bot, chatId) {
         }
 
         if (user.reviews.length > 0) {
-          text = `${text}\n${user.GetRateStars()} (${user.reviews.length})`;
+          text = `${text}\n${user.getRateStars()} (${user.reviews.length})`;
         }
 
         if (user.bio) {

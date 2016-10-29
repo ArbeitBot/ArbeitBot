@@ -64,7 +64,7 @@ function sendRateKeyboard(msg, bot, type) {
       const user = job.selectedCandidate;
       const ratingMessage = ((user.reviews.length) === 0 ?
         '' :
-        ` ${user.GetRateStars()} (${user.reviews.length})`
+        ` ${user.getRateStars()} (${user.reviews.length})`
       );
 
       const specialSymbol = ((user.specialSymbol) ?
@@ -170,7 +170,7 @@ function writeReview(bot, jobId, rating, reviewType) {
                     const freelancer = job.selectedCandidate;
                     const ratingMessage = ((freelancer.reviews.length === 0) ?
                       '' :
-                      ` ${freelancer.GetRateStars()} (${freelancer.reviews.length})`
+                      ` ${freelancer.getRateStars()} (${freelancer.reviews.length})`
                     );
                     const specialSymbol = ((freelancer.specialSymbol) ?
                       freelancer.specialSymbol + ' ':
