@@ -1,7 +1,10 @@
 /**
- * Handles thw whole life cycle of job after creation: from showing a list 
+ * Handles thw whole life cycle of job after creation: from showing a list
  * of available freelancers to client to rating client and freelancer
  * Please see docs/job_process.txt to get better idea on job life cycle
+ *
+ * @module helpers/jobManager.js
+ * @license MIT
  */
 
 const keyboards = require('./keyboards');
@@ -20,7 +23,7 @@ const eventEmitter = global.eventEmitter;
 /** Main functions */
 
 /**
- * Sending a message to client after job has been created; message includes inline with 
+ * Sending a message to client after job has been created; message includes inline with
  * freelancers available and suitalbe for this job
  * @param  {Mongoose:User} user Owner of this job
  * @param  {Telegram:Bot} bot  Bot that should send message
@@ -134,7 +137,7 @@ eventEmitter.on(strings.freelancerPageInline, ({ msg, bot }) => {
   let options = msg.data.split(strings.inlineSeparator);
   let answer = options[1];
   let jobId = options[2];
-  
+
   dbmanager.findJobById(jobId, 'interestedCandidates')
     .then(job => {
       if (answer === strings.jobBackPage) {
@@ -493,7 +496,7 @@ function showSelectFreelancers(msg, job, bot) {
     msg.message.message_id,
     `[${job.category.title}]\n` +
       job.description + '\n\n' +
-      strings.selectCandidateMessage + '\n\n' + 
+      strings.selectCandidateMessage + '\n\n' +
       messageFromFreelancers(job.interestedCandidates),
     jobSelectCandidateKeyboard(job));
 }
@@ -525,9 +528,9 @@ function sendJobMessages(user, bot) {
  */
 function sendNewJobMessage(job, user, bot) {
   deprecateJobMessage(job, bot);
-  keyboards.sendInline(bot, 
-    user.id, 
-    strings.loadingMessage, 
+  keyboards.sendInline(bot,
+    user.id,
+    strings.loadingMessage,
     [],
     data => {
       job.current_inline_chat_id = data.chat.id;
@@ -653,7 +656,7 @@ function addFreelancersToCandidates(jobId, users, msg, bot) {
   dbmanager.findJobById(jobId, 'client')
     .then(job => {
       users = users.filter(user => {
-        return !job.candidates.map(o => String(o)).includes(String(user._id)) && 
+        return !job.candidates.map(o => String(o)).includes(String(user._id)) &&
           !job.interestedCandidates.map(o => String(o)).includes(String(user._id)) &&
           !job.notInterestedCandidates.map(o => String(o)).includes(String(user._id));
       });
@@ -810,29 +813,29 @@ function updateJobMessageForFinished(job, bot) {
     .then(user => {
       let keyboard = [[{
           text: strings.jobFinishedOptions.rate,
-          callback_data: 
-            strings.askRateFreelancerInline + 
-            strings.inlineSeparator + 
+          callback_data:
+            strings.askRateFreelancerInline +
+            strings.inlineSeparator +
             job._id +
             strings.inlineSeparator +
             user._id
         }
       ]];
-      
+
       //detect if freelancer already was reported by this client
       let isAlreadyReportedInThisJob = !!user.reports.find(report => {
         return String(report.job) == String(job._id);
       });
-      
+
       // !String(user.reportedBy).includes(String(job.client))
       if (!isAlreadyReportedInThisJob) {
         keyboard[0].push({
           text: strings.jobFinishedOptions.report,
-          callback_data: 
-            strings.reportFreelancerInline + 
-            strings.inlineSeparator + 
-            job._id + 
-            strings.inlineSeparator + 
+          callback_data:
+            strings.reportFreelancerInline +
+            strings.inlineSeparator +
+            job._id +
+            strings.inlineSeparator +
             user._id
         });
       }
@@ -877,7 +880,7 @@ function updateJobMessageForRemoved(job, bot) {
  */
 function jobInlineKeyboard(job, freelancers, count) {
   let keyboard = [];
-  
+
   if (job.interestedCandidates.length > 0) {
     keyboard.push([{
       text: strings.jobSelectFreelancer,
@@ -935,12 +938,12 @@ function jobInlineKeyboard(job, freelancers, count) {
         job._id
     }]);
   });
-  
+
   let navKeyboard = [];
-  
+
   let pages = Math.ceil(count / 10) - 1; //TODO:Move to one place
   if (pages <= -1) pages = 0;
-  
+
   if (job.current_page > 0) {
     navKeyboard.push({
       text: strings.jobBackPage,
@@ -951,7 +954,7 @@ function jobInlineKeyboard(job, freelancers, count) {
       job._id
     });
   }
-  
+
   if (job.current_page < pages) {
     navKeyboard.push({
       text: strings.jobNextPage,
@@ -962,9 +965,9 @@ function jobInlineKeyboard(job, freelancers, count) {
       job._id
     });
   }
-  
+
   keyboard.push(navKeyboard);
-  
+
   return keyboard;
 }
 
@@ -982,7 +985,7 @@ function jobSelectCandidateKeyboard(job) {
     strings.inlineSeparator +
     strings.selectFreelancerCancel +
     strings.inlineSeparator +
-    job._id 
+    job._id
   }]);
   job.interestedCandidates.forEach(freelancer => {
     keyboard.push([{
@@ -1198,7 +1201,7 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
         user._id
     });
   }
-  
+
   job.populate('client', (err, job) => {
     keyboards.editMessage(
       bot,
