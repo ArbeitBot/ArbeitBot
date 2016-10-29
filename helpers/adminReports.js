@@ -14,8 +14,8 @@ const adminChatId = -1001088665045;
  * @param  {Mongoose:Job} job - Job that should be sent
  */
 function jobCreated(bot, job) {
-  job.populate('client', (err, job) => {
-    const msg = `👍 @${job.client.username} created a job:\n\n[${job.category.title}] ${job.hourly_rate}\n${job.description}`;
+  job.populate('client', (err, populatedJob) => {
+    const msg = `👍 @${populatedJob.client.username} created a job:\n\n[${populatedJob.category.title}] ${populatedJob.hourly_rate}\n${populatedJob.description}`;
     bot.sendMessage(adminChatId, msg);
   });
 }
