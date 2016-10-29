@@ -41,18 +41,13 @@ bot.on('message', (msg) => {
       profile.updateProfile(msg, user);
 
       if (isTextInput) {
-        eventEmitter.emit(((msg.text === strings.cancel) ? 'cancel' : '') + isTextInput, { msg, user, bot });
+        global.eventEmitter.emit(((msg.text === strings.cancel) ? 'cancel' : '') + isTextInput, { msg, user, bot });
+      } else if (check.replyMarkup(msg)) {
+        handleKeyboard(msg);
+      } else if (check.botCommandStart(msg)) {
+        keyboards.sendMainMenu(bot, msg.chat.id, false);
       } else {
-        if (check.replyMarkup(msg)) {
-          handleKeyboard(msg);
-        }
-        else {
-          if (check.botCommandStart(msg)) {
-            keyboards.sendMainMenu(bot, msg.chat.id, false);
-          } else {
-            console.log(msg);
-          }
-        }
+        /** todo: handle strange message */
       }
     } else if (check.botCommandStart(msg)) {
       profile.createProfile(bot, msg);
@@ -67,7 +62,7 @@ bot.on('message', (msg) => {
  *
  * @param {Telegram:Message} msg - Message that gets passed from user and info about button clicked
  */
-bot.on('callback_query', msg => {
+bot.on('callback_query', (msg) => {
   if (!msg.from.username) {
     profile.sendAskForUsername(msg);
     return;
@@ -82,8 +77,9 @@ bot.on('callback_query', msg => {
 
       const options = msg.data.split(strings.inlineSeparator);
       const inlineQuery = options[0];
-      eventEmitter.emit(inlineQuery, { msg, bot });
-    });
+      global.eventEmitter.emit(inlineQuery, { msg, bot });
+    })
+    .catch(/** todo: handle error */);
 });
 
 bot.on('inline_query', (msg) => {
@@ -91,10 +87,10 @@ bot.on('inline_query', (msg) => {
     .then((user) => {
       const results = [{
         type: 'article',
-        id: `${GetRandomInt(1000000000000000, 999999999999999999)}`,
+        id: `${getRandomInt(1000000000000000, 999999999999999999)}`,
         title: strings.shareProfile,
-        input_message_content : {
-          message_text: user.GetTextToShareProfile(),
+        input_message_content: {
+          message_text: user.getTextToShareProfile(),
         },
       }];
 
@@ -104,10 +100,9 @@ bot.on('inline_query', (msg) => {
       };
 
       bot.answerInlineQuery(msg.id, results, opts)
-        .then((msg2) => { })
-        .catch((ex) => { console.error(ex); });
+        .catch(/** todo: handle error */);
     })
-    .catch((err) => { console.error(err.message); });
+    .catch(/** todo: handle error */);
 });
 
 /**
@@ -121,32 +116,27 @@ function handleKeyboard(msg) {
   const clientOptions = strings.clientMenuOptions;
   const freelanceMenuOptions = strings.freelanceMenuOptions;
 
-  // Check main menu
   if (text === mainMenuOptions.findJobs) {
     keyboards.sendFreelanceMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.findContractors) {
     keyboards.sendClientMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.help) {
     keyboards.sendHelp(bot, msg.chat.id);
-  }
-  // Check client menu
-  else if (text === clientOptions.postNewJob) {
+  } else if (text === clientOptions.postNewJob) {
     jobManager.askForNewJobCategory(msg, bot);
   } else if (text === clientOptions.myJobs) {
     jobManager.sendAllJobs(bot, msg);
-  }
-  // Check freelance menu
-  else if (text === freelanceMenuOptions.editBio || text === freelanceMenuOptions.addBio) {
+  } else if (text === freelanceMenuOptions.editBio || text === freelanceMenuOptions.addBio) {
     profile.askForBio(msg, bot);
-  } else if (text === freelanceMenuOptions.editCategories || text === freelanceMenuOptions.addCategories) {
+  } else if (text === freelanceMenuOptions.editCategories ||
+    text === freelanceMenuOptions.addCategories) {
     categoryPicker.sendCategories(bot, msg.chat.id);
-  } else if (text === freelanceMenuOptions.editHourlyRate || text === freelanceMenuOptions.addHourlyRate) {
+  } else if (text === freelanceMenuOptions.editHourlyRate ||
+    text === freelanceMenuOptions.addHourlyRate) {
     hourlyRatePicker.sendHourlyRate(bot, msg.chat.id);
   } else if (text === freelanceMenuOptions.busy || text === freelanceMenuOptions.available) {
     profile.toggleAvailability(bot, msg.chat.id);
-  }
-  // Check back button
-  else if (text === freelanceMenuOptions.back) {
+  } else if (text === freelanceMenuOptions.back) {
     keyboards.sendMainMenu(bot, msg.chat.id);
   }
 }
@@ -157,11 +147,10 @@ function handleKeyboard(msg) {
 /**
  * Get random int
  *
- * @method GetRandomInt
  * @param {Number} min
  * @param {Number} max
  * @return {Number} Random number
  */
-function GetRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * ((max - min) + 1)) + min;
 }

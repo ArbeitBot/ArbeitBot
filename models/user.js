@@ -131,7 +131,7 @@ userSchema.methods = {
   },
 
   /** @return {String} */
-  GetTextToShareProfile() {
+  getTextToShareProfile() {
     let text = `Name: ${this.first_name} ${(this.last_name) ? this.last_name : ''}\n` +
                `Rating: ${this.getRateStars()}(${this.reviews.length})\n` +
                `Bio: ${(this.bio) ? this.bio : ''}\n` +
