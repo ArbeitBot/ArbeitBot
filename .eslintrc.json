@@ -10,6 +10,7 @@
     "promise"
   ],
   "rules": {
+    "require-jsdoc": 2,
     "promise/catch-or-return": 2,
     "indent": [ "warn", 2 ],
     "linebreak-style": [ "warn", "unix" ],
