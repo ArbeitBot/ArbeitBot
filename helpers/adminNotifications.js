@@ -23,7 +23,7 @@ global.eventEmitter.on(strings.newReview, ({ bot, dbReviewObject }) => {
 /**
  * Getting a keyboard with buttons to respond to new review
  * @param  {Mongoose:Review}  review - Review to be reviewed
- * @return {Telegram:Inline}  Inline keyboard with relevant buttons
+ * @return {Telegram:InlineKeyboard}  Inline keyboard with relevant buttons
  */
 function adminNewReviewKeyboard(review) {
   const keyboard = [[
