@@ -138,7 +138,7 @@ function categoriesKeyboard(categories, user, page) {
   });
 
   let allCategories = user.categories.concat(categoriesLeft);
-  allCategories = allCategories.slice(page * pageSize, page * (pageSize + pageSize));
+  allCategories = allCategories.slice(page * pageSize, (page * pageSize) + pageSize);
 
   const keyboard = [];
   let tempRow = [];

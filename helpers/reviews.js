@@ -89,7 +89,7 @@ function sendRateKeyboard(msg, bot, type) {
         msg.message.chat.id,
         msg.message.message_id,
         message,
-        keyboards.rateKeyboard(type, job._id),
+        keyboards.rateKeyboard(type, job._id)
       );
     });
 }
@@ -187,7 +187,7 @@ function writeReview(bot, jobId, rating, reviewType) {
                     chat_id,
                     message_id,
                     message,
-                    [],
+                    []
                   ).catch((err) => { console.log(err); });
                 });
             });

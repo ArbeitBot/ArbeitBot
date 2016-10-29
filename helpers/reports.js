@@ -143,7 +143,7 @@ function deleteAllAdminMessages(report, bot) {
       bot,
       msgData[1],
       msgData[0],
-      [],
+      []
     );
   });
 }
