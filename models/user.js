@@ -92,7 +92,7 @@ userSchema.methods = {
   },
 
   /** @return {String} */
-  GetRateStars() {
+  getRateStars() {
     let ret = '';
 
     for (let i = 0; i < Math.round(this.rate / this.reviews.length); i += 1) {
@@ -102,7 +102,7 @@ userSchema.methods = {
     return ret;
   },
 
-  UpdateRate() {
+  updateRate() {
     let tRate = 0;
     let tPRate = 0;
 
@@ -131,9 +131,9 @@ userSchema.methods = {
   },
 
   /** @return {String} */
-  GetTextToShareProfile() {
+  getTextToShareProfile() {
     let text = `Name: ${this.first_name} ${(this.last_name) ? this.last_name : ''}\n` +
-               `Rating: ${this.GetRateStars()}(${this.reviews.length})\n` +
+               `Rating: ${this.getRateStars()}(${this.reviews.length})\n` +
                `Bio: ${(this.bio) ? this.bio : ''}\n` +
                `Hourly rate: ${(this.hourly_rate) ? this.hourly_rate : '0'}\n`;
 

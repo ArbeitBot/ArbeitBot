@@ -15,7 +15,7 @@ const User = mongoose.model('user');
 const Category = mongoose.model('category');
 const Job = mongoose.model('job');
 const Review = mongoose.model('review');
-// @todo: functions to access reports
+/** todo: functions to access reports */
 const Report = mongoose.model('report');
 const UserChatInline = mongoose.model('userChatInline');
 
@@ -93,7 +93,7 @@ function findUserById(id) {
  * @param {Object} user - Javascript object with fields for new user
  */
 function addUser(user) {
-  return new Promise((fullfill) => {
+  return new Promise((fullfill, reject) =>
     findUser({ id: user.id })
       .then((dbuserObject) => {
         if (dbuserObject) fullfill({ user: dbuserObject, new: false });
@@ -101,12 +101,11 @@ function addUser(user) {
           const userObject = new User(user);
 
           userObject.save()
-            .then((user) => {
-              fullfill({ user, new: true });
-            });
+            .then(savedUser => fullfill({ user: savedUser, new: true }))
+            .catch(reject);
         }
-      });
-  });
+      })
+  );
 }
 
 /**
@@ -115,14 +114,15 @@ function addUser(user) {
  * @param  {Number} chatId - Chat id of user that should have busy status toggled
  */
 function toggleUserAvailability(chatId) {
-  return new Promise((fullfill) => {
+  return new Promise(fullfill =>
     findUser({ id: chatId })
       .then((user) => {
-        user.busy = !user.busy;
-        user.save()
+        const userCopy = Object.create(user);
+        userCopy.busy = !userCopy.busy;
+        return userCopy.save()
           .then(fullfill);
-      });
-  });
+      })
+  );
 }
 
 /**
@@ -136,13 +136,13 @@ function toggleUserAvailability(chatId) {
  * @param  {Mongo:ObjectId} categoryId - Id of category that should be added\removed to\from user
  */
 function toggleCategoryForUser(chatId, categoryId) {
-  return new Promise((fullfill) => {
+  return new Promise(fullfill =>
     findUser({ id: chatId })
-      .then((user) => {
+      .then(user =>
         Category.findById(categoryId)
           .then((category) => {
             const index = user.categories.map(
-              category => String(category._id)
+              cat => String(cat._id)
             ).indexOf(String(category.id));
 
             if (index < 0) {
@@ -155,16 +155,16 @@ function toggleCategoryForUser(chatId, categoryId) {
               ).indexOf(String(user._id)), 1);
             }
 
-            user.save()
-              .then((user) => {
+            return user.save()
+              .then(savedUser =>
                 category.save()
-                  .then((category) => {
-                    fullfill({ user: user, isAdded: index < 0 });
-                  });
-              });
-          });
-      });
-  });
+                  .then(() => {
+                    fullfill({ user: savedUser, isAdded: index < 0 });
+                  })
+              );
+          })
+      )
+  );
 }
 
 /**
@@ -173,7 +173,7 @@ function toggleCategoryForUser(chatId, categoryId) {
  * Returns number of users registered
  */
 function userCount() {
-  return new Promise((fullfill, reject) => {
+  return new Promise((fullfill) => {
     User.count({}, (err, c) => {
       if (err) throw err;
       else fullfill(c);
@@ -195,7 +195,7 @@ function freelancerCount() {
     hourly_rate: { $exists: true },
   };
 
-  return new Promise((fullfill, reject) => {
+  return new Promise((fullfill) => {
     User.count(options, (err, c) => {
       if (err) throw err;
       else fullfill(c);
@@ -240,7 +240,8 @@ function getCategory(categoryTitle) {
 /**
  * @todo fix it comment;
  *
- * Get all categories from db; populates 'freelancers', returns only freelancers available for work and with full profile, sorts them by name for now
+ * Get all categories from db; populates 'freelancers', returns only freelancers
+ *    available for work and with full profile, sorts them by name for now
  */
 function getCategories() {
   return new Promise((fullfill) => {
@@ -302,7 +303,7 @@ function freelancersForJob(job) {
       { bio: { $exists: true } },
       { hourly_rate: job.hourly_rate },
       { _id: { $nin: job.notInterestedCandidates } },
-    ]})
+    ] })
       .sort({ sortRate: -1 })
       .limit(10) // TODO:Move to one place
       .skip(10 * job.current_page) // TODO:Move to one place
@@ -313,7 +314,10 @@ function freelancersForJob(job) {
   });
 }
 
-// TODO:Update doc
+/**
+ * Counts number of available freelancers for a job
+ * @param {Mongoose:Job} job - Job for which number of freelancers should be counted
+ */
 function freelancersForJobCount(job) {
   return new Promise((fullfill) => {
     User.count({ $and: [
@@ -322,8 +326,8 @@ function freelancersForJobCount(job) {
       { ban_state: { $nin: true } },
       { bio: { $exists: true } },
       { hourly_rate: job.hourly_rate },
-      { _id: { $nin: job.notInterestedCandidates } }
-    ]})
+      { _id: { $nin: job.notInterestedCandidates } },
+    ] })
       .exec((err, count) => {
         if (err) throw err;
         else fullfill(count);
@@ -331,23 +335,28 @@ function freelancersForJobCount(job) {
   });
 }
 
-// TODO:Update doc
+/**
+ * Update job model's current page on the list of freelancers
+ * @param {Mongoose:Job} job - Job which model should be updated
+ */
 function checkAndFixJobPage(job) {
-  return new Promise((fullfill) => {
+  return new Promise(fullfill =>
     freelancersForJobCount(job)
       .then((count) => {
+        const jobCopy = Object.create(job);
+
         let pages = Math.ceil(count / 10) - 1; // TODO:Move to one place
         if (pages <= -1) pages = 0;
 
-        if (job.current_page <= -1) job.current_page = 0;
-        if (job.current_page > pages) job.current_page = pages;
+        if (jobCopy.current_page <= -1) jobCopy.current_page = 0;
+        if (jobCopy.current_page > pages) jobCopy.current_page = pages;
 
-        job.save()
-          .then((job) => {
-            fullfill({ job, count });
+        return jobCopy.save()
+          .then((savedJob) => {
+            fullfill({ job: savedJob, count });
           });
-      });
-  });
+      })
+  );
 }
 
 /**
@@ -356,13 +365,13 @@ function checkAndFixJobPage(job) {
  * @param  {Mongo:Object id} jobId - Job id object for which freelancers are returned
  */
 function freelancersForJobId(jobId) {
-  return new Promise((fullfill) => {
+  return new Promise(fullfill =>
     findJobById(jobId)
-      .then((job) => {
+      .then(job =>
         freelancersForJob(job)
-          .then(fullfill);
-      });
-  });
+          .then(fullfill)
+      )
+  );
 }
 
 /**
@@ -374,16 +383,16 @@ function freelancersForJobId(jobId) {
  */
 function saveFreelancerMessageToJob(msg, job, user) {
   return new Promise((fullfill) => {
-    const chatInline = new UserChatInline({
+    const inline = new UserChatInline({
       user,
       message_id: msg.message.message_id,
       chat_id: msg.message.chat.id,
     });
 
-    chatInline.save()
-      .then((chatInline) => {
-        job.freelancer_chat_inlines.push(chatInline);
-        job.save().then(fullfill);
+    return inline.save()
+      .then((savedInline) => {
+        job.freelancer_chat_inlines.push(savedInline);
+        return job.save().then(fullfill);
       });
   });
 }
@@ -392,7 +401,7 @@ function saveFreelancerMessageToJob(msg, job, user) {
  * Returns number of active jobs
  */
 function jobCount() {
-  return new Promise((fullfill, reject) => {
+  return new Promise((fullfill) => {
     Job.count({
       state: strings.jobStates.searchingForFreelancer,
       description: {
@@ -433,7 +442,7 @@ function addReview(review) {
   return new Promise((fullfill) => {
     const reviewObject = new Review(review);
 
-    reviewObject.save()
+    return reviewObject.save()
       .then(fullfill);
   });
 }
@@ -448,13 +457,13 @@ function addReview(review) {
  * @returns {Mongoose:UserChatInline} Chat inline object
  */
 function chatInline(job, user) {
-  let chatInline;
+  let inline;
 
   job.freelancer_chat_inlines.forEach((ci) => {
-    if (ci.chat_id === user.id) chatInline = ci;
+    if (ci.chat_id === user.id) inline = ci;
   });
 
-  return chatInline;
+  return inline;
 }
 
 // Report

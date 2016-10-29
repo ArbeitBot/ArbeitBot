@@ -16,7 +16,7 @@ const strings = require('./strings');
  * @param  {Telegram:Bot} bot - Bot that should edit or send hourly rate keyboard
  * @param  {Telegram:Message} msg - Message that came along with inline button click
  */
-eventEmitter.on(strings.hourlyRateInline, ({ msg, bot }) => {
+global.eventEmitter.on(strings.hourlyRateInline, ({ msg, bot }) => {
   editHourlyRate(bot, msg);
 });
 
@@ -31,14 +31,14 @@ function sendHourlyRate(bot, chatId) {
     .then((user) => {
       const hourlyRates = strings.hourlyRateOptions;
       const keyboard = hourlyRateKeyboard(user, hourlyRates);
-
       keyboards.sendInline(
         bot,
         user.id,
         strings.editHourlyRateMessage,
         keyboard
       );
-    });
+    })
+    .catch(/** todo: handle error */);
 }
 
 /**
@@ -48,35 +48,33 @@ function sendHourlyRate(bot, chatId) {
  * @param  {Telegram:Message} msg - Message that came along with inline button click
  */
 function editHourlyRate(bot, msg) {
-  let command = msg.data.split(strings.inlineSeparator)[1];
-
-  function getUserCallback(user) {
-    /** @todo: WHAT? Fix it. */
-  }
+  const command = msg.data.split(strings.inlineSeparator)[1];
 
   dbmanager.findUser({ id: msg.message.chat.id })
     .then((user) => {
-      const needCongrats = !user.hourly_rate;
-      user.hourly_rate = command;
-      user.save()
-        .then((user) => {
+      const userCopy = Object.create(user);
+      const needCongrats = !userCopy.hourly_rate;
+      userCopy.hourly_rate = command;
+      return userCopy.save()
+        .then((savedUser) => {
           keyboards.editInline(
             bot,
             msg.message.chat.id,
             msg.message.message_id,
-            hourlyRateKeyboard(user, strings.hourlyRateOptions)
+            hourlyRateKeyboard(savedUser, strings.hourlyRateOptions)
           );
 
-          if (needCongrats && user.bio && user.categories.length > 0) {
+          if (needCongrats && savedUser.bio && savedUser.categories.length > 0) {
             keyboards.sendKeyboard(
               bot,
-              user.id,
+              savedUser.id,
               strings.filledEverythingMessage,
-              keyboards.freelancerKeyboard(user)
+              keyboards.freelancerKeyboard(savedUser)
             );
           }
-      });
-    });
+        });
+    })
+    .catch(/** todo: handle error */);
 }
 
 /**
@@ -85,24 +83,24 @@ function editHourlyRate(bot, msg) {
  *
  * @param  {Mongoose:User} user - User that should receive keyboard later
  * @param  {[String]} hourlyRates - A list of all hourly rates that should be shown to user
- * @return {Telegram:Inline} Inline keyboard that gets created depending on user's picked hourly rate
+ * @return {Telegram:Inline} Inline keyboard that gets created depending on user's picked
+ *    hourly rate
  */
 function hourlyRateKeyboard(user, hourlyRates) {
-  let hourlyRate = user.hourly_rate;
-  let keyboard = [];
+  const hourlyRate = user.hourly_rate;
+  const keyboard = [];
   let tempRow = [];
 
-  for (var i in hourlyRates) {
-    const isOdd = i % 2 == 1;
+  for (let i = 0; i < hourlyRates.length; i += 1) {
+    const isOdd = i % 2 === 1;
     const currentHR = hourlyRates[i];
 
-    const text = hourlyRate == ((currentHR) ?
+    const text = (hourlyRate === currentHR) ?
       strings.selectedHourlyRate + currentHR :
-      currentHR
-    );
+      currentHR;
 
     tempRow.push({
-      text: text,
+      text,
       callback_data: strings.hourlyRateInline + strings.inlineSeparator + currentHR,
     });
 
@@ -116,5 +114,5 @@ function hourlyRateKeyboard(user, hourlyRates) {
 }
 
 module.exports = {
-  sendHourlyRate: sendHourlyRate,
+  sendHourlyRate,
 };
