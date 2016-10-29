@@ -8,6 +8,7 @@
 /** Dependencies */
 const dbmanager = require('./dbmanager');
 
+/** Constants */
 const admins = ['74169393', '-1001052392095'];
 
 /**
@@ -79,7 +80,7 @@ function handleGodVoiceCommand(msg, bot) {
       users.forEach((user) => {
         bot.sendMessage(user.id, message, {
           disable_web_page_preview: 'true',
-        }).catch(err => console.log(err.message));
+        }).catch(err => bot.sendMessage(msg.chat.id, err.message));
       });
     });
 }
@@ -93,15 +94,15 @@ function handleGodVoiceCommand(msg, bot) {
 function handleBanCommand(msg, bot) {
   const username = /^\/ban@?.* @(.*)$/.exec(msg.text)[1];
 
-  console.log(username);
-
   dbmanager.findUser({ username })
     .then((user) => {
-      user.ban_state = true;
-      user.save().then(
+      const userCopy = Object.create(user);
+      userCopy.ban_state = true;
+      userCopy.save().then(
         sendConfirmed(msg, bot)
       );
-    });
+    })
+    .catch(err => bot.sendMessage(msg.chat.id, err.message));
 }
 
 /**
@@ -114,10 +115,11 @@ function handleUnbanCommand(msg, bot) {
   const username = /^\/unban@?.* @(.*)$/.exec(msg.text)[1];
   dbmanager.findUser({ username })
     .then((user) => {
-      user.ban_state = false;
-      user.save().then(
-        sendConfirmed(msg, bot)
-      );
+      const userCopy = Object.create(user);
+      userCopy.ban_state = false;
+      userCopy.save()
+        .then(sendConfirmed(msg, bot))
+        .catch(err => bot.sendMessage(msg.chat.id, err.message));
     });
 }
 
@@ -131,9 +133,10 @@ function handleUpdateRatingsCommand(msg, bot) {
   dbmanager.getAllUsers()
     .then((users) => {
       users.forEach((user) => {
-        user.UpdateRate();
+        user.updateRate();
       });
-    });
+    })
+    .catch(err => bot.sendMessage(msg.chat.id, err.message));
 }
 
 /**
@@ -154,8 +157,6 @@ function handleAdminCommand(msg, bot) {
     handleGodVoiceCommand(msg, bot);
   } else if (isUpdateRatingsCommand(messageText)) {
     handleUpdateRatingsCommand(msg, bot);
-  } else {
-    console.log('Admin sent command which we dont have');
   }
 }
 

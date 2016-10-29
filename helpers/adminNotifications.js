@@ -144,7 +144,7 @@ function deleteReview(review) {
 
   user.reviews.remove(review._id);
   user.save();
-  user.UpdateRate();
+  user.updateRate();
 }
 
 /**

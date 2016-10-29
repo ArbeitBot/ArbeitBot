@@ -102,7 +102,7 @@ userSchema.methods = {
     return ret;
   },
 
-  UpdateRate() {
+  updateRate() {
     let tRate = 0;
     let tPRate = 0;
 
