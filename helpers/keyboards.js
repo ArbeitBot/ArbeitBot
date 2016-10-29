@@ -76,23 +76,23 @@ function rateKeyboard(inline, jobId) {
   return [
     [{
       text: strings.rateOptions.oneStar,
-      callback_data: inline + strings.inlineSeparator + '1' + strings.inlineSeparator + jobId,
+      callback_data: `${inline}${strings.inlineSeparator}1${strings.inlineSeparator}${jobId}`,
     },
     {
       text: strings.rateOptions.twoStars,
-      callback_data: inline + strings.inlineSeparator + '2' + strings.inlineSeparator + jobId,
+      callback_data: `${inline}${strings.inlineSeparator}2${strings.inlineSeparator}${jobId}`,
     },
     {
       text: strings.rateOptions.threeStars,
-      callback_data: inline + strings.inlineSeparator + '3' + strings.inlineSeparator + jobId,
+      callback_data: `${inline}${strings.inlineSeparator}3${strings.inlineSeparator}${jobId}`,
     }],
     [{
       text: strings.rateOptions.fourStars,
-      callback_data: inline + strings.inlineSeparator + '4' + strings.inlineSeparator + jobId,
+      callback_data: `${inline}${strings.inlineSeparator}4${strings.inlineSeparator}${jobId}`,
     },
     {
       text: strings.rateOptions.fiveStars,
-      callback_data: inline + strings.inlineSeparator + '5' + strings.inlineSeparator + jobId,
+      callback_data: `${inline}${strings.inlineSeparator}5${strings.inlineSeparator}${jobId}`,
     }],
   ];
 }
@@ -187,7 +187,8 @@ function sendFreelanceMenu(bot, chatId) {
         text,
         freelancerKeyboard(user)
       );
-    });
+    })
+    .catch(/** todo: handle error */);
 }
 
 /**
@@ -216,7 +217,7 @@ function sendHelp(bot, chatId) {
  * @param {Boolean} hide - If true will hide keyboard afterwards
  */
 function sendKeyboard(bot, chatId, text, keyboard, then, hide) {
-  let options = {
+  const options = {
     reply_markup: {
       keyboard,
       resize_keyboard: true,
@@ -231,7 +232,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then, hide) {
   options.reply_markup = JSON.stringify(options.reply_markup);
   bot.sendMessage(chatId, text, options)
     .then(then)
-    .catch((err) => { console.error(err.message); });
+    .catch(/** todo: handle error */);
 }
 
 /**
@@ -243,7 +244,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then, hide) {
  * @param {Telegram:Inline} keyboard - Inline keyboard to send
  */
 function sendInline(bot, chatId, text, keyboard, then) {
-  let options = {
+  const options = {
     reply_markup: { inline_keyboard: keyboard },
     disable_web_page_preview: 'true',
   };
@@ -251,7 +252,7 @@ function sendInline(bot, chatId, text, keyboard, then) {
   options.reply_markup = JSON.stringify(options.reply_markup);
   bot.sendMessage(chatId, text, options)
     .then(then)
-    .catch((err) => { console.error(err.message); });
+    .catch(/** todo: handle error */);
 }
 
 /**
@@ -274,7 +275,7 @@ function editInline(bot, chatId, messageId, keyboard) {
   };
 
   bot.editMessageReplyMarkup(inlineMarkup, options)
-    .catch((err) => { console.error(err.message); });
+    .catch(/** todo: handle error */);
 }
 
 /**
@@ -294,7 +295,7 @@ function editMessage(bot, chatId, messageId, text, keyboard) {
       inline_keyboard: keyboard,
     }),
     disable_web_page_preview: 'true',
-  }).catch((err) => { console.error(err.message); });
+  }).catch(/** todo: handle error */);
 }
 
 /** Exports */
