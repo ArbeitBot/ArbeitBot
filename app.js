@@ -33,4 +33,4 @@ require('./helpers/logic');
 require('./helpers/statServer');
 
 /** Print a message to assure that bot is up and running */
-console.log('Bot is up and running');
+console.log('Bot is up and running'); // eslint-disable-line no-console

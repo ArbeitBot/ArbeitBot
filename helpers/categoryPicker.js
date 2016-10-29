@@ -1,5 +1,6 @@
 /**
- * Category picker is a file that manages category picking for freelancers through inline keyboards
+ * Category picker is a file that manages category picking for
+ * freelancers through inline keyboards
  *
  * @module helpers/categoryPicker
  * @license MIT
@@ -18,7 +19,7 @@ const pageSize = 10;
  * @param  {Telegram:Bot} bot - Bot that should send a response to this action
  * @param  {Telegram:Message} - msg Message that was received upon clicking an inline button
  */
-eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
+global.eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
   const command = msg.data.split(strings.inlineSeparator)[1];
   const page = parseInt(msg.data.split(strings.inlineSeparator)[2], 10);
 
@@ -41,7 +42,8 @@ eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
         }
 
         editPage(bot, msg, page);
-      });
+      })
+      .catch(/** todo: handle error */);
   }
 });
 
@@ -53,18 +55,21 @@ eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
  */
 function sendCategories(bot, chatId) {
   dbmanager.findUser({ id: chatId })
-    .then((user) => {
+    .then(user =>
       dbmanager.getCategories()
         .then((categories) => {
           getCategoriesCallback(categories, user, bot);
-        });
-    });
+        })
+    )
+    .catch(/** todo: handle error */);
 }
 
 /**
- * Callback function that is used when user and categories are obtained from Mongo DB – triggers sending of categories picker to user
+ * Callback function that is used when user and categories are obtained
+ * from Mongo DB – triggers sending of categories picker to user
  *
- * @param  {[Mongoose:Category]} categories - A list of categories that should be available for picking
+ * @param  {[Mongoose:Category]} categories - A list of categories that
+ *    should be available for picking
  * @param  {Mongoose:User} user - User that should receive a keyboard
  * @param  {Telegram:Bot} bot - Bot that should send a keyboard
  */
@@ -80,15 +85,18 @@ function getCategoriesCallback(categories, user, bot) {
 }
 
 /**
- * Edits message and it's inline buttons for category picker message – mainly used for paging and if we need to update message with category picker
+ * Edits message and it's inline buttons for category picker message –
+ * mainly used for paging and if we need to update message with category
+ * picker
  *
  * @param  {Telegram:Bot} bot - Bot that should edit message
- * @param  {Telegram:Message} msg - Message that should be editted, usually obtained with inline button click callback
+ * @param  {Telegram:Message} msg - Message that should be editted,
+ *    usually obtained with inline button click callback
  * @param  {Number} page - Page of the list of categories that should be displayed
  */
 function editPage(bot, msg, page) {
   dbmanager.findUser({ id: msg.message.chat.id })
-    .then((user) => {
+    .then(user =>
       dbmanager.getCategories()
         .then((categories) => {
           keyboards.editInline(
@@ -97,41 +105,46 @@ function editPage(bot, msg, page) {
             msg.message.message_id,
             categoriesKeyboard(categories, user, page)
           );
-        });
-    });
+        })
+    )
+    .catch(/** todo: handle error*/);
 }
 
 /**
- * Returns inline keyboard for freelancer; decorates it with checkmark if category is picked, supports multiple categories to be picked; shows picked categories on top of the list; supports paging
+ * Returns inline keyboard for freelancer; decorates it with checkmark if
+ * category is picked, supports multiple categories to be picked; shows
+ * picked categories on top of the list; supports paging
  *
  * @param  {[Mongoose:Category]} categories - A list of all categories that should be shown
  * @param  {Mongoose:User} user - User that requested keyboards
- * @param  {Number} page - Page for which the keyboard should be sent; i.e. page 1 will return categories 0 through pageSize, page 2 will return pages pageSize through pageSize*2
- * @return {Telegram:InlineKeyboard} Keyboard with paging buttons if required and a list of categories with picked indicator for specified user
+ * @param  {Number} page - Page for which the keyboard should be sent;
+ *    i.e. page 1 will return categories 0 through pageSize, page 2 will
+ *    return pages pageSize through pageSize*2
+ * @return {Telegram:InlineKeyboard} Keyboard with paging buttons if
+ *    required and a list of categories with picked indicator for
+ *    specified user
  */
 function categoriesKeyboard(categories, user, page) {
-  let categoriesLeft = [];
+  const categoriesLeft = [];
 
-  for (let i in categories) {
-    const cat = categories[i];
+  categories.forEach((cat) => {
     let shouldAdd = true;
 
-    for (let j in user.categories) {
-      let inCat = user.categories[j];
-      if ('' + inCat._id === '' + cat._id) shouldAdd = false;
-    }
+    user.categories.forEach((category) => {
+      if (String(category._id) === String(cat._id)) shouldAdd = false;
+    });
 
     if (shouldAdd) categoriesLeft.push(cat);
-  }
+  });
 
   let allCategories = user.categories.concat(categoriesLeft);
-  allCategories = allCategories.slice(page * pageSize, page * (pageSize + pageSize));
+  allCategories = allCategories.slice(page * pageSize, (page * pageSize) + pageSize);
 
-  let keyboard = [];
+  const keyboard = [];
   let tempRow = [];
-  for (let i in allCategories) {
+  for (let i = 0; i < allCategories.length; i += 1) {
     const isOdd = (i % 2) === 1;
-    const isLast = i == allCategories.length - 1;
+    const isLast = i === allCategories.length - 1;
     const currentCategory = allCategories[i];
 
     const text = ((user.categories.indexOf(currentCategory) > -1) ?
@@ -140,8 +153,12 @@ function categoriesKeyboard(categories, user, page) {
     );
 
     tempRow.push({
-      text: text,
-      callback_data: strings.categoryInline + strings.inlineSeparator + currentCategory._id + strings.inlineSeparator + page
+      text,
+      callback_data: strings.categoryInline +
+        strings.inlineSeparator +
+        currentCategory._id +
+        strings.inlineSeparator +
+        page,
     });
 
     if (isOdd || isLast) {
@@ -150,7 +167,7 @@ function categoriesKeyboard(categories, user, page) {
     }
   }
 
-  let navButtons = [];
+  const navButtons = [];
   if (page > 0) {
     navButtons.push({
       text: strings.categoryLeft,
@@ -158,22 +175,22 @@ function categoriesKeyboard(categories, user, page) {
         strings.inlineSeparator +
         strings.categoryLeft +
         strings.inlineSeparator +
-        page
+        page,
     });
   }
 
   const remainder = categories.length % pageSize;
   let lastPage = (categories.length - remainder) / pageSize;
 
-  if (remainder > 0) lastPage = lastPage + 1;
-  if (page+1 < lastPage) {
+  if (remainder > 0) lastPage += 1;
+  if (page + 1 < lastPage) {
     navButtons.push({
       text: strings.categoryRight,
       callback_data: strings.categoryInline +
         strings.inlineSeparator +
         strings.categoryRight +
         strings.inlineSeparator +
-        page
+        page,
     });
   }
 
@@ -182,7 +199,7 @@ function categoriesKeyboard(categories, user, page) {
   if (page + 1 === lastPage) {
     keyboard.push([{
       text: strings.suggestCategoryMessage,
-      url: 'http://telegram.me/borodutch'
+      url: 'http://telegram.me/borodutch',
     }]);
   }
 
@@ -191,5 +208,5 @@ function categoriesKeyboard(categories, user, page) {
 
 /** Exports */
 module.exports = {
-  sendCategories
+  sendCategories,
 };
