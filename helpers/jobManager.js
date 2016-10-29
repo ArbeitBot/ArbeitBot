@@ -969,7 +969,8 @@ function jobInlineKeyboard(job, freelancers, count) {
       strings.inlineSeparator +
       job._id,
   }],
-  [{
+  // for some reason eslint was failing here
+  [{ // eslint-disable-line indent
     text: strings.jobRefresh,
     callback_data:
       strings.jobManageInline +
