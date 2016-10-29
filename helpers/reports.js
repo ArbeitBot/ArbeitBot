@@ -110,14 +110,14 @@ eventEmitter.on(strings.adminBanInline, ({ msg, bot }) => {
       //mark report as already viewed by admin
       report.resolved = true;
       report.save();
-      //ban the user
+      //find the user and set it's state as banned
       dbmanager.findUserById(report.sendTo)
         .then((user) => {
           user.ban_state = true;
           user.save();
         });
 
-      //delete BAN button from all inline messages
+      //remove [BAN] button from all inline messages
       deleteAllAdminMessages(report, bot);
     })
     .catch((err) => { console.error(err.message); });
@@ -134,16 +134,22 @@ function deleteAllAdminMessages(report, bot) {
       return;
     }
 
+    const chatId = msgData[1];
+    const messageId = msgData[0];
+    const emptyKeyboard = [];
+
+    //Mark report message as viewed and resolved
     bot.editMessageText('Resolved report.', {
-      chat_id: msgData[1],
-      message_id: msgData[0]
-    }).catch((err) => { console.log('lol', err); });
+      chat_id: chatId,
+      message_id: messageId,
+    }).catch((err) => { console.log(err) });
+
 
     keyboards.editInline(
       bot,
-      msgData[1],
-      msgData[0],
-      []
+      chatId,
+      messageId,
+      emptyKeyboard,
     );
   });
 }
@@ -165,35 +171,31 @@ function adminBanKeyboard(adminChatId, reportId) {
 }
 
 /**
- *
+ * Sends message about new Report to all admin chats.
  * @param bot - which responds
  * @param report - mongoose object ! Not and ObjectId !
  */
 function sendReportAlert(bot, report) {
-  // Сформировать текст сообщения
-  // Затем для каждого админа
-  // Сформировать инлайн клавиатуру
-  // отправить
   formReportMessage(report)
     .then((message) => {
-      admins.forEach((admin) => {
-        const keyboard = adminBanKeyboard(admin, report._id);
+      const keyboard = adminBanKeyboard(admin, report._id);
+      const replyMarkup = JSON.stringify({
+        inline_keyboard: keyboard
+      });
 
+      admins.forEach((admin) => {
         bot.sendMessage(admin, message, {
-          reply_markup: JSON.stringify({
-            inline_keyboard: keyboard,
-          }),
+          reply_markup: replyMarkup,
         })
           .then((message) => {
             report.inlineMessages.push(message.message_id + '+' + message.chat.id);
-          })
-          .then(() => {
             report.save();
           })
-          .catch((err) => { console.log(err.name); });
+          .catch((err) => { console.log(err); });
       });
     });
 }
+
 
 function formReportMessage(report) {
   function formUserInformation(job, user) {
@@ -232,18 +234,12 @@ function sendResponseToUser(bot, msg) {
 
 /**
  * Initializes job report
- *
  * @param {Telegram:Bot} bot - Bot that should respond
  * @param {Telegram:Message} msg - Message passed with action
- * @param {Mongoose:ObjectId} job - Job object to report
- * @param {Mongoose:ObjectId} user - User object who reports
+ * @param {Mongoose:ObjectId} job - Job object which is reported
+ * @param {Mongoose:ObjectId} user - User object who sends us a report
  */
 function reportJob(bot, msg, job, user) {
-  // Найти id клиента и фрилансера
-  // Создать новый обьект report
-  // Сохранить его и добавить его id к работе, которую зарепортили, и к создателю работы
-  // Отправить сообщения с инфой о репорте всем админам
-  // Отправить сообщение пользователю
   return new Promise((fullfill) => {
     let clientId = job.client;
     let report = new Report({
@@ -282,16 +278,7 @@ function reportJob(bot, msg, job, user) {
   });
 }
 
-/**
- * THIS IS UNUSED CURRENTLY FUNCTIONS
- * ONE DAY I'LL USE IT
- * TODAY IS NOT THIS DAY.
- * All params are id
- * @param from id
- * @param to id
- * @param job id
- */
-function reportUser(from, to, job) {
+/*function reportUser(from, to, job) {
   return new Promise((fullfill) => {
     let report = new Report({
       sendBy: from,
@@ -310,7 +297,7 @@ function reportUser(from, to, job) {
           });
     });
   });
-}
+}*/
 
 function reportFreelancer(bot, msg, job, user) {
   return new Promise((fullfill) => {
@@ -332,7 +319,6 @@ function reportFreelancer(bot, msg, job, user) {
             fullfill();
           })
           .catch((err) => {
-            console.log('Error in reportFreelancer(...) in reports.js file. 289.');
             console.log(err);
           });
     });
