@@ -3,6 +3,7 @@
 [![Product Hunt](/docs/ph.png?raw=true)](https://www.producthunt.com/tech/arbeitbot)
 [![Habrahabr](/docs/habr.png?raw=true)](https://habrahabr.ru/post/310434/)
 [![Hacker News](/docs/hackernews.png?raw=true)](https://news.ycombinator.com/item?id=12821984)
+[![Reddit](/docs/reddit.png?raw=true)](https://www.reddit.com/r/javascript/comments/59y20u/first_free_opensource_telegram_freelance_market/)
 [![vc.ru](/docs/vc.png?raw=true)](https://vc.ru/p/arbeitbot)
 
 First free open-source Telegram freelance market. Built by people for people.
