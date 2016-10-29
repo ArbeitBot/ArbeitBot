@@ -1,5 +1,8 @@
 /**
  * Storage for all the strings in project; change once, use everywhere ;)
+ *
+ * @module helpers/strings
+ * @license MIT
  */
 
 module.exports = {
