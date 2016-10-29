@@ -80,9 +80,10 @@ function handleGodVoiceCommand(msg, bot) {
       users.forEach((user) => {
         bot.sendMessage(user.id, message, {
           disable_web_page_preview: 'true',
-        }).catch(err => bot.sendMessage(msg.chat.id, err.message));
+        });
       });
-    });
+    })
+    .catch(err => bot.sendMessage(msg.chat.id, err.message));
 }
 
 /**
@@ -98,9 +99,7 @@ function handleBanCommand(msg, bot) {
     .then((user) => {
       const userCopy = Object.create(user);
       userCopy.ban_state = true;
-      userCopy.save().then(
-        sendConfirmed(msg, bot)
-      );
+      return userCopy.save().then(sendConfirmed(msg, bot));
     })
     .catch(err => bot.sendMessage(msg.chat.id, err.message));
 }
@@ -117,10 +116,10 @@ function handleUnbanCommand(msg, bot) {
     .then((user) => {
       const userCopy = Object.create(user);
       userCopy.ban_state = false;
-      userCopy.save()
-        .then(sendConfirmed(msg, bot))
-        .catch(err => bot.sendMessage(msg.chat.id, err.message));
-    });
+      return userCopy.save()
+        .then(sendConfirmed(msg, bot));
+    })
+    .catch(err => bot.sendMessage(msg.chat.id, err.message));
 }
 
 /**
