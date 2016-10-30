@@ -117,7 +117,7 @@ function sendMessage(text, users, bot, results) {
       bot.sendMessage(user.id, text, {
         disable_web_page_preview: 'true',
       })
-        .then(() => resolve('sucess'))
+        .then(() => resolve('success'))
         .catch(err => resolve(String(err.message)));
     }));
   });
