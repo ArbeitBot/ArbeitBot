@@ -70,20 +70,71 @@ function sendConfirmed(msg, bot) {
 function handleGodVoiceCommand(msg, bot) {
   // todo: change to regex
   // let message = /^\/godvoice@?[^ ]* +(.*)$/.exec(msg.text)[1];
-  const message = msg.text.split('/godvoice@arbeit_bot ')[1];
+  const message = msg.text.split('/godvoice ')[1];
   if (!message || message.length <= 0) {
     return;
   }
 
   dbmanager.getAllUsers()
     .then((users) => {
-      users.forEach((user) => {
-        bot.sendMessage(user.id, message, {
-          disable_web_page_preview: 'true',
-        });
-      });
+      sendMessage(message, users, bot, {});
     })
     .catch(err => bot.sendMessage(msg.chat.id, err.message));
+}
+
+/**
+ * Recursive function to send text to an array of users; please don't use this
+ *    function twice at any given point of time. Sends at most 30 messages/sec
+ * @param {String} text - Text to be sent
+ * @param {[Mongoose:User]} users - Users to get this message
+ * @param  {Telegram:Bot} bot - Bot that should respond
+ */
+function sendMessage(text, users, bot, results) {
+  if (users.length <= 0) {
+    const keys = Object.keys(results);
+    const successKeyIndex = keys.indexOf('success');
+    if (successKeyIndex > -1) {
+      keys.splice(successKeyIndex, 1);
+    }
+    let message = `All messages were sent, here are the results:\n\nSuccess: ${results.success || 0}`;
+
+    keys.forEach((key) => {
+      message = `${message}\n${key}: ${results[key]}`;
+    });
+
+    bot.sendMessage(admins[1], message);
+    return;
+  }
+
+  /** Get current users and users for the next loop */
+  const nextUsers = Object.create(users);
+  const currentUsers = nextUsers.splice(0, 30);
+  const resultsCopy = Object.create(results);
+
+  const promises = [];
+  currentUsers.forEach((user) => {
+    promises.push(new Promise((resolve) => {
+      bot.sendMessage(user.id, text, {
+        disable_web_page_preview: 'true',
+      })
+        .then(() => resolve('sucess'))
+        .catch(err => resolve(String(err.message)));
+    }));
+  });
+  Promise.all(promises)
+    .then((values) => {
+      values.forEach((value) => {
+        if (resultsCopy[value]) {
+          resultsCopy[value] += 1;
+        } else {
+          resultsCopy[value] = 1;
+        }
+      });
+      setTimeout(() => {
+        sendMessage(text, nextUsers, bot, resultsCopy);
+      }, 1500);
+    })
+    .catch(err => bot.sendMessage(admins[1], err.message));
 }
 
 /**
