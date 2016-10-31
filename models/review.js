@@ -6,8 +6,8 @@
 /** Dependencies */
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
-const reviewSchema = new Schema({
+/** Schema */
+const reviewSchema = new mongoose.Schema({
   byUser: {
     type: Schema.ObjectId,
     ref: 'user',
@@ -37,4 +37,4 @@ const reviewSchema = new Schema({
   inlineMessages: [{ type: String }],
 });
 
-mongoose.model('review', reviewSchema);
+module.exports = mongoose.model('review', reviewSchema);

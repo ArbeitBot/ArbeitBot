@@ -6,8 +6,8 @@
 /** Dependencies */
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
-const reportSchema = new Schema({
+/** Schema */
+const reportSchema = new mongoose.Schema({
   sendBy: {
     type: Schema.ObjectId,
     ref: 'user',
@@ -33,4 +33,4 @@ const reportSchema = new Schema({
   },
 });
 
-mongoose.model('report', reportSchema);
+module.exports = mongoose.model('report', reportSchema);

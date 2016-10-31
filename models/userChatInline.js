@@ -6,8 +6,8 @@
 /** Dependencies */
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
-const userChatInlineSchema = new Schema({
+/** Schema */
+const userChatInlineSchema = new mongoose.Schema({
   user: {
     type: Schema.ObjectId,
     ref: 'user',
@@ -23,4 +23,4 @@ const userChatInlineSchema = new Schema({
   },
 });
 
-mongoose.model('userChatInline', userChatInlineSchema);
+module.exports = mongoose.model('userChatInline', userChatInlineSchema);

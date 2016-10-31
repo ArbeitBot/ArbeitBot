@@ -20,11 +20,6 @@ const config = require('./config');
 /** Setup mongoose and load all models */
 mongoose.Promise = global.Promise;
 mongoose.connect(config.database);
-fs.readdirSync(path.join(__dirname, '/models')).forEach((filename) => {
-  if (filename.indexOf('.js') > -1) {
-    require.call(global, path.join(__dirname, '/models/', filename));
-  }
-});
 
 /** Start bot */
 require('./helpers/logic');
