@@ -85,6 +85,7 @@ function handleGodVoiceCommand(msg, bot) {
 /**
  * Recursive function to send text to an array of users; please don't use this
  *    function twice at any given point of time. Sends at most 30 messages/sec
+ *
  * @param {String} text - Text to be sent
  * @param {[Mongoose:User]} users - Users to get this message
  * @param  {Telegram:Bot} bot - Bot that should respond

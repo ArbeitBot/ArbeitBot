@@ -6,8 +6,8 @@
 /** Dependencies */
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
-const categorySchema = new Schema({
+/** Schema */
+const categorySchema = new mongoose.Schema({
   title: String,
   freelancers: [{
     type: Schema.ObjectId,
@@ -17,4 +17,4 @@ const categorySchema = new Schema({
   }],
 });
 
-mongoose.model('category', categorySchema);
+module.exports = mongoose.model('category', categorySchema);
