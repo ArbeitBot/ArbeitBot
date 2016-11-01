@@ -7,7 +7,8 @@
 const mongoose = require('mongoose');
 
 /** Schema */
-const categorySchema = new mongoose.Schema({
+const Schema = mongoose.Schema;
+const categorySchema = new Schema({
   title: String,
   freelancers: [{
     type: Schema.ObjectId,

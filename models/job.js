@@ -8,7 +8,8 @@ const mongoose = require('mongoose');
 const strings = require('../helpers/strings');
 
 /** Schema */
-const jobSchema = new mongoose.Schema({
+const Schema = mongoose.Schema;
+const jobSchema = new Schema({
   state: {
     type: String,
     required: true,

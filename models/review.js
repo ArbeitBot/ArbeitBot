@@ -7,7 +7,8 @@
 const mongoose = require('mongoose');
 
 /** Schema */
-const reviewSchema = new mongoose.Schema({
+const Schema = mongoose.Schema;
+const reviewSchema = new Schema({
   byUser: {
     type: Schema.ObjectId,
     ref: 'user',

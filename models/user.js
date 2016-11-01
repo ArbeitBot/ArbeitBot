@@ -8,7 +8,8 @@ const mongoose = require('mongoose');
 const strings = require('../helpers/strings');
 
 /** Schema */
-const userSchema = new mongoose.Schema({
+const Schema = mongoose.Schema;
+const userSchema = new Schema({
   id: Number,
   first_name: String,
   last_name: String,

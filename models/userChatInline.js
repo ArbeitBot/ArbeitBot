@@ -7,7 +7,8 @@
 const mongoose = require('mongoose');
 
 /** Schema */
-const userChatInlineSchema = new mongoose.Schema({
+const Schema = mongoose.Schema;
+const userChatInlineSchema = new Schema({
   user: {
     type: Schema.ObjectId,
     ref: 'user',
