@@ -67,7 +67,7 @@ After execution you will have `key.key` (your ssl key) and `crt.pem` (your ssl c
 Wonderful! After you got everything working well, please follow instructions from [Want to contribute?](#want-to-contribute) We all hope to see you with the 🐝 emoji someday!
 
 # Where to seek help?
-In case you need a hand to figure something out, please feel free to [open an issue](https://github.com/ArbeitBot/ArbeitBot/issues) or chat with us on our [Telegram channel](https://telegram.me/borodutcher) (careful, channel is conquered by Russians) ❤️. Or bug the person responsible for the majority of bot's bugs — [@borodutch](https://telegram.me/borodutch).
+In case you need a hand to figure something out, please feel free to [open an issue](https://github.com/ArbeitBot/ArbeitBot-landing/issues) or chat with us on our Telegram channel [@arbeit_bot_support](https://telegram.me/arbeit_bot_support) ❤️
 
 # License
 ArbeitBot is released under the MIT license. See LICENSE for details. ArbeitBot development would not be possible without help of [existing Node.js Telegram bot API](https://github.com/yagop/node-telegram-bot-api/) written by [@yagop](https://github.com/yagop). Thank you!
