@@ -7,7 +7,7 @@
 const mongoose = require('mongoose');
 const strings = require('../helpers/strings');
 
-/** Very basic variant */
+/** Schema */
 const Schema = mongoose.Schema;
 const jobSchema = new Schema({
   state: {
@@ -79,4 +79,4 @@ const jobSchema = new Schema({
   },
 });
 
-mongoose.model('job', jobSchema);
+module.exports = mongoose.model('job', jobSchema);

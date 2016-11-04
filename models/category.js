@@ -6,6 +6,7 @@
 /** Dependencies */
 const mongoose = require('mongoose');
 
+/** Schema */
 const Schema = mongoose.Schema;
 const categorySchema = new Schema({
   title: String,
@@ -17,4 +18,4 @@ const categorySchema = new Schema({
   }],
 });
 
-mongoose.model('category', categorySchema);
+module.exports = mongoose.model('category', categorySchema);

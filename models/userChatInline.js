@@ -6,6 +6,7 @@
 /** Dependencies */
 const mongoose = require('mongoose');
 
+/** Schema */
 const Schema = mongoose.Schema;
 const userChatInlineSchema = new Schema({
   user: {
@@ -23,4 +24,4 @@ const userChatInlineSchema = new Schema({
   },
 });
 
-mongoose.model('userChatInline', userChatInlineSchema);
+module.exports = mongoose.model('userChatInline', userChatInlineSchema);

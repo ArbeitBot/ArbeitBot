@@ -6,6 +6,7 @@
 /** Dependencies */
 const mongoose = require('mongoose');
 
+/** Schema */
 const Schema = mongoose.Schema;
 const reviewSchema = new Schema({
   byUser: {
@@ -37,4 +38,4 @@ const reviewSchema = new Schema({
   inlineMessages: [{ type: String }],
 });
 
-mongoose.model('review', reviewSchema);
+module.exports = mongoose.model('review', reviewSchema);

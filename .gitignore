@@ -1,9 +1,10 @@
 .DS_Store
 *.swp
 *.swo
-config.js
 .env
 .idea
 
 node_modules
 npm-debug.*
+
+config.js

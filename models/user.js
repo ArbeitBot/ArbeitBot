@@ -7,6 +7,7 @@
 const mongoose = require('mongoose');
 const strings = require('../helpers/strings');
 
+/** Schema */
 const Schema = mongoose.Schema;
 const userSchema = new Schema({
   id: Number,
@@ -84,7 +85,7 @@ const userSchema = new Schema({
   specialSymbol: String,
 });
 
-
+/** Functionality */
 userSchema.methods = {
   /** @return {String} */
   GetRate() {
@@ -149,4 +150,4 @@ userSchema.methods = {
   },
 };
 
-mongoose.model('user', userSchema);
+module.exports = mongoose.model('user', userSchema);
