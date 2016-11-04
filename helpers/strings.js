@@ -18,6 +18,7 @@ module.exports = {
   selectCategoryMessage: 'Please, select a category relevant to your job. The number of available contractors is displayed between [square brackets] for each category.',
   selectJobHourlyRateMessage: 'Please, select how much you would like to pay. The price is given in USD/hour to identify the skill levels of developers. You can negotiate a fixed price with the contractor later on. The number of available contractors is displayed between [square brackets] for each rate range.',
   addJobDescriptionMessage: 'Please, provide a job description (max 500 chars). It will be visible to contractors. Please, be brief – the details can be discussed with the contractors later on.',
+  addJobDescriptionMessageCancel: 'You can cancel at any time',
   filledEverythingMessage: 'You did it! Your profile is now complete. Now just sit back and wait for job offers.',
   fullFreelancerMessageAvailable: 'Your profile is complete! Now just sit back and wait for job offers.',
   fullFreelancerMessageBusy: 'Your profile is complete! However, clients will not contact you since your status is "Busy".',

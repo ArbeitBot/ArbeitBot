@@ -214,9 +214,8 @@ function sendHelp(bot, chatId) {
  * @param {String} text - Text that should come along with keyboard
  * @param {Telegram:Keyboard} keyboard Keyboard that should be sent
  * @param {Function} then - Function that should be executed when message is delivered
- * @param {Boolean} hide - If true will hide keyboard afterwards
  */
-function sendKeyboard(bot, chatId, text, keyboard, then, hide) {
+function sendKeyboard(bot, chatId, text, keyboard, then) {
   const options = {
     reply_markup: {
       keyboard,
@@ -224,10 +223,6 @@ function sendKeyboard(bot, chatId, text, keyboard, then, hide) {
     },
     disable_web_page_preview: 'true',
   };
-
-  if (hide) {
-    options.reply_markup.one_time_keyboard = hide;
-  }
 
   options.reply_markup = JSON.stringify(options.reply_markup);
   bot.sendMessage(chatId, text, options)

@@ -621,9 +621,7 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
           bot,
           msg.chat.id,
           strings.selectJobHourlyRateMessage,
-          keyboard,
-          null,
-          true);
+          keyboard);
     })
     .catch(/** todo: handle error */);
 }
@@ -633,7 +631,7 @@ function askForNewJobPriceRange(msg, user, bot, job, category) {
  *    relevant flag to db for user
  * @param  {Telegram:Message} msg Message received
  * @param  {Telegram:Bot} bot Bot that should respond
- * * @param  {Mongoose:User} user Owner of job
+ * @param  {Mongoose:User} user Owner of job
  */
 function askForNewJobDescription(msg, bot, user) {
   const userCopy = Object.create(user);
@@ -643,16 +641,22 @@ function askForNewJobDescription(msg, bot, user) {
     .then(savedUser =>
       bot.sendMessage(msg.chat.id, strings.addJobDescriptionMessage, {
         reply_markup: JSON.stringify({
-          inline_keyboard: [
-            [{
-              text: strings.cancel,
-              callback_data: strings.cancelJobCreationInline +
-                strings.inlineSeparator +
-                savedUser.id,
-            }],
-          ],
+          hide_keyboard: true,
         }),
         disable_web_page_preview: 'true',
+      }).then(() => {
+        bot.sendMessage(msg.chat.id, strings.addJobDescriptionMessageCancel, {
+          reply_markup: JSON.stringify({
+            inline_keyboard: [
+              [{
+                text: strings.cancel,
+                callback_data: strings.cancelJobCreationInline +
+                  strings.inlineSeparator +
+                  savedUser.id,
+              }],
+            ],
+          }),
+        });
       })
     )
     .catch(/** todo: handle error */);
