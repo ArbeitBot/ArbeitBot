@@ -11,7 +11,7 @@ module.exports = {
   loadingMessage: '🦄 Loading...',
   askForUsername: 'It looks like you don\'t have a username. Please, set it up in Telegram settings.',
   deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ⤵️',
-  initialMessage: 'Welcome to the first free (almost opensource) Telegram freelance market.\n\nIf you are looking for a job, please fill out your "Profile". Otherwise, you can proceed to "Find contractors". Click "Help" if you have any questions.\n\nThank you for joining our friendly family!',
+  initialMessage: 'Welcome to the first free opensource Telegram freelance market.\n\nIf you are looking for a job, please fill out your "Profile". Otherwise, you can proceed to "Find contractors". Click "Help" if you have any questions.\n\nThank you for joining our friendly family!',
   mainMenuMessage: 'Select "Profile" if you are looking for a job, otherwise – "Find contractors".',
   noJobsExistMessage: 'You do not have any jobs yet. You can create one by clicking "Post new job" button.',
   clientMenuMessage: 'Please, select an option from the menu below.',
