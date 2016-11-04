@@ -8,4 +8,5 @@ module.exports = {
   ssl_certificate_path: process.env.SSL_CERTIFICATE_PATH,
   ssl_key_path: process.env.SSL_KEY_PATH,
   ssh_rsa_path: process.env.SSH_RSA_PATH,
+  adminChatId: process.env.ADMIN_CHAT_ID,
 };

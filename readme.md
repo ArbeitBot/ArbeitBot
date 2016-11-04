@@ -46,6 +46,7 @@ So, you decided to help us out — good, good. First, ArbeitBot can be launched 
 ### Necessary environment variables
 * `TELEGRAM_API_KEY` — api key for your telegram bot (obtained from [@BotFather](https://telegram.me/botfather))
 * `MONGO_DB_URL` — url of your mongo database (i.e. `mongodb://localhost:27017/`)
+* `ADMIN_CHAT_ID` — chat id of Telegram channel that should receive logs from bot
 * `USE_WEBHOOKS` — flag identifying if bot should use [webhooks](https://core.telegram.org/bots/api/#setwebhook) or should fetch updates every 1000 seconds (webhooks make bot faster but require custom server with SSL setup)
 * *(Optional)* `WEBHOOK_CALLBACK_URL` — url that should be used by Telegram servers for webhooks, should be `https`
 * *(Optional)* `SSL_CERTIFICATE_PATH` — path to ssl certificate for webhooks
