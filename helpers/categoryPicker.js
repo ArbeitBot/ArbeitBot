@@ -31,7 +31,10 @@ global.eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
     dbmanager.toggleCategoryForUser(msg.message.chat.id, command)
       .then(({ user, isAdded }) => {
         if (isAdded) {
-          if (user.bio && user.hourly_rate && user.categories.length === 1) {
+          if (user.bio &&
+              user.hourly_rate &&
+              user.categories.length === 1 &&
+              user.languages.length > 0) {
             keyboards.sendKeyboard(
               bot,
               user.id,

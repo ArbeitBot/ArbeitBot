@@ -47,6 +47,7 @@ function findUser(query) {
         'jobs',
         'job_draft',
         'reviews',
+        'languages',
         {
           path: 'jobs',
           populate: {

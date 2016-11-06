@@ -64,7 +64,10 @@ function editHourlyRate(bot, msg) {
             hourlyRateKeyboard(savedUser, strings.hourlyRateOptions)
           );
 
-          if (needCongrats && savedUser.bio && savedUser.categories.length > 0) {
+          if (needCongrats &&
+              savedUser.bio &&
+              savedUser.categories.length > 0 &&
+              savedUser.languages.length > 0) {
             keyboards.sendKeyboard(
               bot,
               savedUser.id,

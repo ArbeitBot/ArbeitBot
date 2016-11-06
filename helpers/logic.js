@@ -8,6 +8,7 @@
 /** Dependencies */
 const hourlyRatePicker = require('./hourlyRatePicker');
 const categoryPicker = require('./categoryPicker');
+const languagePicker = require('./languagePicker');
 const adminPanel = require('./adminCommands');
 const jobManager = require('./jobManager');
 const keyboards = require('./keyboards');
@@ -115,7 +116,7 @@ function handleKeyboard(msg) {
   const mainMenuOptions = strings.mainMenuOptions;
   const clientOptions = strings.clientMenuOptions;
   const freelanceMenuOptions = strings.freelanceMenuOptions;
-
+  console.log(text);
   if (text === mainMenuOptions.findJobs) {
     keyboards.sendFreelanceMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.findContractors) {
@@ -136,6 +137,9 @@ function handleKeyboard(msg) {
     hourlyRatePicker.sendHourlyRate(bot, msg.chat.id);
   } else if (text === freelanceMenuOptions.busy || text === freelanceMenuOptions.available) {
     profile.toggleAvailability(bot, msg.chat.id);
+  } else if (text.indexOf('🇷🇺') > -1 || text.indexOf('🇺🇸') > -1) {
+    /** todo: remove hardcoded flags ^^^ */
+    languagePicker.sendLanguagePicker(bot, msg.chat.id);
   } else if (text === freelanceMenuOptions.back) {
     keyboards.sendMainMenu(bot, msg.chat.id);
   }

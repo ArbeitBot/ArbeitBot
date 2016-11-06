@@ -61,6 +61,11 @@ function replyMarkup(message) {
   );
 
   const allOptions = mainMenuOptions.concat(freelanceMenuOptions, clientMenuOptions);
+  /** todo: remove hardcode */
+  allOptions.push('🇺🇸');
+  allOptions.push('🇷🇺');
+  allOptions.push('🇷🇺 🇺🇸');
+  allOptions.push('🇺🇸 🇷🇺');
   return allOptions.indexOf(message.text) > -1;
 }
 

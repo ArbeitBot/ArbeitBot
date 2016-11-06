@@ -10,7 +10,10 @@ const keyboards = require('./keyboards');
 const strings = require('./strings');
 
 global.eventEmitter.on(strings.inputBioState, ({ msg, user, bot }) => {
-  const needsCongrats = !user.bio && !!user.hourly_rate && user.categories.length > 0;
+  const needsCongrats = !user.bio &&
+    user.hourly_rate &&
+    user.categories.length > 0
+    && user.languages.length > 0;
   const newBio = msg.text.substring(0, 150);
   const userCopy = Object.create(user);
   userCopy.bio = newBio;
@@ -148,7 +151,6 @@ function toggleAvailability(bot, chatId) {
     })
     .catch(/** todo: handle error */);
 }
-
 
 /** Helpers */
 

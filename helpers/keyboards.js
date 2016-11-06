@@ -57,9 +57,12 @@ function freelancerKeyboard(user) {
     strings.freelanceMenuOptions.busy
   );
 
+  const languages = (user.languages.length > 0) ?
+    user.languages.map(v => v.flag).reduce((res, cur) => `${res} ${cur}`) :
+    strings.freelanceMenuOptions.addLanguage;
   return [
     [{ text: bioText }, { text: categoriesText }],
-    [{ text: hourlyRateText }],
+    [{ text: hourlyRateText }, { text: languages }],
     [{ text: strings.freelanceMenuOptions.back },
      { text: availableText }],
   ];
@@ -159,7 +162,15 @@ function sendFreelanceMenu(bot, chatId) {
         text = `${text}\n`;
 
         if (user.hourly_rate) {
-          text = `${text}\n${user.hourly_rate}`;
+          if (user.languages.length > 0) {
+            text = `${text}\n`;
+            user.languages.forEach((language) => {
+              text = `${text}${language.flag}`;
+            });
+            text = `${text} ${user.hourly_rate}`;
+          } else {
+            text = `${text}\n${user.hourly_rate}`;
+          }
         }
 
         if (user.reviews.length > 0) {
