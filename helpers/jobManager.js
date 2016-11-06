@@ -412,7 +412,7 @@ eventEmitter.on(strings.shouldMakeInterested, ({ interested, bot, msg, job, user
  */
 function startJobDraft(language, msg, user, bot) {
   const draft = new Job({
-    language,
+    language: language._id,
     client: user,
     /** todo: we shouldn't add user to list of not interested candidates initially,
        this hack should be addressed in future */
@@ -631,7 +631,7 @@ function askForNewJobPriceRange(msg, user, bot) {
           const freelancer = category.freelancers[j];
           if (freelancer.hourly_rate === option &&
             String(freelancer._id) !== String(savedUser._id) &&
-            freelancer.languages.map(v => String(v)).includes(String(language._id))) {
+            freelancer.languages.map(v => String(v)).includes(String(language))) {
             count += 1;
           }
         }
@@ -709,7 +709,7 @@ function askForNewJobLanguage(msg, bot) {
               languagesButtons.forEach((button) => {
                 flagButtons.push(button);
               });
-              languagesButtons = [flagButtons]
+              languagesButtons = [flagButtons];
               languagesButtons.unshift([{ text: strings.jobCreateCancel }]);
               keyboards.sendKeyboard(
                   bot,

@@ -48,7 +48,6 @@ const jobSchema = new Schema({
   category: {
     type: Schema.ObjectId,
     ref: 'category',
-    required: true,
   },
   client: {
     type: Schema.ObjectId,

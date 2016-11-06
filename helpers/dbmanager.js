@@ -244,19 +244,28 @@ function getCategory(categoryTitle) {
  * @param {Mongoose:Language} language Optional language for freelancers
  */
 function getCategories(language) {
+  const match = (language) ?
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+      { languages: { $in: [language._id] } },
+    ],
+  } :
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+    ],
+  };
   return new Promise((fullfill) => {
     Category.find({})
       .sort('title')
       .populate({
         path: 'freelancers',
-        match: {
-          $and: [
-            { busy: false },
-            { bio: { $exists: true } },
-            { hourly_rate: { $exists: true } },
-            { language },
-          ],
-        },
+        match,
         options: {
           sort: {
             name: -1,
@@ -303,6 +312,7 @@ function freelancersForJob(job) {
       { ban_state: { $nin: true } },
       { bio: { $exists: true } },
       { hourly_rate: job.hourly_rate },
+      { languages: { $in: [job.language] } },
       { _id: { $nin: job.notInterestedCandidates } },
     ] })
       .sort({ sortRate: -1 })
@@ -327,6 +337,7 @@ function freelancersForJobCount(job) {
       { ban_state: { $nin: true } },
       { bio: { $exists: true } },
       { hourly_rate: job.hourly_rate },
+      { languages: { $in: [job.language] } },
       { _id: { $nin: job.notInterestedCandidates } },
     ] })
       .exec((err, count) => {
