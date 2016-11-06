@@ -13,4 +13,5 @@ module.exports = {
   Review: require('./review.js'),
   User: require('./user.js'),
   Job: require('./job.js'),
+  Language: require('./language.js'),
 };

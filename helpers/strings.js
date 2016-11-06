@@ -54,12 +54,12 @@ module.exports = {
   shareProfile: 'Share profile',
   mainMenuOptions: {
     findJobs: '👤 Profile',
-    findContractors: '⛑ Find contractors',
+    findContractors: '⛑ Find freelancers',
     help: '❔ Help',
   },
   clientMenuOptions: {
-    postNewJob: '🔨 Post new job',
-    myJobs: '🛠 My jobs',
+    postNewJob: '🔨 Create new job',
+    myJobs: '🛠 Created jobs',
     back: '🔙 Back',
   },
   freelanceMenuOptions: {

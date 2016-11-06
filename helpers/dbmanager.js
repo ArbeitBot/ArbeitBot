@@ -7,7 +7,6 @@
  */
 
 /** Dependencies */
-const mongoose = require('mongoose');
 const strings = require('./strings');
 
 /** Get schemas **/
@@ -18,6 +17,7 @@ const {
   Review,
   User,
   Job,
+  Language,
 } = require('../models');
 
 /** User */
