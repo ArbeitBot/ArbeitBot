@@ -13,7 +13,7 @@ module.exports = {
   deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ⤵️',
   initialMessage: 'Welcome to the first free opensource Telegram freelance market.\n\nIf you are looking for a job, please fill out your "Profile". Otherwise, you can proceed to "Find contractors". Click "Help" if you have any questions.\n\nThank you for joining our friendly family!',
   mainMenuMessage: 'Select "Profile" if you are looking for a job, otherwise – "Find contractors".',
-  noJobsExistMessage: 'You do not have any jobs yet. You can create one by clicking "Post new job" button.',
+  noJobsExistMessage: 'You do not have any jobs yet. You can create one by clicking "Create new job" button.',
   clientMenuMessage: 'Please, select an option from the menu below.',
   selectCategoryMessage: 'Please, select a category relevant to your job. The number of available contractors is displayed between [square brackets] for each category.',
   selectJobHourlyRateMessage: 'Please, select how much you would like to pay. The price is given in USD/hour to identify the skill levels of developers. You can negotiate a fixed price with the contractor later on. The number of available contractors is displayed between [square brackets] for each rate range.',
