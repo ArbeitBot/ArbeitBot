@@ -116,7 +116,7 @@ function handleKeyboard(msg) {
   const mainMenuOptions = strings.mainMenuOptions;
   const clientOptions = strings.clientMenuOptions;
   const freelanceMenuOptions = strings.freelanceMenuOptions;
-  console.log(text);
+
   if (text === mainMenuOptions.findJobs) {
     keyboards.sendFreelanceMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.findContractors) {
