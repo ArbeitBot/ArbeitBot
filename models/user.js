@@ -68,6 +68,10 @@ const userSchema = new Schema({
     required: true,
     default: [],
   }],
+  languages: [{
+    type: Schema.ObjectId,
+    ref: 'language',
+  }],
   jobs: [{
     type: Schema.ObjectId,
     ref: 'job',

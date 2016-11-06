@@ -1,19 +1,14 @@
 Job creation logic:
 
-1. Client creates job
-2. Bot sends a list of available freelancers
-3. Client selects freelancers that should receive job offer
-4. Freelancer receives job offer
-5. Freelancer chooses if he is interested or not
-6. Client receives a job message inline update marking interested freelancers with check and without uninterested freelancers
-(?)6.1 Client receives separate message if freelancers reject or approve offer
-7. Client chooses "Select contractor"
-8. Freelancer who was chosen receives a message to approve that he is going to take that job
-9. Freelancer chooses if he will do this job or rejects
-	9.1: reject
-		9.1.1. Client receives a message that this freelancer rejected offer and gets back inline with available freelancers
-	9.2: agree
-		9.2.1. Client receives a message that freelancer agreed
-		9.2.2. Freelancer receives instrucrions on what to do next with this job
-		9.2.3. Client can mark job as finished and rate freelancer
-		9.2.4. When job is finished freelancer rates client
+1. askForNewJobLanguage — brings keyboard with languages to user, saves 'inputLanguageState' as user's state
+2. eventEmitter.on(strings.inputLanguageState) — calls startJobDraft if language is valid
+3. startJobDraft — creates job draft and saves it to user, calls askForNewJobCategory
+4. askForNewJobCategory — switches user's state to inputCategoryNameState, brings keyboard with available job categories to user
+5. eventEmitter.on(strings.inputCategoryNameState) — saves job's category and calls askForNewJobPriceRange
+6. askForNewJobPriceRange — saves user's input state to inputHourlyRateState, sends a keyboard with available hourly rates
+7. eventEmitter.on(strings.inputHourlyRateState) — calls addHourlyRateToJobDraft
+8. addHourlyRateToJobDraft — sets job draft's hourly rate and calls askForNewJobDescription
+9. askForNewJobDescription - saves user state to inputJobDescriptionState and adds message with inline button to cancel job description
+10. eventEmitter.on(strings.inputJobDescriptionState) — calls addDescriptionToJobDraft
+11. addDescriptionToJobDraft — adds description to job draft, sets user state to undefined, adds job to user's list of jobs and calls sendJobCreatedMessage
+12. sendJobCreatedMessage — sends job created message and job's message with available freelancers

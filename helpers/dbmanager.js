@@ -239,12 +239,11 @@ function getCategory(categoryTitle) {
 }
 
 /**
- * @todo fix it comment;
- *
- * Get all categories from db; populates 'freelancers', returns only freelancers
- *    available for work and with full profile, sorts them by name for now
+ * Getting a list of all categories with only freelancers of a specific language if specified,
+ *     available for work and with full profile
+ * @param {Mongoose:Language} language Optional language for freelancers
  */
-function getCategories() {
+function getCategories(language) {
   return new Promise((fullfill) => {
     Category.find({})
       .sort('title')
@@ -255,6 +254,7 @@ function getCategories() {
             { busy: false },
             { bio: { $exists: true } },
             { hourly_rate: { $exists: true } },
+            { language },
           ],
         },
         options: {
@@ -415,7 +415,7 @@ function jobCount() {
   });
 }
 
-// Review
+/** Review */
 
 /**
  * Get review by id
@@ -446,6 +446,15 @@ function addReview(review) {
     return reviewObject.save()
       .then(fullfill);
   });
+}
+
+/** Languages */
+
+/**
+ * Used to get the list of all available languages
+ */
+function getLanguages() {
+  return Language.find({});
 }
 
 // Helpers
@@ -511,6 +520,8 @@ module.exports = {
   // Review
   findReviewById,
   addReview,
+  // Languages
+  getLanguages,
   // Helpers
   chatInline,
   // Reports

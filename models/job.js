@@ -23,6 +23,10 @@ const jobSchema = new Schema({
     required: true,
     default: [],
   }],
+  language: {
+    type: Schema.ObjectId,
+    ref: 'language',
+  },
   description: String,
   hourly_rate: String,
   reviewByClient: {

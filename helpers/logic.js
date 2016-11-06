@@ -123,7 +123,7 @@ function handleKeyboard(msg) {
   } else if (text === mainMenuOptions.help) {
     keyboards.sendHelp(bot, msg.chat.id);
   } else if (text === clientOptions.postNewJob) {
-    jobManager.askForNewJobCategory(msg, bot);
+    jobManager.askForNewJobLanguage(msg, bot);
   } else if (text === clientOptions.myJobs) {
     jobManager.sendAllJobs(bot, msg);
   } else if (text === freelanceMenuOptions.editBio || text === freelanceMenuOptions.addBio) {
