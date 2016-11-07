@@ -238,7 +238,8 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ msg, bot }) => {
       if (job.state === strings.jobStates.freelancerChosen) {
         dbmanager.findUser({ username: freelancerUsername })
           .then((user) => {
-            const jobCopy = Object.copy(job);
+            const jobCopy = Object.create(job);
+
             if (option === strings.freelancerAcceptOptions.accept) {
               jobCopy.state = strings.jobStates.finished;
               jobCopy.save()
