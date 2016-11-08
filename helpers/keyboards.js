@@ -100,6 +100,15 @@ function rateKeyboard(inline, jobId) {
   ];
 }
 
+function hideKeyboard(bot, chatId, text) {
+  bot.sendMessage(chatId, text, {
+    reply_markup: JSON.stringify({
+      hide_keyboard: true,
+    }),
+    disable_web_page_preview: 'true',
+  });
+}
+
 /**
  * Sends main menu keyboard to user with chat id
  *
@@ -319,4 +328,5 @@ module.exports = {
   sendInline,
   editInline,
   editMessage,
+  hideKeyboard,
 };
