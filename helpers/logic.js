@@ -78,7 +78,7 @@ bot.on('callback_query', (msg) => {
 
       const options = msg.data.split(strings.inlineSeparator);
       const inlineQuery = options[0];
-      global.eventEmitter.emit(inlineQuery, { msg, bot });
+      global.eventEmitter.emit(inlineQuery, { bot, msg, user });
     })
     .catch(/** todo: handle error */);
 });
@@ -124,7 +124,7 @@ function handleKeyboard(msg) {
   } else if (text === mainMenuOptions.help) {
     keyboards.sendHelp(bot, msg.chat.id);
   } else if (text === clientOptions.postNewJob) {
-    jobManager.askForNewJobLanguage(msg, bot);
+    jobManager.startJobDraft(bot, msg);
   } else if (text === clientOptions.myJobs) {
     jobManager.sendAllJobs(bot, msg);
   } else if (text === freelanceMenuOptions.editBio || text === freelanceMenuOptions.addBio) {
