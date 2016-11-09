@@ -251,7 +251,7 @@ function getCategories(language) {
       { busy: false },
       { bio: { $exists: true } },
       { hourly_rate: { $exists: true } },
-      { languages: { $in: [language._id] } },
+      { languages: { $in: [language._id || language] } },
     ],
   } :
   {

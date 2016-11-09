@@ -100,8 +100,14 @@ function rateKeyboard(inline, jobId) {
   ];
 }
 
+/**
+ * Function to send message and hide keyboard
+ * @param {Telegram:Bot} bot Bot that should send message
+ * @param {String} chatId Id of chat where to send message
+ * @param {String} text Text that should go to this message
+ */
 function hideKeyboard(bot, chatId, text) {
-  bot.sendMessage(chatId, text, {
+  return bot.sendMessage(chatId, text, {
     reply_markup: JSON.stringify({
       hide_keyboard: true,
     }),
@@ -303,7 +309,7 @@ function editInline(bot, chatId, messageId, keyboard) {
  * @param {Telegram:InlineKeyboard} keyboard - Inline keyboard to appear in message
  */
 function editMessage(bot, chatId, messageId, text, keyboard) {
-  bot.editMessageText(text, {
+  return bot.editMessageText(text, {
     chat_id: chatId,
     message_id: messageId,
     reply_markup: JSON.stringify({

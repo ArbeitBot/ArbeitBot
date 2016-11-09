@@ -264,23 +264,36 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
+/** Job creation inlines */
+
 eventEmitter.on(strings.inputLanguageInline, ({ bot, msg, user }) => {
   const options = msg.data.split(strings.inlineSeparator);
   const language = options[1];
-  const draft = Object.create(user.job_draft);
-  draft.language = language;
-  draft.save()
-    .then((savedDraft) => {
-      askForNewJobCategory(bot, msg, user, savedDraft);
+  const draftId = options[2];
+
+  dbmanager.findJobById(draftId, 'language')
+    .then((draft) => {
+      const draftCopy = Object.create(draft);
+      draftCopy.language = language;
+      return draftCopy.save()
+        .then((savedDraft) => {
+          askForNewJobCategory(bot, msg, user, savedDraft);
+        });
     })
     .catch(/** todo: handle error */);
 });
 
 eventEmitter.on(strings.inputCategoryNameInline, ({ bot, msg, user }) => {
   const options = msg.data.split(strings.inlineSeparator);
-  const categoryTitle = options[1];
-  dbmanager.getCategories()
-    .then((categories) => {
+  const categoryId = options[1];
+  const draftId = options[2];
+
+  dbmanager.findJobById(draftId, 'language')
+    .then(draft =>
+      dbmanager.getCategories()
+        .then(categories => ({ draft, categories }))
+    )
+    .then(({ draft, categories }) => {
       const filteredCategories = categories
         .filter(category =>
           category.freelancers.length - (category.freelancers
@@ -288,13 +301,12 @@ eventEmitter.on(strings.inputCategoryNameInline, ({ bot, msg, user }) => {
         );
       for (let i = 0; i < filteredCategories.length; i += 1) {
         const cat = filteredCategories[i];
-        if (cat.title === categoryTitle) {
-          const userCopy = Object.create(user);
-
-          userCopy.job_draft.category = cat;
-          userCopy.job_draft.save()
-            .then(() => {
-              askForNewJobPriceRange(bot, msg, userCopy);
+        if (String(cat._id) === String(categoryId)) {
+          const draftCopy = Object.create(draft);
+          draftCopy.category = cat;
+          draftCopy.save()
+            .then((savedDraft) => {
+              askForNewJobPriceRange(bot, msg, user, savedDraft);
             })
             .catch(/** todo: handle error */);
           break;
@@ -310,19 +322,28 @@ eventEmitter.on(strings.inputCategoryNameInline, ({ bot, msg, user }) => {
 eventEmitter.on(strings.inputHourlyRateInline, ({ bot, msg, user }) => {
   const options = msg.data.split(strings.inlineSeparator);
   const hourlyRate = options[1];
+  const draftId = options[2];
+
   if (strings.hourlyRateOptions.includes(hourlyRate)) {
-    const userCopy = Object.create(user);
-    userCopy.job_draft.hourly_rate = hourlyRate;
-    userCopy.job_draft.save(() => {
-      askForNewJobDescription(bot, msg, userCopy);
-    })
+    dbmanager.findJobById(draftId)
+      .then((draft) => {
+        const draftCopy = Object.create(draft);
+        draftCopy.hourly_rate = hourlyRate;
+        return draftCopy.save()
+          .then((savedDraft) => {
+            askForNewJobDescription(bot, msg, user, savedDraft);
+          });
+      })
       .catch(/** todo: handle error */);
   }
 });
 
 eventEmitter.on(strings.inputJobDescriptionState, ({ bot, msg, user }) => {
   const description = msg.text.substring(0, 500);
-  addDescriptionToJobDraft(bot, msg, user, description);
+  user.populate('current_job_draft', (err, populatedUser) => {
+    /** todo: handle error */
+    addDescriptionToJobDraft(bot, msg, populatedUser, description);
+  })
 });
 
 
@@ -332,10 +353,21 @@ eventEmitter.on(strings.inputJobDescriptionState, ({ bot, msg, user }) => {
  * @param  {Telegram:Messager} msg Message received
  */
 eventEmitter.on(strings.cancelJobCreationInline, ({ bot, msg, user }) => {
-  // Get essential info
-  // const options = msg.data.split(strings.inlineSeparator);
-  keyboards.editInline(bot, msg.message.chat.id, msg.message.message_id, []);
-  cancelJobCreation(bot, msg.message, user);
+  const options = msg.data.split(strings.inlineSeparator);
+  const draftId = options[1];
+
+  dbmanager.findJobById(draftId)
+      .then(draft =>
+        keyboards.editMessage(bot,
+          msg.message.chat.id,
+          msg.message.message_id,
+          strings.thisWorkIsRemoved,
+          [])
+          .then(() => {
+            cancelJobCreation(bot, msg.message, user, draft);
+          })
+      )
+      .catch(/** todo: handle error */);
 });
 
 eventEmitter.on(`cancel${strings.inputLanguageState}`, ({ bot, msg, user }) => {
@@ -410,12 +442,10 @@ function startJobDraft(bot, msg) {
       draft.save()
         .then((savedDraft) => {
           const userCopy = Object.create(user);
-          userCopy.input_state = strings.jobCreationState;
-          userCopy.job_draft = savedDraft;
+          userCopy.job_drafts.push(savedDraft);
           userCopy.save()
-            .then((savedUser) => {
-              keyboards.hideKeyboard(bot, msg.chat.id, strings.startJobDraftMessage);
-              askForNewJobLanguage(bot, msg, savedUser);
+            .then(() => {
+              askForNewJobLanguage(bot, msg, savedDraft);
             })
             .catch(/** todo: handle error */);
         })
@@ -429,13 +459,20 @@ function startJobDraft(bot, msg) {
  * @param  {Telegram:Message} msg  Message received
  * @param  {Mongoose:User} user Owner of job
  * @param  {Telegram:Bot} bot Bot that should respond
+ * @param  {Mongoose:Job} draft Draft to be removed
  */
-function cancelJobCreation(bot, msg, user) {
+function cancelJobCreation(bot, msg, user, draft) {
   const userCopy = Object.create(user);
 
   userCopy.input_state = undefined;
-  const tempJob = userCopy.job_draft;
-  userCopy.job_draft = undefined;
+  const tempJob = draft;
+
+  const index = userCopy.job_drafts.map(v => String(v)).indexOf(String(draft._id));
+  if (index > -1) {
+    userCopy.job_drafts.splice(index, 1);
+  }
+
+  userCopy.current_job_draft = undefined;
   userCopy.save()
     .then(() => {
       if (tempJob) {
@@ -465,22 +502,35 @@ function cancelJobCreation(bot, msg, user) {
  * @param {Telegram:Bot} bot        Bot that should respond
  */
 function addDescriptionToJobDraft(bot, msg, user, description) {
-  const jobDraft = user.job_draft;
+  const jobDraft = user.current_job_draft;
   jobDraft.description = description;
   const userCopy = Object.create(user);
+
+  const index = userCopy.job_drafts.map(v => String(v)).indexOf(String(jobDraft._id));
+  if (index > -1) {
+    userCopy.job_drafts.splice(index, 1);
+  }
 
   userCopy.job_draft = undefined;
   userCopy.jobs.push(jobDraft);
   userCopy.input_state = undefined;
+
   jobDraft.save()
     .then(draft =>
       userCopy.save()
-        .then((savedUser) => {
-          draft.populate('category', (err, job) => {
-            adminReports.jobCreated(bot, job);
-            sendJobCreatedMessage(savedUser, bot, job);
-          });
-        })
+        .then(savedUser =>
+          keyboards.editMessage(bot,
+            draft.current_inline_chat_id,
+            draft.current_inline_message_id,
+            strings.jobCreationSuccessMessage)
+            .then(() => {
+              draft.populate('category', (err, job) => {
+                /** todo: handle error */
+                adminReports.jobCreated(bot, job);
+                sendJobCreatedMessage(savedUser, bot, job);
+              });
+            })
+        )
     )
     .catch(/** todo: handle error */);
 }
@@ -583,24 +633,30 @@ function sendNewJobMessage(job, user, bot) {
  *    relevant flag to db for user
  * @param {Telegram:Bot} bot Bot that should respond
  * @param {Telegram:Message} msg Message received
- * @param {Mongoose:User} user Owner of the job
+ * @param {Mongoose:Job} draft Job draft for which language
+ *     keyboard should be displayed
  */
-function askForNewJobLanguage(bot, msg, user) {
+function askForNewJobLanguage(bot, msg, draft) {
   dbmanager.getLanguages()
     .then((languages) => {
       let languagesButtons = languages
-        .map(language => ({ text: `${language.flag}`, callback_data: `${strings.inputLanguageInline}${strings.inlineSeparator}${language._id}` }));
+        .map(language => ({ text: `${language.flag}`, callback_data: `${strings.inputLanguageInline}${strings.inlineSeparator}${language._id}${strings.inlineSeparator}${draft._id}` }));
       const flagButtons = [];
       languagesButtons.forEach((button) => {
         flagButtons.push(button);
       });
       languagesButtons = [flagButtons];
-      languagesButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}` }]);
-      bot.sendMessage(msg.chat.id, strings.selectLanguageMessage, {
-        reply_markup: JSON.stringify({
-          inline_keyboard: languagesButtons,
-        }),
-      });
+      languagesButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}` }]);
+      keyboards.sendInline(bot,
+        msg.chat.id,
+        strings.selectLanguageMessage,
+        languagesButtons,
+        (data) => {
+          const draftCopy = Object.create(draft);
+          draftCopy.current_inline_message_id = data.message_id;
+          draftCopy.current_inline_chat_id = data.chat.id;
+          draftCopy.save();
+        });
     })
     .catch(/** todo: handle error */);
 }
@@ -614,7 +670,7 @@ function askForNewJobLanguage(bot, msg, user) {
  * @param {Mongoose:Job} job Job draft
  */
 function askForNewJobCategory(bot, msg, user, job) {
-  dbmanager.getCategories(job.language.title)
+  dbmanager.getCategories(job.language)
     .then((categories) => {
       const categoryButtons = categories
         .filter(category =>
@@ -624,12 +680,15 @@ function askForNewJobCategory(bot, msg, user, job) {
         .map(category =>
           [{
             text: `${category.title} [${(category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0))}]`,
-            callback_data: `${strings.inputCategoryNameInline}${strings.inlineSeparator}${category.title}`,
+            callback_data: `${strings.inputCategoryNameInline}${strings.inlineSeparator}${category._id}${strings.inlineSeparator}${job._id}`,
           }]
         );
-      categoryButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}` }]);
-      keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id,
-        strings.selectCategoryMessage, categoryButtons);
+      categoryButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${job._id}` }]);
+      keyboards.editMessage(bot,
+        job.current_inline_chat_id,
+        job.current_inline_message_id,
+        strings.selectCategoryMessage,
+        categoryButtons);
     })
     .catch(/** todo: handle error */);
 }
@@ -640,11 +699,12 @@ function askForNewJobCategory(bot, msg, user, job) {
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Message} msg Message received
  * @param  {Mongoose:User} user Owner of job
+ * @param {Mongoose:Job} draft Job draft for which price range
+ *     keyboard should be displayed
  */
-function askForNewJobPriceRange(bot, msg, user) {
-  const userCopy = Object.create(user);
-  const category = user.job_draft.category;
-  const language = user.job_draft.language;
+function askForNewJobPriceRange(bot, msg, user, draft) {
+  const category = draft.category;
+  const language = draft.language;
   const keyboard = [];
   const options = strings.hourlyRateOptions;
   for (let i = 0; i < options.length; i += 1) {
@@ -654,8 +714,8 @@ function askForNewJobPriceRange(bot, msg, user) {
     for (let j = 0; j < category.freelancers.length; j += 1) {
       const freelancer = category.freelancers[j];
       if (freelancer.hourly_rate === option &&
-        String(freelancer._id) !== String(userCopy._id) &&
-        freelancer.languages.map(v => String(v)).includes(String(language))) {
+        String(freelancer._id) !== String(user._id) &&
+        freelancer.languages.map(v => String(v)).includes(String(language._id))) {
         count += 1;
       }
     }
@@ -663,13 +723,16 @@ function askForNewJobPriceRange(bot, msg, user) {
     if (count > 0) {
       keyboard.push([{
         text: `${option} [${count}]`,
-        callback_data: `${strings.inputHourlyRateInline}${strings.inlineSeparator}${option}`,
+        callback_data: `${strings.inputHourlyRateInline}${strings.inlineSeparator}${option}${strings.inlineSeparator}${draft._id}`,
       }]);
     }
   }
-  keyboard.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}` }]);
-  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id,
-    strings.selectJobHourlyRateMessage, keyboard);
+  keyboard.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}` }]);
+  keyboards.editMessage(bot,
+    draft.current_inline_chat_id,
+    draft.current_inline_message_id,
+    strings.selectJobHourlyRateMessage,
+    keyboard);
 }
 
 /**
@@ -678,18 +741,28 @@ function askForNewJobPriceRange(bot, msg, user) {
  * @param  {Telegram:Message} msg Message received
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Mongoose:User} user Owner of job
+ * @param {Mongoose:Job} draft Relevant job draft
  */
-function askForNewJobDescription(bot, msg, user) {
+function askForNewJobDescription(bot, msg, user, draft) {
   const userCopy = Object.create(user);
 
   userCopy.input_state = strings.inputJobDescriptionState;
+  userCopy.current_job_draft = draft;
   userCopy.save()
-    .then(savedUser =>
-      keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id,
-        strings.addJobDescriptionMessage, [[{
+    .then(() =>
+      keyboards.editMessage(bot,
+        draft.current_inline_chat_id,
+        draft.current_inline_message_id,
+        strings.addJobDescriptionMessage,
+        [[{
           text: strings.cancel,
-          callback_data: strings.cancelJobCreationInline,
+          callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}`,
         }]])
+        .then(() => {
+          keyboards.hideKeyboard(bot,
+            draft.current_inline_chat_id,
+            strings.addJobDescriptionHideKeyboardMessage);
+        })
     )
     .catch(/** todo: handle error */);
 }

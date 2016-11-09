@@ -78,7 +78,13 @@ const userSchema = new Schema({
     required: true,
     default: [],
   }],
-  job_draft: {
+  job_drafts: [{
+    type: Schema.ObjectId,
+    ref: 'job',
+    requred: true,
+    default: [],
+  }],
+  current_job_draft: {
     type: Schema.ObjectId,
     ref: 'job',
   },
