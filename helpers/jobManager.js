@@ -339,11 +339,15 @@ eventEmitter.on(strings.inputHourlyRateInline, ({ bot, msg, user }) => {
 });
 
 eventEmitter.on(strings.inputJobDescriptionState, ({ bot, msg, user }) => {
+  if (msg.text.length < 100 || msg.text.length > 500) {
+    bot.sendMessage(msg.chat.id, strings.jobDescriptionErrorMessage);
+    return;
+  }
   const description = msg.text.substring(0, 500);
   user.populate('current_job_draft', (err, populatedUser) => {
     /** todo: handle error */
     addDescriptionToJobDraft(bot, msg, populatedUser, description);
-  })
+  });
 });
 
 
@@ -361,7 +365,7 @@ eventEmitter.on(strings.cancelJobCreationInline, ({ bot, msg, user }) => {
         keyboards.editMessage(bot,
           msg.message.chat.id,
           msg.message.message_id,
-          strings.thisWorkIsRemoved,
+          strings.thisDraftIsRemoved,
           [])
           .then(() => {
             cancelJobCreation(bot, msg.message, user, draft);

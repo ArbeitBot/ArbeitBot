@@ -18,7 +18,8 @@ module.exports = {
   selectLanguageMessage: 'Please, select what language will you use for your job description. You will only see the freelancers who selected this language as one of their means of communication.',
   selectCategoryMessage: 'Please, select a category relevant to your job. The number of available contractors is displayed between [square brackets] for each category.',
   selectJobHourlyRateMessage: 'Please, select how much you would like to pay. The price is given in USD/hour to identify the skill levels of developers. You can negotiate a fixed price with the contractor later on. The number of available contractors is displayed between [square brackets] for each rate range.',
-  addJobDescriptionMessage: 'Please, provide a job description (max 500 chars). It will be visible to contractors. Please, be brief – the details can be discussed with the contractors later on.',
+  addJobDescriptionMessage: 'Please, provide a job description (100-500 chars). It will be visible to contractors. Please, be brief – the details can be discussed with the contractors later on.',
+  jobDescriptionErrorMessage: 'Please make sure that your job description is between 100 and 500 chars.',
   addJobDescriptionHideKeyboardMessage: 'You can cancel at any time at job creation message.',
   filledEverythingMessage: 'You did it! Your profile is now complete. Now just sit back and wait for job offers.',
   fullFreelancerMessageAvailable: 'Your profile is complete! Now just sit back and wait for job offers.',
@@ -54,6 +55,7 @@ module.exports = {
   clientHasChosenAnotherFreelancer: 'The client has chosen another freelancer.',
   noCandidatesMessage: 'There are no available candidates right now 😥 Please, check back later or create a new job.',
   thisWorkIsRemoved: 'This job has been deleted ✌️',
+  thisDraftIsRemoved: 'This job draft has been deleted ✌️',
   shareProfile: 'Share profile',
   mainMenuOptions: {
     findJobs: '👤 Profile',
