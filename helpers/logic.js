@@ -47,13 +47,13 @@ bot.on('message', (msg) => {
         handleKeyboard(msg);
       } else if (check.botCommandStart(msg)) {
         keyboards.sendMainMenu(bot, msg.chat.id, false);
+      } else if (check.adminCommand(msg)) {
+        adminPanel.handleAdminCommand(msg, bot);
       } else {
         /** todo: handle strange message */
       }
     } else if (check.botCommandStart(msg)) {
       profile.createProfile(bot, msg);
-    } else if (check.adminCommand(msg)) {
-      adminPanel.handleAdminCommand(msg, bot);
     }
   });
 });
