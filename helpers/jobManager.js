@@ -1216,6 +1216,14 @@ function makeInterested(interested, bot, msg, job, user) {
     // Add user to interested or not interested
     if (interested) {
       job.interestedCandidates.push(user._id);
+      job.populate('client', (err, populatedJob) => {
+        /** todo: handle error */
+        let addition = '';
+        if (job.description.length > 150) {
+          addition = '...';
+        }
+        bot.sendMessage(populatedJob.client.id, `${strings.interestedOption} @${user.username}${strings.freelancerInterestedNotification}\`${job.description.substring(0, 150)}${addition}\``, { parse_mode: 'Markdown' });
+      });
     } else {
       job.notInterestedCandidates.push(user._id);
     }

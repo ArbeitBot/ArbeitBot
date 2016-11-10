@@ -46,6 +46,7 @@ module.exports = {
   suggestCategoryMessage: 'Suggest your own category',
   waitContractorResponseMessage: 'You sent an offer to one of the freelancers. Please, wait until the freelancer accepts or rejects your offer, or simply select another freelancer if you do not want to wait anymore.',
   acceptOrRejectMessage: 'Congrats! You received a job offer! Please, accept or reject it.',
+  freelancerInterestedNotification: ' became interested in ',
   contactWithFreelancerMessage: 'Wonderful! The contractor has accepted your offer! Please, contact them directly, and rate your contractor after the job is done.',
   contactWithClientMessage: 'Great! You have accepted this offer. Now please communicate with the client directly, and rate your experience as soon as you finish the job.',
   rateFreelancerMessage: 'The only thing left is to rate your contractor. How well was the job done?',
