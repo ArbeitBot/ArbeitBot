@@ -27,7 +27,7 @@ module.exports = {
   fullFreelancerMessageBusy: 'Your profile is complete! However, clients will not contact you since your status is "Busy".',
   emptyFreelancerMessage: 'Welcome to your freelancer profile! Please, fill out your bio, select your hourly rate and categories of expertise.',
   missingFreelancerMessage: 'Welcome to your freelancer profile! You need both to fill out your bio and select your hourly rate and categories of expertise so that clients can see you.',
-  helpMessage: 'If you want to learn more about this bot, please go to arbeitbot.com.\n\nIf you have any requests, suggestions, concerns or just want to chat, please contact my creator by clicking the button bellow.',
+  helpMessage: 'If you want to learn more about this bot, please go to arbeitbot.com.\n\nIf you have any questions, concerns or just found a bug, please contact us at @arbeit_bot_support.\n\nIn case you want to see the code of @arbeit_bot on GitHub, please follow the link provided below. We would appreciate if you could star our repository as well.\n\nThank you a lot for your support!',
   becameBusyMessage: 'You just set your status to "Busy". You will not receive any new job offers until you switch back to "Available".',
   becameAvailableMessage: 'You just switched to "Available" status. You will now receive relevant job offers until you switch back to "Busy".',
   missingBecameBusyMessage: 'You just changed your status to "Busy". But this doesn\'t make much difference since clients will not be able to find you without properly filled bio, categories and hourly rate.',
