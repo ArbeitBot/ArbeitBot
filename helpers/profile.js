@@ -10,6 +10,11 @@ const keyboards = require('./keyboards');
 const strings = require('./strings');
 
 global.eventEmitter.on(strings.inputBioState, ({ msg, user, bot }) => {
+  if (msg.text.length > 150) {
+    bot.sendMessage(msg.chat.id, strings.bioErrorMessage);
+    return;
+  }
+
   const needsCongrats = !user.bio &&
     user.hourly_rate &&
     user.categories.length > 0

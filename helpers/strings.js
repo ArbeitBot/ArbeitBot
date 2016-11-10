@@ -20,6 +20,7 @@ module.exports = {
   selectJobHourlyRateMessage: 'Please, select how much you would like to pay. The price is given in USD/hour to identify the skill levels of developers. You can negotiate a fixed price with the contractor later on. The number of available contractors is displayed between [square brackets] for each rate range.',
   addJobDescriptionMessage: 'Please, provide a job description (100-500 chars). It will be visible to contractors. Please, be brief – the details can be discussed with the contractors later on.',
   jobDescriptionErrorMessage: 'Please make sure that your job description is between 100 and 500 chars.',
+  bioErrorMessage: 'Please make sure that your bio fits in 150 chars.',
   addJobDescriptionHideKeyboardMessage: 'You can cancel at any time at job creation message.',
   filledEverythingMessage: 'You did it! Your profile is now complete. Now just sit back and wait for job offers.',
   fullFreelancerMessageAvailable: 'Your profile is complete! Now just sit back and wait for job offers.',
