@@ -711,6 +711,7 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
   const language = draft.language;
   const keyboard = [];
   const options = strings.hourlyRateOptions;
+  const buttons = [];
   for (let i = 0; i < options.length; i += 1) {
     const option = options[i];
 
@@ -723,12 +724,19 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
         count += 1;
       }
     }
-
     if (count > 0) {
-      keyboard.push([{
+      buttons.push({
         text: `${option} [${count}]`,
         callback_data: `${strings.inputHourlyRateInline}${strings.inlineSeparator}${option}${strings.inlineSeparator}${draft._id}`,
-      }]);
+      });
+    }
+  }
+  let tempRow = [];
+  for (let j = 0; j < buttons.length; j += 1) {
+    tempRow.push(buttons[j]);
+    if (j % 2 !== 0 || j === buttons.length - 1) {
+      keyboard.push(tempRow);
+      tempRow = [];
     }
   }
   keyboard.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}` }]);
