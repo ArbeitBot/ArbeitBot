@@ -1,7 +1,7 @@
 {
-  "name": "arbeit-bot",
+  "name": "JobMaker",
   "version": "0.0.1",
-  "description": "First free open-source Telegram freelance market. Built by people for people.",
+  "description": "Moy bot",
   "main": "app.js",
   "private": true,
   "scripts": {
@@ -11,13 +11,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ArbeitBot/ArbeitBot.git"
+    "url": "git+https://github.com/dimlevsha/ArbeitBot.git"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ArbeitBot/ArbeitBot/issues"
+    "url": "https://github.com/dimlevsha/ArbeitBot/issues"
   },
-  "homepage": "https://arbeitbot.com/",
+  "homepage": "https://vk.com",
   "dependencies": {
     "body": "^5.1.0",
     "mongoose": "^4.5.3",
