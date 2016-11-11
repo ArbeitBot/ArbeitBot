@@ -41,6 +41,6 @@ http.createServer((req, res) => {
     res.writeHead(404);
     res.end('404');
   }
-}).listen(5000, () => {
+}).listen(process.env.PORT || 5000), () => {
   console.log('Statistics server listening on: 5000'); // eslint-disable-line no-console
 });
