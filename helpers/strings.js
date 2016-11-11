@@ -6,14 +6,14 @@
  */
 
 module.exports = {
-  reportThankYouMessage: 'Thank you for reporting this suspicious activity! Our moderators will take immediate action to prevent reported behaviour in the future.',
+  reportThankYouMessage: 'Спасибо за то, что сообщили нам о нарушении! Наши модераторы немедленно рассотрят вашу заявку и предпримут все необходимое(^_<)',
   banMessage: 'На вас подали жалобу, и наши модераторы приняли решение о вашей блокировке.  Если это ошибка, то обращайтесь к администратору @dsl1500 и мы посмотрим, что можно сделать;)',
-  loadingMessage: '(ᵔᴥᵔ)  Загрузка...',
+  loadingMessage: '♔  Загрузка...',
   askForUsername: 'У вас нет никнейма! Пожалуйста заполните его в настройках телеграмма.',
-  deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ⤵️',
+  deprecatedMessage: 'Пролестните страницу вниз ⤵️',
   initialMessage: 'Добро пожаловать, это Job Maker DVFU! Мы рады, что вы пользуетесь нашими услугами и надеемся, что вы тоже останетесь довольны! (◕‿◕)	',
-  mainMenuMessage: 'Select "Profile" if you are looking for a job, otherwise – "Find contractors".',
-  noJobsExistMessage: 'You do not have any jobs yet. You can create one by clicking "Create new job" button.',
+  mainMenuMessage: 'Выберите "Профиль" если ищите задание, либо – "Найти исполнителей".',
+  noJobsExistMessage: 'У вас нет ни одного задания. Но вы можете его создать. (^_~)',
   clientMenuMessage: 'Please, select an option from the menu below.',
   selectLanguageMessage: 'Please, select what language will you use for your job description. You will only see the freelancers who selected this language as one of their means of communication.',
   selectCategoryMessage: 'Please, select a category relevant to your job. The number of available contractors is displayed between [square brackets] for each category.',
