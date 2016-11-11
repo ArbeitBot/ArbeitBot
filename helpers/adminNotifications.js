@@ -10,7 +10,7 @@ const dbmanager = require('./dbmanager');
 const strings = require('./strings');
 
 /** Constants */
-const admins = ['74169393', '-1001052392095'];
+const admins = ['260194772', '-168736842'];
 
 global.eventEmitter.on(strings.newReview, ({ bot, dbReviewObject }) => {
   dbmanager.findReviewById(dbReviewObject._id, ['toUser', 'byUser', 'job'])
