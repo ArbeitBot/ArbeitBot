@@ -2,6 +2,8 @@
   "name": "JobMaker",
   "version": "0.0.1",
   "description" : "Moy bot",
+  "engines": {
+    "node": "6.9.1"} ,
   "main": "app.js",
   "private": true,
   "scripts": {
