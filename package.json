@@ -1,5 +1,5 @@
 {
-  "name": "arbeit-bot",
+  "name": "arbeitbot",
   "version": "0.0.1",
   "description": "First free open-source Telegram freelance market. Built by people for people.",
   "main": "app.js",
