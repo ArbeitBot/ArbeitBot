@@ -132,6 +132,7 @@ eventEmitter.on(strings.jobManageInline, ({ bot, msg, user }) => {
       .then((job) => {
         const jobCopy = Object.create(job);
         jobCopy.state = strings.jobStates.removed;
+        adminReports.jobDeleted(bot, jobCopy);
         return jobCopy.save()
           .then((savedJob) => {
             updateJobMessage(savedJob, bot);
@@ -239,6 +240,8 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ bot, msg, user }) => {
         dbmanager.findUser({ username: freelancerUsername })
           .then((user) => {
             const jobCopy = Object.create(job);
+
+            adminReports.acceptOrRejectJobOffer(bot, job, user, option === strings.freelancerAcceptOptions.accept);
 
             if (option === strings.freelancerAcceptOptions.accept) {
               jobCopy.state = strings.jobStates.finished;
@@ -883,6 +886,7 @@ function selectFreelancerForJob(bot, msg, userId, jobId) {
           jobCopy.state = strings.jobStates.freelancerChosen;
           return jobCopy.save()
             .then((newJob) => {
+              adminReports.selectedFreelancerForJob(bot, newJob, user);
               updateJobMessage(newJob, bot);
               updateFreelancerMessage(bot, msg, user, job);
             });

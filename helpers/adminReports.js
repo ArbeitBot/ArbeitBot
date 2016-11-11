@@ -17,7 +17,52 @@ const adminChatId = config.adminChatId || -1001088665045;
  */
 function jobCreated(bot, job) {
   job.populate('client', (err, populatedJob) => {
-    const msg = `👍 @${populatedJob.client.username} created a job:\n\n[${populatedJob.category.title}] ${populatedJob.hourly_rate}\n${populatedJob.description}`;
+    /** todo: handle error */
+    const msg = `👍 @${populatedJob.client.username} created the job:\n\n[${populatedJob.category.title}] ${populatedJob.hourly_rate}\n${populatedJob.description}`;
+    bot.sendMessage(adminChatId, msg);
+  });
+}
+
+/**
+ * Sends admin notification that job was deleted
+ * @param {Telegram:Bot} bot Bot that should send notification
+ * @param {Mongoose:Job} job Job that was removed
+ */
+function jobDeleted(bot, job) {
+  job.populate('client', (err, populatedJob) => {
+    /** todo: handle error */
+    const msg = `❌ @${populatedJob.client.username} deleted the job:\n\n[${populatedJob.category.title}] ${populatedJob.hourly_rate}\n${populatedJob.description}`;
+    bot.sendMessage(adminChatId, msg);
+  });
+}
+
+/**
+ * Notifies when a freelancer was selected for a job
+ * @param {Telegram:Bot} bot Bot that should send notification
+ * @param {Mongoose:Job} job Relevant job
+ * @param {Mongoose:User} freelancer Freelancer that gets selected
+ */
+function selectedFreelancerForJob(bot, job, freelancer) {
+  job.populate('client', (err, populatedJob) => {
+    /** todo: handle error */
+    const msg = `✅ @${populatedJob.client.username} selected @${freelancer.username} for the job:\n\n[${populatedJob.category.title}] ${populatedJob.hourly_rate}\n${populatedJob.description}`;
+    bot.sendMessage(adminChatId, msg);
+  });
+}
+
+/**
+ * Notifies when a freelancer accepts or refuses job offer
+ * @param {Telegram:Bot} bot Bot that should send notification
+ * @param {Mongoose:Job} job Relevant job
+ * @param {Mongoose:User} freelancer Freelancer that performs this action
+ * @param {Boolean} accept True if accept, false if reject
+ */
+function acceptOrRejectJobOffer(bot, job, freelancer, accept) {
+  job.populate('client', (err, populatedJob) => {
+    /** todo: handle error */
+    const msg = accept ?
+      `✊ @${freelancer.username} accepted the job offer by @${populatedJob.client.username}:\n\n[${populatedJob.category.title}] ${populatedJob.hourly_rate}\n${populatedJob.description}` :
+      `👎 @${freelancer.username} rejected the job offer by @${populatedJob.client.username}:\n\n[${populatedJob.category.title}] ${populatedJob.hourly_rate}\n${populatedJob.description}`;
     bot.sendMessage(adminChatId, msg);
   });
 }
@@ -34,6 +79,9 @@ function userRegistered(bot, user) {
 
 module.exports = {
   jobCreated,
+  jobDeleted,
+  selectedFreelancerForJob,
+  acceptOrRejectJobOffer,
   userRegistered,
 };
 
