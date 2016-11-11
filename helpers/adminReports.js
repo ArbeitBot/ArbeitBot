@@ -7,7 +7,7 @@
 
 const config = require('../config');
 
-const adminChatId = config.adminChatId || -1001088665045;
+const adminChatId = config.adminChatId;
 
 /**
  * Sends admins notification that job was created
