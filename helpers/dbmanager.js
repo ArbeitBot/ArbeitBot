@@ -12,6 +12,7 @@ const strings = require('./strings');
 /** Get schemas **/
 const {
   UserChatInline,
+  Supercategory,
   Category,
   Report,
   Review,
@@ -235,6 +236,94 @@ function getCategory(categoryTitle) {
       .exec((err, category) => {
         if (err) throw err;
         else fullfill(category);
+      });
+  });
+}
+
+/**
+ * Getting a supercategory by id with freelancers for a specific language
+ * @param {String} id Id of mongoose's supercategory
+ * @param {Mongoose:Language} language Language specified
+ */
+function getSupercategoryById(id, language) {
+  const match = (language) ?
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+      { languages: { $in: [language._id || language] } },
+    ],
+  } :
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+    ],
+  };
+  return new Promise((fullfill) => {
+    Supercategory.findById(id)
+      .populate({
+        path: 'categories',
+        populate: {
+          path: 'freelancers',
+          match,
+          options: {
+            sort: {
+              name: -1,
+            },
+          },
+        },
+      })
+      .exec((err, categories) => {
+        if (err) throw err;
+        else fullfill(categories);
+      });
+  });
+}
+
+/**
+ * Getting a list of all supercategories with only freelancers of a specific language if specified,
+ *     available for work and with full profile
+ * @param {Mongoose:Language} language Optional language for freelancers
+ */
+function getSupercategories(language) {
+  const match = (language) ?
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+      { languages: { $in: [language._id || language] } },
+    ],
+  } :
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+    ],
+  };
+
+  return new Promise((fullfill) => {
+    Supercategory.find({})
+      .sort('title')
+      .populate({
+        path: 'categories',
+        populate: {
+          path: 'freelancers',
+          match,
+          options: {
+            sort: {
+              name: -1,
+            },
+          },
+        },
+      })
+      .exec((err, categories) => {
+        if (err) throw err;
+        else fullfill(categories);
       });
   });
 }
@@ -520,6 +609,8 @@ module.exports = {
   freelancerCount,
   // Categories
   getCategory,
+  getSupercategoryById,
+  getSupercategories,
   getCategories,
   // Jobs
   findJobById,
