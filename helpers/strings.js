@@ -7,9 +7,9 @@
 
 module.exports = {
   reportThankYouMessage: 'Thank you for reporting this suspicious activity! Our moderators will take immediate action to prevent reported behaviour in the future.',
-  banMessage: 'It looks like you have been reported, and our moderators decided that there was a reason to ban you. If this is a mistake, please let my creator @borodutch know – we will see what we can do ;)',
-  loadingMessage: '🦄 Loading...',
-  askForUsername: 'It looks like you don\'t have a username. Please, set it up in Telegram settings.',
+  banMessage: 'На вас подали жалобу, и наши модераторы приняли решение о вашей блокировке.  Если это ошибка, то обращайтесь к администратору @dsl1500 и мы посмотрим, что можно сделать;)',
+  loadingMessage: '🦄 Загрузка...',
+  askForUsername: 'У вас нет никнейма! Пожалуйста заполните его в настройках телеграмма.',
   deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ⤵️',
   initialMessage: 'Welcome to the first free opensource Telegram freelance market.\n\nIf you are looking for a job, please fill out your "Profile". Otherwise, you can proceed to "Find contractors". Click "Help" if you have any questions.\n\nThank you for joining our friendly family!',
   mainMenuMessage: 'Select "Profile" if you are looking for a job, otherwise – "Find contractors".',
