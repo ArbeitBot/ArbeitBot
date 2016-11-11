@@ -530,7 +530,7 @@ function addDescriptionToJobDraft(bot, msg, user, description) {
     userCopy.job_drafts.splice(index, 1);
   }
 
-  userCopy.job_draft = undefined;
+  userCopy.current_job_draft = undefined;
   userCopy.jobs.push(jobDraft);
   userCopy.input_state = undefined;
 
@@ -810,6 +810,11 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
  */
 function askForNewJobDescription(bot, msg, user, draft) {
   const userCopy = Object.create(user);
+
+  if (user.current_job_draft) {
+    bot.sendMessage(msg.message.chat.id, strings.anotherJobDraftErrorMessage);
+    return;
+  }
 
   userCopy.input_state = strings.inputJobDescriptionState;
   userCopy.current_job_draft = draft;
