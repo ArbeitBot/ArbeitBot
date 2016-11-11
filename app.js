@@ -26,7 +26,6 @@ require('./helpers/logic');
 /** Start stat server */
 require('./helpers/statServer');
 
-.listen(process.env.PORT || 5000)
 
 /** Print a message to assure that bot is up and running */
 console.log('Bot is up and running'); // eslint-disable-line no-console
