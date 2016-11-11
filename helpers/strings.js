@@ -8,10 +8,10 @@
 module.exports = {
   reportThankYouMessage: 'Thank you for reporting this suspicious activity! Our moderators will take immediate action to prevent reported behaviour in the future.',
   banMessage: 'На вас подали жалобу, и наши модераторы приняли решение о вашей блокировке.  Если это ошибка, то обращайтесь к администратору @dsl1500 и мы посмотрим, что можно сделать;)',
-  loadingMessage: '🦄 Загрузка...',
+  loadingMessage: '(ᵔᴥᵔ)  Загрузка...',
   askForUsername: 'У вас нет никнейма! Пожалуйста заполните его в настройках телеграмма.',
   deprecatedMessage: 'This message is deprecated, please scroll down to see the new message ⤵️',
-  initialMessage: 'Welcome to the first free opensource Telegram freelance market.\n\nIf you are looking for a job, please fill out your "Profile". Otherwise, you can proceed to "Find contractors". Click "Help" if you have any questions.\n\nThank you for joining our friendly family!',
+  initialMessage: 'Добро пожаловать, это Job Maker DVFU! Мы рады, что вы пользуетесь нашими услугами и надеемся, что вы тоже останетесь довольны! (◕‿◕)	',
   mainMenuMessage: 'Select "Profile" if you are looking for a job, otherwise – "Find contractors".',
   noJobsExistMessage: 'You do not have any jobs yet. You can create one by clicking "Create new job" button.',
   clientMenuMessage: 'Please, select an option from the menu below.',
