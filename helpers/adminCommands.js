@@ -9,7 +9,7 @@
 const dbmanager = require('./dbmanager');
 
 /** Constants */
-const admins = ['74169393', '-1001052392095'];
+const admins = ['260194772', '-168736842'];
 
 /**
  * Check if command is unban
