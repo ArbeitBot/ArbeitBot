@@ -1,2 +1,2 @@
 node i
-node  ./app.js
+node app.js
