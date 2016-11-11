@@ -18,7 +18,7 @@ module.exports = {
   clientMenuMessage: 'Please, select an option from the menu below.',
   selectLanguageMessage: 'Please, select what language will you use for your job description. You will only see the freelancers who selected this language as one of their means of communication.',
   selectSupercategoryMessage: 'Please, select a category relevant to your job. The number of available contractors is displayed between [square brackets] for each category.',
-  selectCategoryMessage: 'Please, select a subcategory relevant to your job. The number of available contractors is displayed between [square brackets] for each category.',
+  selectCategoryMessage: 'Please, select a subcategory relevant to your job. The number of available contractors is displayed between [square brackets] for each subcategory.',
   selectJobHourlyRateMessage: 'Please, select how much you would like to pay. The price is given in USD/hour to identify the skill levels of developers. You can negotiate a fixed price with the contractor later on. The number of available contractors is displayed between [square brackets] for each rate range.',
   addJobDescriptionMessage: 'Please, provide a job description (100-500 chars). It will be visible to contractors. Please, be brief – the details can be discussed with the contractors later on.',
   jobDescriptionErrorMessage: 'Please make sure that your job description is between 100 and 500 chars.',
