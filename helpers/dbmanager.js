@@ -395,8 +395,16 @@ function findJobById(id, populate) {
  * @param  {Mongo:Job} job - Job object for which freelancers are returned
  */
 function freelancersForJob(job) {
-  return new Promise((fullfill) => {
-    User.find({ $and: [
+  const query = job.hourly_rate === strings.hourlyRateAllRatesOption ?
+    [
+      { categories: job.category },
+      { busy: false },
+      { ban_state: { $nin: true } },
+      { bio: { $exists: true } },
+      { languages: { $in: [job.language] } },
+      { _id: { $nin: job.notInterestedCandidates } },
+    ] :
+    [
       { categories: job.category },
       { busy: false },
       { ban_state: { $nin: true } },
@@ -404,7 +412,9 @@ function freelancersForJob(job) {
       { hourly_rate: job.hourly_rate },
       { languages: { $in: [job.language] } },
       { _id: { $nin: job.notInterestedCandidates } },
-    ] })
+    ];
+  return new Promise((fullfill) => {
+    User.find({ $and: query })
       .sort({ sortRate: -1 })
       .limit(10) // TODO:Move to one place
       .skip(10 * job.current_page) // TODO:Move to one place
@@ -420,8 +430,16 @@ function freelancersForJob(job) {
  * @param {Mongoose:Job} job - Job for which number of freelancers should be counted
  */
 function freelancersForJobCount(job) {
-  return new Promise((fullfill) => {
-    User.count({ $and: [
+  const query = job.hourly_rate === strings.hourlyRateAllRatesOption ?
+    [
+      { categories: job.category },
+      { busy: false },
+      { ban_state: { $nin: true } },
+      { bio: { $exists: true } },
+      { languages: { $in: [job.language] } },
+      { _id: { $nin: job.notInterestedCandidates } },
+    ] :
+    [
       { categories: job.category },
       { busy: false },
       { ban_state: { $nin: true } },
@@ -429,7 +447,10 @@ function freelancersForJobCount(job) {
       { hourly_rate: job.hourly_rate },
       { languages: { $in: [job.language] } },
       { _id: { $nin: job.notInterestedCandidates } },
-    ] })
+    ];
+
+  return new Promise((fullfill) => {
+    User.count({ $and: query })
       .exec((err, count) => {
         if (err) throw err;
         else fullfill(count);

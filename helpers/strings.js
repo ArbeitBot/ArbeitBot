@@ -90,6 +90,7 @@ module.exports = {
     '$50 – $75', '$75 – $100', '$100 – $200',
     '$200+',
   ],
+  hourlyRateAllRatesOption: 'All hourly rates',
   selectedCategory: '✅ ',
   selectedHourlyRate: '✅ ',
   selectedLanguage: '✅ ',

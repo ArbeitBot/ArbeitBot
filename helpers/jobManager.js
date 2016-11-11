@@ -339,7 +339,7 @@ eventEmitter.on(strings.inputHourlyRateInline, ({ bot, msg, user }) => {
   const hourlyRate = options[1];
   const draftId = options[2];
 
-  if (strings.hourlyRateOptions.includes(hourlyRate)) {
+  if (strings.hourlyRateOptions.includes(hourlyRate) || hourlyRate === strings.hourlyRateAllRatesOption) {
     dbmanager.findJobById(draftId)
       .then((draft) => {
         const draftCopy = Object.create(draft);
@@ -792,6 +792,7 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
       tempRow = [];
     }
   }
+  keyboard.unshift([{ text: strings.hourlyRateAllRatesOption, callback_data: `${strings.inputHourlyRateInline}${strings.inlineSeparator}${strings.hourlyRateAllRatesOption}${strings.inlineSeparator}${draft._id}` }]);
   keyboard.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}` }]);
   keyboards.editMessage(bot,
     draft.current_inline_chat_id,
