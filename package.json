@@ -1,10 +1,7 @@
 {
   "name": "JobMaker",
   "version": "0.0.1",
-  "engines": {
-    "node": "6.9.1"
-  }
-  "description": "Moy bot",
+  "description" : "Moy bot",
   "main": "app.js",
   "private": true,
   "scripts": {
