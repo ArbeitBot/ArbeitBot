@@ -26,19 +26,15 @@ function botCommandStart(message) {
 
 /**
  * Checks if message is an admin command
+ * Every admin message starts with: /admin
+ * /admin_ban
+ * /admin_unban
+ * /admin_godvoice
  * @param {Telegram:Message} message - Message to check
  * @return {Boolean} True if admin command, false otherwise
  */
 function adminCommand(message) {
-  const adminCommands = ['/ban', '/unban', '/godvoice'];
-
-  for (let i = 0; i < adminCommands.length; i += 1) {
-    if (message.text.indexOf(adminCommands[i]) > -1) {
-      return true;
-    }
-  }
-
-  return false;
+  return message.text.indexOf('/admin') == 0;
 }
 
 /**

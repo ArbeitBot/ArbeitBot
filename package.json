@@ -4,6 +4,9 @@
   "description": "First free open-source Telegram freelance market. Built by people for people.",
   "main": "app.js",
   "private": true,
+  "engines": {
+    "node" : ">=6.4"
+  },
   "scripts": {
     "start": "node ./app.js",
     "test": "mocha --reporter spec",
