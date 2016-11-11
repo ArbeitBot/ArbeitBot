@@ -1,7 +1,7 @@
 {
-  "name": "JobMaker",
+  "name": "arbeit-bot",
   "version": "0.0.1",
-  "description": "Place for services",
+  "description": "First free open-source Telegram freelance market. Built by people for people.",
   "main": "app.js",
   "private": true,
   "engines": {
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+git+https://github.com/ArbeitBot/ArbeitBot.git"
+    "url": "git+https://github.com/ArbeitBot/ArbeitBot.git"
   },
   "license": "MIT",
   "bugs": {
@@ -23,7 +23,7 @@
   "homepage": "https://arbeitbot.com/",
   "dependencies": {
     "body": "^5.1.0",
-    "mongoose": "^4.6.6",
+    "mongoose": "4.6.6",
     "node-telegram-bot-api": "^0.23.3"
   },
   "devDependencies": {
