@@ -10,7 +10,7 @@
 const mongoose = require('mongoose');
 const events = require('events');
 
-/** Noinspection JSAnnotator */
+// noinspection JSAnnotator
 global.eventEmitter = new events.EventEmitter();
 
 /** Configure a bot */
