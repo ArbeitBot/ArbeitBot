@@ -59,10 +59,10 @@ function adminNewReviewKeyboard(review) {
  * @return {String}  Text generated for admins from the given review
  */
 function formNewReviewMessageText(review) {
-  const status = String(review.toUser._id) === (String(review.job.client) ? 'client' : 'freelancer');
+  const status = (String(review.byUser._id) === String(review.job.client)) ? 'client' : 'freelancer';
   const message =
     `${strings.rateOptionsArray[review.rate - 1]}\n` +
-    `@${review.byUser.username} (${status(review, review.byUser._id)}) rated @${review.toUser.username} (${status})\n` +
+    `@${review.byUser.username} (${status}) rated @${review.toUser.username} (${status})\n` +
     `${review.resolveWay || ''}\n` +
     `${review.job.description}`;
 
