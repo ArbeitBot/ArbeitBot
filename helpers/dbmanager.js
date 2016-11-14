@@ -12,6 +12,7 @@ const strings = require('./strings');
 /** Get schemas **/
 const {
   UserChatInline,
+  Supercategory,
   Category,
   Report,
   Review,
@@ -240,6 +241,94 @@ function getCategory(categoryTitle) {
 }
 
 /**
+ * Getting a supercategory by id with freelancers for a specific language
+ * @param {String} id Id of mongoose's supercategory
+ * @param {Mongoose:Language} language Language specified
+ */
+function getSupercategoryById(id, language) {
+  const match = (language) ?
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+      { languages: { $in: [language._id || language] } },
+    ],
+  } :
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+    ],
+  };
+  return new Promise((fullfill) => {
+    Supercategory.findById(id)
+      .populate({
+        path: 'categories',
+        populate: {
+          path: 'freelancers',
+          match,
+          options: {
+            sort: {
+              name: -1,
+            },
+          },
+        },
+      })
+      .exec((err, categories) => {
+        if (err) throw err;
+        else fullfill(categories);
+      });
+  });
+}
+
+/**
+ * Getting a list of all supercategories with only freelancers of a specific language if specified,
+ *     available for work and with full profile
+ * @param {Mongoose:Language} language Optional language for freelancers
+ */
+function getSupercategories(language) {
+  const match = (language) ?
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+      { languages: { $in: [language._id || language] } },
+    ],
+  } :
+  {
+    $and: [
+      { busy: false },
+      { bio: { $exists: true } },
+      { hourly_rate: { $exists: true } },
+    ],
+  };
+
+  return new Promise((fullfill) => {
+    Supercategory.find({})
+      .sort('title')
+      .populate({
+        path: 'categories',
+        populate: {
+          path: 'freelancers',
+          match,
+          options: {
+            sort: {
+              name: -1,
+            },
+          },
+        },
+      })
+      .exec((err, categories) => {
+        if (err) throw err;
+        else fullfill(categories);
+      });
+  });
+}
+
+/**
  * Getting a list of all categories with only freelancers of a specific language if specified,
  *     available for work and with full profile
  * @param {Mongoose:Language} language Optional language for freelancers
@@ -306,8 +395,16 @@ function findJobById(id, populate) {
  * @param  {Mongo:Job} job - Job object for which freelancers are returned
  */
 function freelancersForJob(job) {
-  return new Promise((fullfill) => {
-    User.find({ $and: [
+  const query = job.hourly_rate === strings.hourlyRateAllRatesOption ?
+    [
+      { categories: job.category },
+      { busy: false },
+      { ban_state: { $nin: true } },
+      { bio: { $exists: true } },
+      { languages: { $in: [job.language] } },
+      { _id: { $nin: job.notInterestedCandidates } },
+    ] :
+    [
       { categories: job.category },
       { busy: false },
       { ban_state: { $nin: true } },
@@ -315,7 +412,9 @@ function freelancersForJob(job) {
       { hourly_rate: job.hourly_rate },
       { languages: { $in: [job.language] } },
       { _id: { $nin: job.notInterestedCandidates } },
-    ] })
+    ];
+  return new Promise((fullfill) => {
+    User.find({ $and: query })
       .sort({ sortRate: -1 })
       .limit(10) // TODO:Move to one place
       .skip(10 * job.current_page) // TODO:Move to one place
@@ -331,8 +430,16 @@ function freelancersForJob(job) {
  * @param {Mongoose:Job} job - Job for which number of freelancers should be counted
  */
 function freelancersForJobCount(job) {
-  return new Promise((fullfill) => {
-    User.count({ $and: [
+  const query = job.hourly_rate === strings.hourlyRateAllRatesOption ?
+    [
+      { categories: job.category },
+      { busy: false },
+      { ban_state: { $nin: true } },
+      { bio: { $exists: true } },
+      { languages: { $in: [job.language] } },
+      { _id: { $nin: job.notInterestedCandidates } },
+    ] :
+    [
       { categories: job.category },
       { busy: false },
       { ban_state: { $nin: true } },
@@ -340,7 +447,10 @@ function freelancersForJobCount(job) {
       { hourly_rate: job.hourly_rate },
       { languages: { $in: [job.language] } },
       { _id: { $nin: job.notInterestedCandidates } },
-    ] })
+    ];
+
+  return new Promise((fullfill) => {
+    User.count({ $and: query })
       .exec((err, count) => {
         if (err) throw err;
         else fullfill(count);
@@ -520,6 +630,8 @@ module.exports = {
   freelancerCount,
   // Categories
   getCategory,
+  getSupercategoryById,
+  getSupercategories,
   getCategories,
   // Jobs
   findJobById,

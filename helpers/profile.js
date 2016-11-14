@@ -10,6 +10,11 @@ const keyboards = require('./keyboards');
 const strings = require('./strings');
 
 global.eventEmitter.on(strings.inputBioState, ({ msg, user, bot }) => {
+  if (msg.text.length > 150) {
+    bot.sendMessage(msg.chat.id, strings.bioErrorMessage);
+    return;
+  }
+
   const needsCongrats = !user.bio &&
     user.hourly_rate &&
     user.categories.length > 0
@@ -42,20 +47,21 @@ global.eventEmitter.on(strings.inputBioState, ({ msg, user, bot }) => {
     .catch(/** todo: handle error */);
 });
 
-global.eventEmitter.on(`cancel${strings.inputBioState}`, ({ msg, user, bot }) => {
+global.eventEmitter.on(strings.inputBioCancelInline, ({ msg, user, bot }) => {
   const userCopy = Object.create(user);
 
   userCopy.input_state = undefined;
   userCopy.save()
-    .then((savedUser) => {
-      bot.sendMessage(msg.chat.id, strings.notChangedBioMessage + savedUser.bio, {
-        reply_markup: JSON.stringify({
-          keyboard: keyboards.freelancerKeyboard(savedUser),
-          resize_keyboard: true,
-        }),
-        disable_web_page_preview: 'true',
-      }).catch(/** todo: handle error */);
-    })
+    .then(() =>
+      keyboards.editMessage(bot,
+        msg.message.chat.id,
+        msg.message.message_id,
+        msg.message.text,
+        [])
+        .then(() => {
+          keyboards.sendFreelanceMenu(bot, msg.message.chat.id);
+        })
+    )
     .catch(/** todo: handle error */);
 });
 
@@ -93,14 +99,16 @@ function askForBio(msg, bot) {
             `${strings.editBioMessage}\n\n${strings.yourCurrentBio}\n\n${savedUser.bio}` :
             strings.editBioMessage
           );
-
-          bot.sendMessage(msg.chat.id, message, {
-            reply_markup: JSON.stringify({
-              keyboard: [[strings.cancel]],
-              resize_keyboard: true,
-            }),
-            disable_web_page_preview: 'true',
-          }).catch(/** todo: handle error */);
+          return keyboards.hideKeyboard(bot, msg.chat.id, strings.addBioHideKeyboardMessage)
+            .then(() => {
+              keyboards.sendInline(bot,
+                msg.chat.id,
+                message,
+                [[{
+                  text: strings.cancel,
+                  callback_data: `${strings.inputBioCancelInline}${strings.inlineSeparator}`,
+                }]]);
+            });
         });
     })
     .catch(/** todo: handle error */);

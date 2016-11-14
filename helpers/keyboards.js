@@ -23,7 +23,7 @@ const clientKeyboard = [
 ];
 
 const helpKeyboard = [
-  [{ text: '@borodutch', url: 'http://telegram.me/borodutch' }],
+  [{ text: '@arbeit_bot on GitHub', url: 'https://github.com/arbeitbot/arbeitbot' }],
 ];
 
 /** Functions */

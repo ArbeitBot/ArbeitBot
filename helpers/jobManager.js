@@ -132,6 +132,7 @@ eventEmitter.on(strings.jobManageInline, ({ bot, msg, user }) => {
       .then((job) => {
         const jobCopy = Object.create(job);
         jobCopy.state = strings.jobStates.removed;
+        adminReports.jobDeleted(bot, jobCopy);
         return jobCopy.save()
           .then((savedJob) => {
             updateJobMessage(savedJob, bot);
@@ -240,6 +241,8 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ bot, msg, user }) => {
           .then((user) => {
             const jobCopy = Object.create(job);
 
+            adminReports.acceptOrRejectJobOffer(bot, job, user, option === strings.freelancerAcceptOptions.accept);
+
             if (option === strings.freelancerAcceptOptions.accept) {
               jobCopy.state = strings.jobStates.finished;
               jobCopy.save()
@@ -277,9 +280,24 @@ eventEmitter.on(strings.inputLanguageInline, ({ bot, msg, user }) => {
       draftCopy.language = language;
       return draftCopy.save()
         .then((savedDraft) => {
-          askForNewJobCategory(bot, msg, user, savedDraft);
+          askForNewJobSupercategory(bot, msg, user, savedDraft);
         });
     })
+    .catch(/** todo: handle error */);
+});
+
+eventEmitter.on(strings.inputSupercategoryNameInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings.inlineSeparator);
+  const supercategoryId = options[1];
+  const jobId = options[2];
+
+  dbmanager.findJobById(jobId, 'language')
+    .then(job =>
+      dbmanager.getSupercategoryById(supercategoryId, job.language)
+        .then((supercategory) => {
+          askForNewJobCategory(bot, msg, user, job, supercategory);
+        })
+    )
     .catch(/** todo: handle error */);
 });
 
@@ -324,7 +342,7 @@ eventEmitter.on(strings.inputHourlyRateInline, ({ bot, msg, user }) => {
   const hourlyRate = options[1];
   const draftId = options[2];
 
-  if (strings.hourlyRateOptions.includes(hourlyRate)) {
+  if (strings.hourlyRateOptions.includes(hourlyRate) || hourlyRate === strings.hourlyRateAllRatesOption) {
     dbmanager.findJobById(draftId)
       .then((draft) => {
         const draftCopy = Object.create(draft);
@@ -339,11 +357,15 @@ eventEmitter.on(strings.inputHourlyRateInline, ({ bot, msg, user }) => {
 });
 
 eventEmitter.on(strings.inputJobDescriptionState, ({ bot, msg, user }) => {
+  if (msg.text.length < 100 || msg.text.length > 500) {
+    bot.sendMessage(msg.chat.id, strings.jobDescriptionErrorMessage);
+    return;
+  }
   const description = msg.text.substring(0, 500);
   user.populate('current_job_draft', (err, populatedUser) => {
     /** todo: handle error */
     addDescriptionToJobDraft(bot, msg, populatedUser, description);
-  })
+  });
 });
 
 
@@ -361,7 +383,7 @@ eventEmitter.on(strings.cancelJobCreationInline, ({ bot, msg, user }) => {
         keyboards.editMessage(bot,
           msg.message.chat.id,
           msg.message.message_id,
-          strings.thisWorkIsRemoved,
+          strings.thisDraftIsRemoved,
           [])
           .then(() => {
             cancelJobCreation(bot, msg.message, user, draft);
@@ -511,7 +533,7 @@ function addDescriptionToJobDraft(bot, msg, user, description) {
     userCopy.job_drafts.splice(index, 1);
   }
 
-  userCopy.job_draft = undefined;
+  userCopy.current_job_draft = undefined;
   userCopy.jobs.push(jobDraft);
   userCopy.input_state = undefined;
 
@@ -662,35 +684,73 @@ function askForNewJobLanguage(bot, msg, draft) {
 }
 
 /**
- * Sends message asking for job category of job that is being created, saves
- *    relevant flag to db for user
+ * Sends message asking for job supercategory of job that is being created
  * @param {Telegram:Bot} bot Bot that should respond
  * @param {Telegram:Message} msg Message received
  * @param {Mongoose:User} user Owner of the job
  * @param {Mongoose:Job} job Job draft
  */
-function askForNewJobCategory(bot, msg, user, job) {
-  dbmanager.getCategories(job.language)
-    .then((categories) => {
-      const categoryButtons = categories
-        .filter(category =>
-          category.freelancers.length - (category.freelancers
-            .find(f => f.id === user.id) ? 1 : 0) > 0
-        )
-        .map(category =>
-          [{
-            text: `${category.title} [${(category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0))}]`,
-            callback_data: `${strings.inputCategoryNameInline}${strings.inlineSeparator}${category._id}${strings.inlineSeparator}${job._id}`,
-          }]
-        );
+function askForNewJobSupercategory(bot, msg, user, job) {
+  dbmanager.getSupercategories(job.language)
+    .then((supercategories) => {
+      const categoryButtons = supercategories
+        .filter((supercategory) => {
+          let count = 0;
+          supercategory.categories.forEach((category) => {
+            count += category.freelancers.length -
+              (category.freelancers.find(f => f.id === user.id) ? 1 : 0);
+          });
+          return count > 0;
+        })
+        .map((supercategory) => {
+          let count = 0;
+          supercategory.categories.forEach((category) => {
+            count += category.freelancers.length -
+              (category.freelancers.find(f => f.id === user.id) ? 1 : 0);
+          });
+          return [{
+            text: `${supercategory.title} [${count}]`,
+            callback_data: `${strings.inputSupercategoryNameInline}${strings.inlineSeparator}${supercategory._id}${strings.inlineSeparator}${job._id}`,
+          }];
+        });
       categoryButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${job._id}` }]);
       keyboards.editMessage(bot,
         job.current_inline_chat_id,
         job.current_inline_message_id,
-        strings.selectCategoryMessage,
+        strings.selectSupercategoryMessage,
         categoryButtons);
     })
     .catch(/** todo: handle error */);
+}
+
+/**
+ * Sends message asking for job category of job that is being created, saves
+ * @param {Telegram:Bot} bot Bot that should respond
+ * @param {Telegram:Message} msg Message received
+ * @param {Mongoose:User} user Owner of the job
+ * @param {Mongoose:Job} job Job draft
+ * @param {Mongoose:Supercategory} supercategory Supercategory choosen
+ */
+function askForNewJobCategory(bot, msg, user, job, supercategory) {
+  const categories = supercategory.categories;
+
+  const categoryButtons = categories
+    .filter(category =>
+      category.freelancers.length - (category.freelancers
+        .find(f => f.id === user.id) ? 1 : 0) > 0
+    )
+    .map(category =>
+      [{
+        text: `${category.title} [${(category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0))}]`,
+        callback_data: `${strings.inputCategoryNameInline}${strings.inlineSeparator}${category._id}${strings.inlineSeparator}${job._id}`,
+      }]
+    );
+  categoryButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${job._id}` }]);
+  keyboards.editMessage(bot,
+    job.current_inline_chat_id,
+    job.current_inline_message_id,
+    strings.selectCategoryMessage,
+    categoryButtons);
 }
 
 /**
@@ -707,6 +767,7 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
   const language = draft.language;
   const keyboard = [];
   const options = strings.hourlyRateOptions;
+  const buttons = [];
   for (let i = 0; i < options.length; i += 1) {
     const option = options[i];
 
@@ -719,14 +780,22 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
         count += 1;
       }
     }
-
     if (count > 0) {
-      keyboard.push([{
+      buttons.push({
         text: `${option} [${count}]`,
         callback_data: `${strings.inputHourlyRateInline}${strings.inlineSeparator}${option}${strings.inlineSeparator}${draft._id}`,
-      }]);
+      });
     }
   }
+  let tempRow = [];
+  for (let j = 0; j < buttons.length; j += 1) {
+    tempRow.push(buttons[j]);
+    if (j % 2 !== 0 || j === buttons.length - 1) {
+      keyboard.push(tempRow);
+      tempRow = [];
+    }
+  }
+  keyboard.unshift([{ text: strings.hourlyRateAllRatesOption, callback_data: `${strings.inputHourlyRateInline}${strings.inlineSeparator}${strings.hourlyRateAllRatesOption}${strings.inlineSeparator}${draft._id}` }]);
   keyboard.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}` }]);
   keyboards.editMessage(bot,
     draft.current_inline_chat_id,
@@ -745,6 +814,11 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
  */
 function askForNewJobDescription(bot, msg, user, draft) {
   const userCopy = Object.create(user);
+
+  if (user.current_job_draft) {
+    bot.sendMessage(msg.message.chat.id, strings.anotherJobDraftErrorMessage);
+    return;
+  }
 
   userCopy.input_state = strings.inputJobDescriptionState;
   userCopy.current_job_draft = draft;
@@ -812,6 +886,7 @@ function selectFreelancerForJob(bot, msg, userId, jobId) {
           jobCopy.state = strings.jobStates.freelancerChosen;
           return jobCopy.save()
             .then((newJob) => {
+              adminReports.selectedFreelancerForJob(bot, newJob, user);
               updateJobMessage(newJob, bot);
               updateFreelancerMessage(bot, msg, user, job);
             });
@@ -1212,6 +1287,14 @@ function makeInterested(interested, bot, msg, job, user) {
     // Add user to interested or not interested
     if (interested) {
       job.interestedCandidates.push(user._id);
+      job.populate('client', (err, populatedJob) => {
+        /** todo: handle error */
+        let addition = '';
+        if (job.description.length > 150) {
+          addition = '...';
+        }
+        bot.sendMessage(populatedJob.client.id, `${strings.interestedOption} @${user.username}${strings.freelancerInterestedNotification}\`${job.description.substring(0, 150)}${addition}\``, { parse_mode: 'Markdown' });
+      });
     } else {
       job.notInterestedCandidates.push(user._id);
     }
