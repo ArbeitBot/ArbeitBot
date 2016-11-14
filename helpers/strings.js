@@ -72,6 +72,7 @@ module.exports = {
     myJobs: '🛠 Created jobs',
     back: '🔙 Back',
   },
+  back: '🔙 Back',
   freelanceMenuOptions: {
     editBio: '🖊 Edit bio',
     addBio: '🖊 Add bio',
@@ -117,6 +118,9 @@ module.exports = {
   reportFreelancerInline: 'rpFI',
   reportClientInline: 'rpCI',
   cancelJobCreationInline: 'cJCI',
+  categoryBackInline: 'cBaI',
+  supercategoryBackInline: 'sCBaI',
+  hourlyRateBackInline: 'hRBaI',
   cancelBioEnterInline: 'cBEI',
   inputLanguageInline: 'iLI',
   inputSupercategoryNameInline: 'iSCNI',

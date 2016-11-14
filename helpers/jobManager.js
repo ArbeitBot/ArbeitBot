@@ -301,6 +301,17 @@ eventEmitter.on(strings.inputSupercategoryNameInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
+eventEmitter.on(strings.supercategoryBackInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings.inlineSeparator);
+  const draftId = options[1];
+
+  dbmanager.findJobById(draftId, 'language')
+    .then((draft) => {
+      askForEditJobLanguage(bot, msg, draft);
+    })
+    .catch(/** todo: handle error */);
+});
+
 eventEmitter.on(strings.inputCategoryNameInline, ({ bot, msg, user }) => {
   const options = msg.data.split(strings.inlineSeparator);
   const categoryId = options[1];
@@ -334,6 +345,17 @@ eventEmitter.on(strings.inputCategoryNameInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
+eventEmitter.on(strings.categoryBackInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings.inlineSeparator);
+  const draftId = options[1];
+
+  dbmanager.findJobById(draftId, 'language')
+    .then((draft) => {
+      askForNewJobSupercategory(bot, msg, user, draft);
+    })
+    .catch(/** todo: handle error */);
+});
+
 /**
  * Adds hourly rate to job draft and sends next step
  */
@@ -354,6 +376,29 @@ eventEmitter.on(strings.inputHourlyRateInline, ({ bot, msg, user }) => {
       })
       .catch(/** todo: handle error */);
   }
+});
+
+eventEmitter.on(strings.hourlyRateBackInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings.inlineSeparator);
+  const draftId = options[1];
+
+  dbmanager.findJobById(draftId, 'language')
+    .then(draft =>
+      dbmanager.getSupercategories(draft.language)
+        .then((supercategories) => {
+          let result;
+          supercategories.forEach((supercategory) => {
+            if (supercategory.categories.map(v => String(v._id)).includes(String(draft.category._id))) {
+              result = supercategory;
+            }
+          });
+          if (!result) {
+            throw new Error();
+          }
+          askForNewJobCategory(bot, msg, user, draft, result);
+        })
+    )
+    .catch(/** todo: handle error */);
 });
 
 eventEmitter.on(strings.inputJobDescriptionState, ({ bot, msg, user }) => {
@@ -651,8 +696,7 @@ function sendNewJobMessage(job, user, bot) {
 }
 
 /**
- * Sends message asking for job language of job that is being created, saves
- *    relevant flag to db for user
+ * Sends message asking for job language of job that is being created
  * @param {Telegram:Bot} bot Bot that should respond
  * @param {Telegram:Message} msg Message received
  * @param {Mongoose:Job} draft Job draft for which language
@@ -681,6 +725,34 @@ function askForNewJobLanguage(bot, msg, draft) {
         });
     })
     .catch(/** todo: handle error */);
+}
+
+/**
+ * Edits message asking for job language of job that is being created
+ * @param {Telegram:Bot} bot Bot that should respond
+ * @param {Telegram:Message} msg Message received
+ * @param {Mongoose:Job} draft Job draft for which language
+ *     keyboard should be displayed
+ */
+function askForEditJobLanguage(bot, msg, draft) {
+  dbmanager.getLanguages()
+    .then((languages) => {
+      let languagesButtons = languages
+        .map(language => ({ text: `${language.flag}`, callback_data: `${strings.inputLanguageInline}${strings.inlineSeparator}${language._id}${strings.inlineSeparator}${draft._id}` }));
+      const flagButtons = [];
+      languagesButtons.forEach((button) => {
+        flagButtons.push(button);
+      });
+      languagesButtons = [flagButtons];
+      languagesButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}` }]);
+
+      return keyboards.editMessage(bot,
+        msg.message.chat.id,
+        msg.message.message_id,
+        strings.selectLanguageMessage,
+        languagesButtons);
+    })
+    .catch(err => console.error(err));
 }
 
 /**
@@ -713,7 +785,14 @@ function askForNewJobSupercategory(bot, msg, user, job) {
             callback_data: `${strings.inputSupercategoryNameInline}${strings.inlineSeparator}${supercategory._id}${strings.inlineSeparator}${job._id}`,
           }];
         });
-      categoryButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${job._id}` }]);
+      categoryButtons.unshift([{
+        text: strings.back,
+        callback_data: `${strings.supercategoryBackInline}${strings.inlineSeparator}${job._id}`,
+      },
+      { 
+        text: strings.jobCreateCancel,
+        callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${job._id}`,
+      }]);
       keyboards.editMessage(bot,
         job.current_inline_chat_id,
         job.current_inline_message_id,
@@ -745,7 +824,15 @@ function askForNewJobCategory(bot, msg, user, job, supercategory) {
         callback_data: `${strings.inputCategoryNameInline}${strings.inlineSeparator}${category._id}${strings.inlineSeparator}${job._id}`,
       }]
     );
-  categoryButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${job._id}` }]);
+  categoryButtons.unshift([
+    {
+      text: strings.back,
+      callback_data: `${strings.categoryBackInline}${strings.inlineSeparator}${job._id}` 
+    },
+    {
+      text: strings.jobCreateCancel,
+      callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${job._id}` 
+    }]);
   keyboards.editMessage(bot,
     job.current_inline_chat_id,
     job.current_inline_message_id,
@@ -796,7 +883,14 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
     }
   }
   keyboard.unshift([{ text: strings.hourlyRateAllRatesOption, callback_data: `${strings.inputHourlyRateInline}${strings.inlineSeparator}${strings.hourlyRateAllRatesOption}${strings.inlineSeparator}${draft._id}` }]);
-  keyboard.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}` }]);
+  keyboard.unshift([{
+    text: strings.back,
+    callback_data: `${strings.hourlyRateBackInline}${strings.inlineSeparator}${draft._id}`,
+  },
+  {
+    text: strings.jobCreateCancel,
+    callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}`,
+  }]);
   keyboards.editMessage(bot,
     draft.current_inline_chat_id,
     draft.current_inline_message_id,
