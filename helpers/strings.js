@@ -9,6 +9,9 @@ const englishObjectId = '581d0b8db33e47e7008726bd';
 const russianObjectId = '581d0b8db33e47e7008726be';
 
 const english = {
+  resubscribe: 'Resubscribe',
+  unsubscribe: 'Unsubscribe',
+  hideButtons: 'Keep',
   jobCreationFindFreelancerReminderMessage1: 'It looks like you created this job yesterday:',
   jobCreationFindFreelancerReminderMessage2: 'but didn\'t have a chance to find the freelancers. If you need assitance, please contact our support by clicking the button below. Thank you!',
   anotherJobDraftErrorMessage: 'You are already entering description for another job draft. Please either cancel the currently active job draft or provide us with the job description for the currently active job draft.',
@@ -138,6 +141,9 @@ const english = {
   inputHourlyRateInline: 'iHRI',
   inputJobDescriptionInline: 'iJDI',
   inputBioCancelInline: 'iBCI',
+  unsubscripeFromGodvoiceInline: 'uFGI',
+  hideButtonsGodvoiceInline: 'hBGI',
+  resubscribeGodvoiceInline: 'rGVI',
   jobCreationState: 'jobCreationState',
   inputBioState: 'inputBioState',
   inputLanguageState: 'inputLanguageState',
@@ -219,6 +225,9 @@ const english = {
 };
 
 const russian = {
+  resubscribe: 'Переподписаться',
+  unsubscribe: 'Отписаться',
+  hideButtons: 'Оставить',
   jobCreationFindFreelancerReminderMessage1: 'Похоже, Вы вчера создали работу:',
   jobCreationFindFreelancerReminderMessage2: 'но так и не выбрали фрилансера. Если Вам нужна какая-либо помощь или у Вас есть какие-либо вопросы, пожалуйста, напишите нам в техподдержку, нажав на кнопку ниже. Спасибо!',
   anotherJobDraftErrorMessage: 'Вы уже вводите описание для другого черновика работы. Пожалуйста, либо отмените активный черновик работы, либо введите описание работы.',
@@ -348,6 +357,9 @@ const russian = {
   inputHourlyRateInline: 'iHRI',
   inputJobDescriptionInline: 'iJDI',
   inputBioCancelInline: 'iBCI',
+  unsubscripeFromGodvoiceInline: 'uFGI',
+  hideButtonsGodvoiceInline: 'hBGI',
+  resubscribeGodvoiceInline: 'rGVI',
   jobCreationState: 'jobCreationState',
   inputBioState: 'inputBioState',
   inputLanguageState: 'inputLanguageState',

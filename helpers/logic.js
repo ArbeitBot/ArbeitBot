@@ -31,7 +31,6 @@ bot.on('message', (msg) => {
     profile.sendAskForUsername(bot, msg);
     return;
   }
-
   profile.textInputCheck(msg, (isTextInput, user) => {
     if (user) {
       if (user.ban_state) {
@@ -54,6 +53,8 @@ bot.on('message', (msg) => {
       }
     } else if (check.botCommandStart(msg)) {
       profile.createProfile(bot, msg);
+    } else if (check.adminCommand(msg)) {
+      adminPanel.handleAdminCommand(msg, bot);
     }
   });
 });
@@ -159,10 +160,4 @@ function handleKeyboard(msg) {
  */
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * ((max - min) + 1)) + min;
-}
-
-/** Exports */
-
-module.exports = {
-  bot,
 }

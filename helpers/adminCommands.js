@@ -11,6 +11,35 @@
 
 /** Dependencies */
 const dbmanager = require('./dbmanager');
+const strings = require('./strings');
+const keyboards = require('./keyboards');
+
+global.eventEmitter.on(strings().resubscribeGodvoiceInline, ({ msg, bot, user }) => {
+  const userCopy = Object.create(user);
+  userCopy.unsubscribefromGodvoice = false;
+  userCopy.save()
+    .then((savedUser) => {
+      keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, msg.message.text, []);
+    })
+    .catch(/** todo: handle error */);
+});
+
+global.eventEmitter.on(strings().unsubscripeFromGodvoiceInline, ({ msg, bot, user }) => {
+  const userCopy = Object.create(user);
+  userCopy.unsubscribefromGodvoice = true;
+  userCopy.save()
+    .then((savedUser) => {
+      keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, msg.message.text, [[{
+          text: strings(savedUser).resubscribe,
+          callback_data: strings().resubscribeGodvoiceInline + strings().inlineSeparator + user._id
+        }]]);
+    })
+    .catch(/** todo: handle error */);
+});
+
+global.eventEmitter.on(strings().hideButtonsGodvoiceInline, ({ msg, bot, user }) => {
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, msg.message.text, []);
+});
 
 /**
  * Constants
@@ -57,17 +86,17 @@ function sendConfirmed(msg, bot) {
  * @param  {Telegram:Message} msg - Message that was received
  * @param  {Telegram:Bot} bot - Bot that should respond
  */
-function  handleGodVoiceCommand(msg, bot) {
+function handleGodVoiceCommand(msg, bot) {
   const message = getCommandData(msg.text);
   if (!message || message.length <= 0) {
     return;
   }
-
-  dbmanager.getAllUsers()
+  console.log(message);
+  dbmanager.getAllUsers({ $or: [ { unsubscribefromGodvoice: false }, { unsubscribefromGodvoice: { $exists: false } }] })
     .then((users) => {
       sendMessage(message, users, bot, {});
     })
-    .catch(err => bot.sendMessage(msg.chat.id, err.message));
+    .catch(/** todo: handle error */);
 }
 
 /**
@@ -104,10 +133,25 @@ function sendMessage(text, users, bot, results) {
   currentUsers.forEach((user) => {
     promises.push(new Promise((resolve) => {
       bot.sendMessage(user.id, text, {
+        reply_markup: JSON.stringify({
+          inline_keyboard: [
+            [{
+              text: strings(user).unsubscribe,
+              callback_data: strings().unsubscripeFromGodvoiceInline + strings().inlineSeparator + user._id
+            }],
+            [{
+              text: strings(user).hideButtons,
+              callback_data: strings().hideButtonsGodvoiceInline + strings().inlineSeparator + user._id
+            }],
+          ]
+        }),
         disable_web_page_preview: 'true',
       })
         .then(() => resolve('success'))
-        .catch(err => resolve(String(err.message)));
+        .catch(err => {
+          console.log(err);
+          resolve(String(err.message))
+        });
     }));
   });
   Promise.all(promises)
@@ -197,7 +241,9 @@ function handleAdminCommand(msg, bot) {
     handleGodVoiceCommand(msg, bot);
   } else if (checkIfMessageIsCommand('/admin_updateratings', messageText)) {
     handleUpdateRatingsCommand(msg, bot);
-  } /* else if (checkIfMessageIsCommand('/admin_%yourcommand%', messageText)) {
+  }else if (checkIfMessageIsCommand('/admin_test', messageText)) {
+    handleGodVoiceCommand(msg, bot);
+  }  /* else if (checkIfMessageIsCommand('/admin_%yourcommand%', messageText)) {
     handleYourCommand(msg, bot);
   } */
 }

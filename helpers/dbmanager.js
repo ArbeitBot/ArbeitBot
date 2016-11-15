@@ -24,9 +24,9 @@ const {
 /** User */
 
 /** Makes no population. To save memory */
-function getAllUsers() {
+function getAllUsers(query) {
   return new Promise((fullfill) => {
-    User.find({})
+    User.find(query || {})
       .populate(['reviews'])
       .exec((err, users) => {
         if (err) throw err;

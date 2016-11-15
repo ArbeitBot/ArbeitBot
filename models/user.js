@@ -97,6 +97,11 @@ const userSchema = new Schema({
     ref: 'job',
   },
   specialSymbol: String,
+  unsubscribefromGodvoice: {
+    type: Boolean,
+    required: true,
+    default: false,
+  }
 });
 
 /** Functionality */

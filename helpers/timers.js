@@ -10,6 +10,7 @@ const dbmanager = require('./dbmanager');
 const keyboards = require('./keyboards');
 const strings = require('./strings');
 const adminReports = require('./adminReports');
+const bot = require('./telegramBot');
 
 /** General functions */
 
