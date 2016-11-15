@@ -34,7 +34,6 @@ function botCommandStart(message) {
  * @return {Boolean} True if admin command, false otherwise
  */
 function adminCommand(message) {
-  console.log(message);
   return message.text.indexOf('/admin') == 0;
 }
 

@@ -149,7 +149,6 @@ function sendMessage(text, users, bot, results) {
       })
         .then(() => resolve('success'))
         .catch(err => {
-          console.log(err);
           resolve(String(err.message))
         });
     }));
@@ -241,9 +240,7 @@ function handleAdminCommand(msg, bot) {
     handleGodVoiceCommand(msg, bot);
   } else if (checkIfMessageIsCommand('/admin_updateratings', messageText)) {
     handleUpdateRatingsCommand(msg, bot);
-  }else if (checkIfMessageIsCommand('/admin_test', messageText)) {
-    handleGodVoiceCommand(msg, bot);
-  }  /* else if (checkIfMessageIsCommand('/admin_%yourcommand%', messageText)) {
+  } /* else if (checkIfMessageIsCommand('/admin_%yourcommand%', messageText)) {
     handleYourCommand(msg, bot);
   } */
 }
