@@ -26,6 +26,10 @@ const helpKeyboard = [
   [{ text: '@arbeit_bot on GitHub', url: 'https://github.com/arbeitbot/arbeitbot' }],
 ];
 
+const arbeitbotSupportKeyboard = [
+  [{ text: 'Contact support', url: 'https://telegram.me/arbeit_bot_support' }],
+];
+
 /** Functions */
 
 /**
@@ -264,16 +268,20 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
  * @param {String} text - Text to send along with inline
  * @param {Telegram:Inline} keyboard - Inline keyboard to send
  */
-function sendInline(bot, chatId, text, keyboard, then) {
+function sendInline(bot, chatId, text, keyboard, then, markdown) {
   const options = {
     reply_markup: { inline_keyboard: keyboard },
     disable_web_page_preview: 'true',
   };
 
+  if (markdown) {
+    options.parse_mode = 'Markdown';
+  }
   options.reply_markup = JSON.stringify(options.reply_markup);
+
   bot.sendMessage(chatId, text, options)
     .then(then)
-    .catch(/** todo: handle error */);
+    .catch(err => console.log(err));
 }
 
 /**
@@ -326,6 +334,7 @@ module.exports = {
   mainMenuKeyboard,
   clientKeyboard,
   helpKeyboard,
+  arbeitbotSupportKeyboard,
   sendMainMenu,
   sendClientMenu,
   sendFreelanceMenu,

@@ -80,6 +80,14 @@ const jobSchema = new Schema({
     type: Number,
     default: 0,
   },
+  remindersFired: [{
+    type: String,
+    required: true,
+    default: [],
+  }],
+},
+{
+    timestamps: true
 });
 
 module.exports = mongoose.model('job', jobSchema);

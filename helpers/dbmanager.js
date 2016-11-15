@@ -537,6 +537,22 @@ function jobCount() {
   });
 }
 
+/**
+ * Finds all jobs without reminders fired, but completely filled
+ *     and with strings.jobStates.searchingForFreelancer state
+ */
+function getJobsForReminder() {
+  return Job.find({
+    remindersFired: [],
+    description: { $exists: true },
+    state: strings.jobStates.searchingForFreelancer,
+    language: { $exists: true },
+    category: { $exists: true },
+    hourly_rate: { $exists: true },
+    updatedAt: { $exists: true },
+  });
+}
+
 /** Review */
 
 /**
@@ -641,6 +657,7 @@ module.exports = {
   checkAndFixJobPage,
   saveFreelancerMessageToJob,
   jobCount,
+  getJobsForReminder,
   // Review
   findReviewById,
   addReview,

@@ -6,6 +6,8 @@
  */
 
 module.exports = {
+  jobCreationFindFreelancerReminderMessage1: 'It looks like you created this job yesterday:',
+  jobCreationFindFreelancerReminderMessage2: 'but didn\'t have a chance to find the freelancers. If you need assitance, please contact our support by clicking the button below. Thank you!',
   anotherJobDraftErrorMessage: 'You are already entering description for another job draft. Please either cancel the currently active job draft or provide us with the job description for the currently active job draft.',
   reportThankYouMessage: 'Thank you for reporting this suspicious activity! Our moderators will take immediate action to prevent reported behaviour in the future.',
   banMessage: 'It looks like you have been reported, and our moderators decided that there was a reason to ban you. If this is a mistake, please let my creator @borodutch know – we will see what we can do ;)',

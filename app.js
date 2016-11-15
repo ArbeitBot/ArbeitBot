@@ -21,10 +21,13 @@ mongoose.Promise = global.Promise;
 mongoose.connect(config.database);
 
 /** Start bot */
-require('./helpers/logic');
+const bot = require('./helpers/logic').bot;
 
 /** Start stat server */
 require('./helpers/statServer');
+
+/** Start timers for retention boost and reminders */
+require('./helpers/timers').startTimers(bot);
 
 /** Print a message to assure that bot is up and running */
 console.log('Bot is up and running'); // eslint-disable-line no-console
