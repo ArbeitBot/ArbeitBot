@@ -68,6 +68,16 @@ function acceptOrRejectJobOffer(bot, job, freelancer, accept) {
 }
 
 /**
+ * Notifies when bot ends a job reminder
+ * @param {Tleegram:Bot} bot Bot that should send notification
+ * @param {Mongoose:Job} job Job that is getting reported
+ */
+function sentJobReminder(bot, job) {
+  const msg = `🙆‍♂️ Bot sent reminder to @${job.client.username} for the job:\n\n${job.description}`;
+  bot.sendMessage(adminChatId, msg);
+}
+
+/**
  * Sends admins notification that user has registered
  *
  * @param  {Telegram:Bot} bot - Bot that should respond
@@ -83,5 +93,6 @@ module.exports = {
   selectedFreelancerForJob,
   acceptOrRejectJobOffer,
   userRegistered,
+  sentJobReminder,
 };
 

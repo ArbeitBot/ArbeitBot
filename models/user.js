@@ -72,6 +72,10 @@ const userSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'language',
   }],
+  interfaceLanguage: {
+    type: Schema.ObjectId,
+    ref: 'language',
+  },
   jobs: [{
     type: Schema.ObjectId,
     ref: 'job',

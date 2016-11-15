@@ -46,6 +46,7 @@ module.exports = {
   yourCurrentBio: 'Your current bio:',
   editHourlyRateMessage: 'What is your hourly rate? You will only receive job offers of relevant hourly rate.',
   editLanguageMessage: 'What languages do you speak? You will only receive job offers of selected languages.',
+  editInterfaceLanguageMessage: 'Please select your language of preference. This option will only affect the user interface of the bot. It will not affect your ability to receive or post job offers.',
   pickCategoriesMessage: 'Please, select your skills. You will only receive job offers in categories you select.',
   suggestCategoryMessage: 'Suggest your own category',
   waitContractorResponseMessage: 'You sent an offer to one of the freelancers. Please, wait until the freelancer accepts or rejects your offer, or simply select another freelancer if you do not want to wait anymore.',
@@ -68,6 +69,7 @@ module.exports = {
     findJobs: '👤 Profile',
     findContractors: '⛑ Find freelancers',
     help: '❔ Help',
+    chooseLanguage: '📣 Choose language',
   },
   clientMenuOptions: {
     postNewJob: '🔨 Create new job',
@@ -103,6 +105,7 @@ module.exports = {
   inlineSeparator: '~',
   categoryInline: 'cI',
   hourlyRateInline: 'hRI',
+  interfaceLanguageInline: 'iLanI',
   languageInline: 'lanI',
   adminBanInline: 'abI',
   freelancerInline: 'fI',

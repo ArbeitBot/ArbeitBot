@@ -123,6 +123,8 @@ function handleKeyboard(msg) {
     keyboards.sendClientMenu(bot, msg.chat.id);
   } else if (text === mainMenuOptions.help) {
     keyboards.sendHelp(bot, msg.chat.id);
+  } else if (text === mainMenuOptions.chooseLanguage) {
+    languagePicker.sendInterfaceLanguagePicker(bot, msg.chat.id);
   } else if (text === clientOptions.postNewJob) {
     jobManager.startJobDraft(bot, msg);
   } else if (text === clientOptions.myJobs) {

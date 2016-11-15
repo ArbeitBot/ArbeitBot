@@ -9,6 +9,7 @@
 const dbmanager = require('./dbmanager');
 const keyboards = require('./keyboards');
 const strings = require('./strings');
+const adminReports = require('./adminReports');
 
 /** General functions */
 
@@ -56,7 +57,7 @@ function checkJobsCreationReminder(bot) {
 function checkJobCreationReminder(job, bot) {
   const day = 1000 * 60 * 60 * 24;
   const now = new Date();
-  if (now.getTime() - job.updatedAt.getTime() > 1000) {
+  if (now.getTime() - job.updatedAt.getTime() > day) {
     sendJobCreationReminder(job, bot);
   }
 }
@@ -79,6 +80,7 @@ function sendJobCreationReminder(job, bot) {
         }
         const text = `${strings.jobCreationFindFreelancerReminderMessage1}\n\n\`${savedJob.description.substring(0, 150)}${addition}\`\n\n${strings.jobCreationFindFreelancerReminderMessage2}`;
         keyboards.sendInline(bot, savedJob.client.id, text, keyboards.arbeitbotSupportKeyboard, null, true);
+        adminReports.sentJobReminder(bot , job);
       })
       .catch(/** todo: handle error */);
   });

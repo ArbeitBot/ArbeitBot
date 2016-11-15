@@ -13,7 +13,8 @@ const dbmanager = require('./dbmanager');
 const mainMenuKeyboard = [
   [{ text: strings.mainMenuOptions.findJobs },
   { text: strings.mainMenuOptions.findContractors }],
-  [{ text: strings.mainMenuOptions.help }],
+  [{ text: strings.mainMenuOptions.help },
+  { text: strings.mainMenuOptions.chooseLanguage }],
 ];
 
 const clientKeyboard = [

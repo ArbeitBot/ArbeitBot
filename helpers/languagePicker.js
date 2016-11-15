@@ -20,6 +20,31 @@ global.eventEmitter.on(strings.languageInline, ({ msg, bot }) => {
   editLanguage(bot, msg);
 });
 
+global.eventEmitter.on(strings.interfaceLanguageInline, ({ msg, bot, user }) => {
+  const flag = msg.data.split(strings.inlineSeparator)[1];
+
+  dbmanager.getLanguages()
+    .then((languages) => {
+      let result;
+      languages.forEach((lang) => {
+        if (lang.flag === flag) {
+          result = lang;
+        }
+      });
+      return { user, language: result, languages };
+    })
+    .then(({ user, language, languages }) => {
+      const userCopy = Object.create(user);
+      userCopy.interfaceLanguage = language;
+      return userCopy.save()
+        .then((savedUser) => {
+          const keyboard = interfaceLanguageKeyboard(savedUser, languages);
+          return keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings.editInterfaceLanguageMessage, keyboard);
+        });
+    })
+    .catch(/** todo: handle error */);
+});
+
 /**
  * Used to edit existing message with inline of user who has changed his language
  *
@@ -128,6 +153,57 @@ function languageKeyboard(user, languages) {
   return [row];
 }
 
+/**
+ * Sends initial message with language picker inline
+ *
+ * @param  {Telegram:Bot} bot - Bot that should send message and inline
+ * @param  {Number} chatId - Chat id of user who should receive inline
+ */
+function sendInterfaceLanguagePicker(bot, chatId) {
+  dbmanager.findUser({ id: chatId })
+    .then(user =>
+      dbmanager.getLanguages()
+        .then((languages) => {
+          const keyboard = interfaceLanguageKeyboard(user, languages);
+          console.log(2);
+          keyboards.sendInline(
+            bot,
+            user.id,
+            strings.editInterfaceLanguageMessage,
+            keyboard
+          );
+        })
+    )
+    .catch(/** todo: handle error */);
+}
+
+/**
+ * Gets interface languages inline keyboard;
+ * Highlights language that is currently selected.
+ *
+ * @param  {Mongoose:User} user - User that should receive keyboard later
+ * @param  {[Mongoose:Language]} languages - A list of all languages that should be shown to user
+ * @return {Telegram:Inline} Inline keyboard that gets created depending on user's picked
+ *    language
+ */
+function interfaceLanguageKeyboard(user, languages) {
+  const row = [];
+
+  languages.forEach((language) => {
+    const text =
+      ((String(user.interfaceLanguage._id) || String(user.interfaceLanguage)) === String(language._id)) ?
+      strings.selectedLanguage + language.flag :
+      language.flag;
+    row.push({
+      text,
+      callback_data: strings.interfaceLanguageInline + strings.inlineSeparator + language.flag,
+    });
+  });
+
+  return [row];
+}
+
 module.exports = {
   sendLanguagePicker,
+  sendInterfaceLanguagePicker,
 };
