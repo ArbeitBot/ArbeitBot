@@ -49,7 +49,7 @@ bot.on('message', (msg) => {
       } else if (check.adminCommand(msg)) {
         adminPanel.handleAdminCommand(msg, bot);
       } else {
-        /** todo: handle strange message */
+        bot.sendMessage(-1001088665045, `@${user.username} sent strange message:\n\n\`${msg.text}\``, {parse_mode: 'Markdown'});
       }
     } else if (check.botCommandStart(msg)) {
       profile.createProfile(bot, msg);
