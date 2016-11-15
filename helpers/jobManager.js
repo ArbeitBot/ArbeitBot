@@ -192,6 +192,28 @@ eventEmitter.on(strings.freelancerJobInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
+eventEmitter.on(strings.freelancerJobEditInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings.inlineSeparator);
+  const jobId = options[1];
+  const answer = options[2];
+  const freelancerUsername = options[3];
+  dbmanager.findJobById(jobId)
+    .then(job =>
+      dbmanager.findUser({ username: freelancerUsername })
+        .then(user =>
+          dbmanager.saveFreelancerMessageToJob(msg, job, user)
+            .then((savedJob) => {
+              if (answer === strings.freelancerOptions.interested) {
+                makeInterested(true, bot, msg, savedJob, user, true);
+              } else if (answer === strings.freelancerOptions.notInterested) {
+                makeInterested(false, bot, msg, savedJob, user, true);
+              }
+            })
+        )
+    )
+    .catch(/** todo: handle error */);
+});
+
 /**
  * Handles case when freelancer should be selected for job from client
  * @param  {Telegram:Bot} bot Bot that should respond
@@ -1353,8 +1375,9 @@ function messageFromFreelancers(users) {
  * @param  {Telegram:Message} msg - Message that came along with inline action
  * @param  {Mongoose:Job} job - Job where to add freelancer
  * @param  {Mongoose:User} user - Freelancer object to add to job list
+ * @param  {Boolean} silent - If true will not send interested notification to client
  */
-function makeInterested(interested, bot, msg, job, user) {
+function makeInterested(interested, bot, msg, job, user, silent) {
   if (job.state === strings.jobStates.removed) {
     updateFreelancerMessage(bot, msg, user, job);
   } else if (job.state !== strings.jobStates.searchingForFreelancer && interested) {
@@ -1369,6 +1392,7 @@ function makeInterested(interested, bot, msg, job, user) {
     const candIndex = job.candidates.indexOf(user._id);
     const intIndex = job.interestedCandidates.indexOf(user._id);
     const notIntIndex = job.notInterestedCandidates.indexOf(user._id);
+
     if (candIndex > -1) {
       job.candidates.splice(candIndex, 1);
     }
@@ -1381,14 +1405,16 @@ function makeInterested(interested, bot, msg, job, user) {
     // Add user to interested or not interested
     if (interested) {
       job.interestedCandidates.push(user._id);
-      job.populate('client', (err, populatedJob) => {
-        /** todo: handle error */
-        let addition = '';
-        if (job.description.length > 150) {
-          addition = '...';
-        }
-        bot.sendMessage(populatedJob.client.id, `${strings.interestedOption} @${user.username}${strings.freelancerInterestedNotification}\`${job.description.substring(0, 150)}${addition}\``, { parse_mode: 'Markdown' });
-      });
+      if (!silent) {
+        job.populate('client', (err, populatedJob) => {
+          /** todo: handle error */
+          let addition = '';
+          if (job.description.length > 150) {
+            addition = '...';
+          }
+          bot.sendMessage(populatedJob.client.id, `${strings.interestedOption} @${user.username}${strings.freelancerInterestedNotification}\`${job.description.substring(0, 150)}${addition}\``, { parse_mode: 'Markdown' });
+        });
+      }
     } else {
       job.notInterestedCandidates.push(user._id);
     }
@@ -1438,21 +1464,56 @@ function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
   let prefix = '';
   // todo: get rid of unefficient check towards the line below
   // job.interestedCandidates.find(userId => { userId == user._id })
-  if (job.interestedCandidates.map(o => String(o)).includes(String(user._id))) {
+  const isInterested = job.interestedCandidates.map(o => String(o)).includes(String(user._id));
+  const isNotInterested = job.notInterestedCandidates.map(o => String(o)).includes(String(user._id));
+
+  if (isInterested) {
     prefix = `${strings.interestedOption} ${strings.freelancerOptions.interested}\n\n`;
-  } else if (job.notInterestedCandidates.map(o => String(o)).includes(String(user._id))) {
+  } else if (isNotInterested) {
     prefix = `${strings.notInterestedOption} ${strings.freelancerOptions.notInterested}\n\n`;
   }
 
   const chatId = (msg) ? msg.message.chat.id : chatInline.chat_id;
   const messageId = (msg) ? msg.message.message_id : chatInline.message_id;
 
+  const keyboard = [];
+  if (isInterested) {
+    const option = strings.freelancerOptions.notInterested;
+    const inline = strings.freelancerJobEditInline;
+    keyboard.push([{
+      text: strings.changeTo + option,
+      callback_data:
+        inline +
+        strings.inlineSeparator +
+        job._id +
+        strings.inlineSeparator +
+        option +
+        strings.inlineSeparator +
+        user.username,
+    }]);
+  } else if (isNotInterested) {
+    const option = strings.freelancerOptions.interested;
+    const inline = strings.freelancerJobEditInline;
+    keyboard.push([{
+      text: strings.changeTo + option,
+      callback_data:
+        inline +
+        strings.inlineSeparator +
+        job._id +
+        strings.inlineSeparator +
+        option +
+        strings.inlineSeparator +
+        user.username,
+    }]);
+  }
+
   keyboards.editMessage(
     bot,
     chatId,
     messageId,
     `${prefix}[${job.category.title}]\n${job.description}`,
-    []);
+    keyboard)
+  .catch(err => console.log(err));
 }
 
 /**

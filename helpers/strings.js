@@ -72,6 +72,7 @@ module.exports = {
     myJobs: '🛠 Created jobs',
     back: '🔙 Back',
   },
+  changeTo: 'Change to: ',
   back: '🔙 Back',
   freelanceMenuOptions: {
     editBio: '🖊 Edit bio',
@@ -106,6 +107,7 @@ module.exports = {
   freelancerPageInline: 'fPI',
   jobManageInline: 'jMI',
   freelancerJobInline: 'fJI',
+  freelancerJobEditInline: 'fJEI',
   selectFreelancerInline: 'sFI',
   selectAnotherFreelancerInline: 'sAFI',
   freelancerAcceptInline: 'fAI',
@@ -164,7 +166,7 @@ module.exports = {
     searchingForFreelancer: 'searchingForFreelancer',
     freelancerChosen: 'freelancerChosen',
     finished: 'finished',
-    // todo: need to delete this later
+    /** todo: need to delete this later */
     frozen: 'frozen',
     banned: 'banned',
     rated: 'rated',
