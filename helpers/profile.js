@@ -9,9 +9,9 @@ const dbmanager = require('./dbmanager');
 const keyboards = require('./keyboards');
 const strings = require('./strings');
 
-global.eventEmitter.on(strings.inputBioState, ({ msg, user, bot }) => {
+global.eventEmitter.on(strings().inputBioState, ({ msg, user, bot }) => {
   if (msg.text.length > 150) {
-    bot.sendMessage(msg.chat.id, strings.bioErrorMessage);
+    bot.sendMessage(msg.chat.id, strings().bioErrorMessage);
     return;
   }
 
@@ -25,7 +25,7 @@ global.eventEmitter.on(strings.inputBioState, ({ msg, user, bot }) => {
   userCopy.input_state = undefined;
   userCopy.save()
     .then((savedUser) => {
-      bot.sendMessage(msg.chat.id, strings.changedBioMessage + savedUser.bio, {
+      bot.sendMessage(msg.chat.id, strings().changedBioMessage + savedUser.bio, {
         reply_markup: JSON.stringify({
           keyboard: keyboards.freelancerKeyboard(savedUser),
           resize_keyboard: true,
@@ -37,7 +37,7 @@ global.eventEmitter.on(strings.inputBioState, ({ msg, user, bot }) => {
             keyboards.sendKeyboard(
               bot,
               savedUser.id,
-              strings.filledEverythingMessage,
+              strings().filledEverythingMessage,
               keyboards.freelancerKeyboard(savedUser)
             );
           }
@@ -47,7 +47,7 @@ global.eventEmitter.on(strings.inputBioState, ({ msg, user, bot }) => {
     .catch(/** todo: handle error */);
 });
 
-global.eventEmitter.on(strings.inputBioCancelInline, ({ msg, user, bot }) => {
+global.eventEmitter.on(strings().inputBioCancelInline, ({ msg, user, bot }) => {
   const userCopy = Object.create(user);
 
   userCopy.input_state = undefined;
@@ -92,21 +92,21 @@ function askForBio(msg, bot) {
   dbmanager.findUser({ id: msg.chat.id })
     .then((user) => {
       const userCopy = Object.create(user);
-      userCopy.input_state = strings.inputBioState;
+      userCopy.input_state = strings().inputBioState;
       return userCopy.save()
         .then((savedUser) => {
           const message = ((savedUser.bio) ?
-            `${strings.editBioMessage}\n\n${strings.yourCurrentBio}\n\n${savedUser.bio}` :
-            strings.editBioMessage
+            `${strings().editBioMessage}\n\n${strings().yourCurrentBio}\n\n${savedUser.bio}` :
+            strings().editBioMessage
           );
-          return keyboards.hideKeyboard(bot, msg.chat.id, strings.addBioHideKeyboardMessage)
+          return keyboards.hideKeyboard(bot, msg.chat.id, strings().addBioHideKeyboardMessage)
             .then(() => {
               keyboards.sendInline(bot,
                 msg.chat.id,
                 message,
                 [[{
-                  text: strings.cancel,
-                  callback_data: `${strings.inputBioCancelInline}${strings.inlineSeparator}`,
+                  text: strings().cancel,
+                  callback_data: `${strings().inputBioCancelInline}${strings().inlineSeparator}`,
                 }]]);
             });
         });
@@ -144,14 +144,14 @@ function toggleAvailability(bot, chatId) {
   dbmanager.toggleUserAvailability(chatId)
     .then((user) => {
       let message = ((user.busy) ?
-        strings.becameBusyMessage :
-        strings.becameAvailableMessage
+        strings().becameBusyMessage :
+        strings().becameAvailableMessage
       );
 
       if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
         message = ((user.busy) ?
-          strings.missingBecameBusyMessage :
-          strings.missingBecameAvailableMessage
+          strings().missingBecameBusyMessage :
+          strings().missingBecameAvailableMessage
         );
       }
 
@@ -183,7 +183,7 @@ function textInputCheck(msg, callback) {
  * @param {Telegram:Message} msg - Message that triggered this action
  */
 function sendAskForUsername(bot, msg) {
-  bot.sendMessage(msg.from.id, strings.askForUsername);
+  bot.sendMessage(msg.from.id, strings().askForUsername);
 }
 
 /**
@@ -192,7 +192,7 @@ function sendAskForUsername(bot, msg) {
  * @param {Telegram:Message} msg - Message that triggered this action
  */
 function sendBanMessage(bot, msg) {
-  bot.sendMessage(msg.from.id, strings.banMessage);
+  bot.sendMessage(msg.from.id, strings().banMessage);
 }
 
 /** Exports */

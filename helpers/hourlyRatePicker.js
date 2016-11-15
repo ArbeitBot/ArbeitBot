@@ -16,7 +16,7 @@ const strings = require('./strings');
  * @param  {Telegram:Bot} bot - Bot that should edit or send hourly rate keyboard
  * @param  {Telegram:Message} msg - Message that came along with inline button click
  */
-global.eventEmitter.on(strings.hourlyRateInline, ({ msg, bot }) => {
+global.eventEmitter.on(strings().hourlyRateInline, ({ msg, bot }) => {
   editHourlyRate(bot, msg);
 });
 
@@ -29,12 +29,12 @@ global.eventEmitter.on(strings.hourlyRateInline, ({ msg, bot }) => {
 function sendHourlyRate(bot, chatId) {
   dbmanager.findUser({ id: chatId })
     .then((user) => {
-      const hourlyRates = strings.hourlyRateOptions;
+      const hourlyRates = strings().hourlyRateOptions;
       const keyboard = hourlyRateKeyboard(user, hourlyRates);
       keyboards.sendInline(
         bot,
         user.id,
-        strings.editHourlyRateMessage,
+        strings(user).editHourlyRateMessage,
         keyboard
       );
     })
@@ -48,7 +48,7 @@ function sendHourlyRate(bot, chatId) {
  * @param  {Telegram:Message} msg - Message that came along with inline button click
  */
 function editHourlyRate(bot, msg) {
-  const command = msg.data.split(strings.inlineSeparator)[1];
+  const command = msg.data.split(strings().inlineSeparator)[1];
 
   dbmanager.findUser({ id: msg.message.chat.id })
     .then((user) => {
@@ -61,7 +61,7 @@ function editHourlyRate(bot, msg) {
             bot,
             msg.message.chat.id,
             msg.message.message_id,
-            hourlyRateKeyboard(savedUser, strings.hourlyRateOptions)
+            hourlyRateKeyboard(savedUser, strings().hourlyRateOptions)
           );
 
           if (needCongrats &&
@@ -71,7 +71,7 @@ function editHourlyRate(bot, msg) {
             keyboards.sendKeyboard(
               bot,
               savedUser.id,
-              strings.filledEverythingMessage,
+              strings(savedUser).filledEverythingMessage,
               keyboards.freelancerKeyboard(savedUser)
             );
           }
@@ -99,12 +99,12 @@ function hourlyRateKeyboard(user, hourlyRates) {
     const currentHR = hourlyRates[i];
 
     const text = (hourlyRate === currentHR) ?
-      strings.selectedHourlyRate + currentHR :
+      strings(user).selectedHourlyRate + currentHR :
       currentHR;
 
     tempRow.push({
       text,
-      callback_data: strings.hourlyRateInline + strings.inlineSeparator + currentHR,
+      callback_data: strings().hourlyRateInline + strings().inlineSeparator + currentHR,
     });
 
     if (isOdd) {

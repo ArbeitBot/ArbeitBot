@@ -42,7 +42,7 @@ bot.on('message', (msg) => {
       profile.updateProfile(msg, user);
 
       if (isTextInput) {
-        global.eventEmitter.emit(((msg.text === strings.cancel) ? 'cancel' : '') + isTextInput, { msg, user, bot });
+        global.eventEmitter.emit(((msg.text === strings().cancel) ? 'cancel' : '') + isTextInput, { msg, user, bot });
       } else if (check.replyMarkup(msg)) {
         handleKeyboard(msg);
       } else if (check.botCommandStart(msg)) {
@@ -76,7 +76,7 @@ bot.on('callback_query', (msg) => {
         return;
       }
 
-      const options = msg.data.split(strings.inlineSeparator);
+      const options = msg.data.split(strings().inlineSeparator);
       const inlineQuery = options[0];
       global.eventEmitter.emit(inlineQuery, { bot, msg, user });
     })
@@ -89,7 +89,7 @@ bot.on('inline_query', (msg) => {
       const results = [{
         type: 'article',
         id: `${getRandomInt(1000000000000000, 999999999999999999)}`,
-        title: strings.shareProfile,
+        title: strings().shareProfile,
         input_message_content: {
           message_text: user.getTextToShareProfile(),
         },
@@ -113,9 +113,9 @@ bot.on('inline_query', (msg) => {
  */
 function handleKeyboard(msg) {
   const text = msg.text;
-  const mainMenuOptions = strings.mainMenuOptions;
-  const clientOptions = strings.clientMenuOptions;
-  const freelanceMenuOptions = strings.freelanceMenuOptions;
+  const mainMenuOptions = strings().mainMenuOptions;
+  const clientOptions = strings().clientMenuOptions;
+  const freelanceMenuOptions = strings().freelanceMenuOptions;
 
   if (text === mainMenuOptions.findJobs) {
     keyboards.sendFreelanceMenu(bot, msg.chat.id);

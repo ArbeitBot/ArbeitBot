@@ -22,9 +22,9 @@ const admins = ['74169393', '-1001052392095'];
  * @param {Telegram:Bot} bot - Bot that should respond
  * @param {Telegram:Messager} msg - Message received
  */
-global.eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
-  const freelancerId = msg.data.split(strings.inlineSeparator)[2];
+global.eventEmitter.on(strings().reportFreelancerInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings().inlineSeparator)[1];
+  const freelancerId = msg.data.split(strings().inlineSeparator)[2];
 
   dbmanager.findJobById(jobId)
     .then(job =>
@@ -33,7 +33,7 @@ global.eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
           reportFreelancer(bot, msg, job, user)
             .then(() => {
               global.eventEmitter.emit(
-                strings.shouldUpdateJobMessage,
+                strings().shouldUpdateJobMessage,
                 { job, bot }
               );
             })
@@ -48,9 +48,9 @@ global.eventEmitter.on(strings.reportFreelancerInline, ({ msg, bot }) => {
  * @param {Telegram:Bot} bot - Bot that should respond
  * @param {Telegram:Messager} msg - Message received
  */
-global.eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
-  const freelancerIdReported = msg.data.split(strings.inlineSeparator)[2];
+global.eventEmitter.on(strings().reportClientInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings().inlineSeparator)[1];
+  const freelancerIdReported = msg.data.split(strings().inlineSeparator)[2];
 
   dbmanager.findJobById(jobId)
     .then(job =>
@@ -65,7 +65,7 @@ global.eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
               dbmanager.findUser({ id: msg.from.id })
                 .then((freelancer) => {
                   global.eventEmitter.emit(
-                    strings.shouldUpdateFreelancerMessage,
+                    strings().shouldUpdateFreelancerMessage,
                     { bot, msg, freelancer, reportedJob }
                   );
                 })
@@ -81,9 +81,9 @@ global.eventEmitter.on(strings.reportClientInline, ({ msg, bot }) => {
  * @param {Telegram:Bot} bot - Bot that should respond
  * @param {Telegram:Messager} msg - Message received
  */
-global.eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
-  const freelancerUsernameReported = msg.data.split(strings.inlineSeparator)[3];
+global.eventEmitter.on(strings().reportJobInline, ({ msg, bot }) => {
+  const jobId = msg.data.split(strings().inlineSeparator)[1];
+  const freelancerUsernameReported = msg.data.split(strings().inlineSeparator)[3];
 
   dbmanager.findJobById(jobId)
     .then(job =>
@@ -97,8 +97,8 @@ global.eventEmitter.on(strings.reportJobInline, ({ msg, bot }) => {
 
 /** The rest of the file */
 
-global.eventEmitter.on(strings.adminBanInline, ({ msg, bot }) => {
-  const data = msg.data.split(strings.inlineSeparator);
+global.eventEmitter.on(strings().adminBanInline, ({ msg, bot }) => {
+  const data = msg.data.split(strings().inlineSeparator);
 
   if (!(data.length === 3)) {
     /** todo: handle error 'Data from tg was corrupted. report.js' */
@@ -175,10 +175,10 @@ function adminBanKeyboard(adminChatId, reportId) {
       text: 'Ban',
       callback_data:
       [
-        strings.adminBanInline,
+        strings().adminBanInline,
         adminChatId,
         reportId,
-      ].join(strings.inlineSeparator),
+      ].join(strings().inlineSeparator),
     },
   ]];
 
@@ -257,7 +257,7 @@ function formReportMessage(report) {
  * @param {Telegram:Message} msg - Message that triggered this function
  */
 function sendResponseToUser(bot, msg) {
-  bot.sendMessage(msg.from.id, strings.reportThankYouMessage, {
+  bot.sendMessage(msg.from.id, strings().reportThankYouMessage, {
     disable_web_page_preview: 'true',
   });
 }
@@ -295,7 +295,7 @@ function reportJob(bot, msg, job, user) {
           .catch(/** todo: handle error */);
 
         global.eventEmitter.emit(
-          strings.shouldMakeInterested,
+          strings().shouldMakeInterested,
           {
             interested: false,
             bot,

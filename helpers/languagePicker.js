@@ -16,12 +16,12 @@ const strings = require('./strings');
  * @param  {Telegram:Bot} bot - Bot that should edit or send hourly rate keyboard
  * @param  {Telegram:Message} msg - Message that came along with inline button click
  */
-global.eventEmitter.on(strings.languageInline, ({ msg, bot }) => {
+global.eventEmitter.on(strings().languageInline, ({ msg, bot }) => {
   editLanguage(bot, msg);
 });
 
-global.eventEmitter.on(strings.interfaceLanguageInline, ({ msg, bot, user }) => {
-  const flag = msg.data.split(strings.inlineSeparator)[1];
+global.eventEmitter.on(strings().interfaceLanguageInline, ({ msg, bot, user }) => {
+  const flag = msg.data.split(strings().inlineSeparator)[1];
 
   dbmanager.getLanguages()
     .then((languages) => {
@@ -39,7 +39,7 @@ global.eventEmitter.on(strings.interfaceLanguageInline, ({ msg, bot, user }) => 
       return userCopy.save()
         .then((savedUser) => {
           const keyboard = interfaceLanguageKeyboard(savedUser, languages);
-          return keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings.editInterfaceLanguageMessage, keyboard);
+          return keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().editInterfaceLanguageMessage, keyboard);
         });
     })
     .catch(/** todo: handle error */);
@@ -52,7 +52,7 @@ global.eventEmitter.on(strings.interfaceLanguageInline, ({ msg, bot, user }) => 
  * @param  {Telegram:Message} msg - Message that came along with inline button click
  */
 function editLanguage(bot, msg) {
-  const flag = msg.data.split(strings.inlineSeparator)[1];
+  const flag = msg.data.split(strings().inlineSeparator)[1];
 
   dbmanager.findUser({ id: msg.message.chat.id })
     .then(user =>
@@ -93,7 +93,7 @@ function editLanguage(bot, msg) {
                 keyboards.sendKeyboard(
                   bot,
                   dbuser.id,
-                  strings.filledEverythingMessage,
+                  strings().filledEverythingMessage,
                   keyboards.freelancerKeyboard(dbuser)
                 );
               })
@@ -119,7 +119,7 @@ function sendLanguagePicker(bot, chatId) {
           keyboards.sendInline(
             bot,
             user.id,
-            strings.editLanguageMessage,
+            strings().editLanguageMessage,
             keyboard
           );
         })
@@ -142,11 +142,11 @@ function languageKeyboard(user, languages) {
   languages.forEach((language) => {
     const text =
       (user.languages.map(v => String(v._id) || String(v)).includes(String(language._id))) ?
-      strings.selectedLanguage + language.flag :
+      strings().selectedLanguage + language.flag :
       language.flag;
     row.push({
       text,
-      callback_data: strings.languageInline + strings.inlineSeparator + language.flag,
+      callback_data: strings().languageInline + strings().inlineSeparator + language.flag,
     });
   });
 
@@ -165,11 +165,10 @@ function sendInterfaceLanguagePicker(bot, chatId) {
       dbmanager.getLanguages()
         .then((languages) => {
           const keyboard = interfaceLanguageKeyboard(user, languages);
-          console.log(2);
           keyboards.sendInline(
             bot,
             user.id,
-            strings.editInterfaceLanguageMessage,
+            strings().editInterfaceLanguageMessage,
             keyboard
           );
         })
@@ -191,12 +190,12 @@ function interfaceLanguageKeyboard(user, languages) {
 
   languages.forEach((language) => {
     const text =
-      ((String(user.interfaceLanguage._id) || String(user.interfaceLanguage)) === String(language._id)) ?
-      strings.selectedLanguage + language.flag :
+      (String(user.interfaceLanguage._id)  === String(language._id) || String(user.interfaceLanguage)  === String(language._id)) ?
+      strings().selectedLanguage + language.flag :
       language.flag;
     row.push({
       text,
-      callback_data: strings.interfaceLanguageInline + strings.inlineSeparator + language.flag,
+      callback_data: strings().interfaceLanguageInline + strings().inlineSeparator + language.flag,
     });
   });
 

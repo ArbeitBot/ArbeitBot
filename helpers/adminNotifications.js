@@ -12,7 +12,7 @@ const strings = require('./strings');
 /** Constants */
 const admins = ['74169393', '-1001088665045'];
 
-global.eventEmitter.on(strings.newReview, ({ bot, dbReviewObject }) => {
+global.eventEmitter.on(strings().newReview, ({ bot, dbReviewObject }) => {
   dbmanager.findReviewById(dbReviewObject._id, ['toUser', 'byUser', 'job'])
     .then((review) => {
       sendNewReviewAlerts(bot, review);
@@ -30,23 +30,23 @@ function adminNewReviewKeyboard(review) {
     {
       text: 'Ok',
       callback_data: [
-        strings.adminNotifications.adminOkReviewInline,
+        strings().adminNotifications.adminOkReviewInline,
         review._id,
-      ].join(strings.inlineSeparator),
+      ].join(strings().inlineSeparator),
     },
     {
       text: 'Ban',
       callback_data: [
-        strings.adminNotifications.adminBanReviewInline,
+        strings().adminNotifications.adminBanReviewInline,
         review._id,
-      ].join(strings.inlineSeparator),
+      ].join(strings().inlineSeparator),
     },
     {
       text: 'Delete',
       callback_data: [
-        strings.adminNotifications.adminDeleteReviewInline,
+        strings().adminNotifications.adminDeleteReviewInline,
         review._id,
-      ].join(strings.inlineSeparator),
+      ].join(strings().inlineSeparator),
     },
   ]];
 
@@ -63,7 +63,7 @@ function formNewReviewMessageText(review) {
     return (String(userId) === String(review.job.client)) ? 'client' : 'freelancer';
   }
   const message =
-    `${strings.rateOptionsArray[review.rate - 1]}\n` +
+    `${strings().rateOptionsArray[review.rate - 1]}\n` +
     `@${review.byUser.username} (${status(review.byUser._id)}) rated @${review.toUser.username} (${status(review.toUser._id)})\n` +
     `${review.resolveWay || ''}\n` +
     `${review.job.description}`;
@@ -90,8 +90,8 @@ function sendNewReviewAlerts(bot, review) {
   });
 }
 
-global.eventEmitter.on(strings.adminNotifications.adminBanReviewInline, ({ msg, bot }) => {
-  const reviewId = msg.data.split(strings.inlineSeparator)[1];
+global.eventEmitter.on(strings().adminNotifications.adminBanReviewInline, ({ msg, bot }) => {
+  const reviewId = msg.data.split(strings().inlineSeparator)[1];
 
   dbmanager.findReviewById(reviewId, ['toUser', 'byUser', 'job'])
     .then((review) => {
@@ -105,9 +105,9 @@ global.eventEmitter.on(strings.adminNotifications.adminBanReviewInline, ({ msg, 
     .catch(/** todo: handle error */);
 });
 
-global.eventEmitter.on(strings.adminNotifications.adminDeleteReviewInline, ({ msg, bot }) => {
+global.eventEmitter.on(strings().adminNotifications.adminDeleteReviewInline, ({ msg, bot }) => {
   // Ищем ревью в базе данных - удаляем
-  const reviewId = msg.data.split(strings.inlineSeparator)[1];
+  const reviewId = msg.data.split(strings().inlineSeparator)[1];
   dbmanager.findReviewById(reviewId, ['toUser', 'byUser', 'job'])
     .then((review) => {
       const reviewCopy = Object.create(review);
@@ -119,8 +119,8 @@ global.eventEmitter.on(strings.adminNotifications.adminDeleteReviewInline, ({ ms
     .catch(/** todo: handle error */);
 });
 
-global.eventEmitter.on(strings.adminNotifications.adminOkReviewInline, ({ msg, bot }) => {
-  const reviewId = msg.data.split(strings.inlineSeparator)[1];
+global.eventEmitter.on(strings().adminNotifications.adminOkReviewInline, ({ msg, bot }) => {
+  const reviewId = msg.data.split(strings().inlineSeparator)[1];
 
   //  Everything is ok so we just clear all messages
   dbmanager.findReviewById(reviewId, ['toUser', 'byUser', 'job'])

@@ -395,7 +395,7 @@ function findJobById(id, populate) {
  * @param  {Mongo:Job} job - Job object for which freelancers are returned
  */
 function freelancersForJob(job) {
-  const query = job.hourly_rate === strings.hourlyRateAllRatesOption ?
+  const query = job.hourly_rate === strings().hourlyRateAllRatesOption ?
     [
       { categories: job.category },
       { busy: false },
@@ -430,7 +430,7 @@ function freelancersForJob(job) {
  * @param {Mongoose:Job} job - Job for which number of freelancers should be counted
  */
 function freelancersForJobCount(job) {
-  const query = job.hourly_rate === strings.hourlyRateAllRatesOption ?
+  const query = job.hourly_rate === strings().hourlyRateAllRatesOption ?
     [
       { categories: job.category },
       { busy: false },
@@ -526,7 +526,7 @@ function saveFreelancerMessageToJob(msg, job, user) {
 function jobCount() {
   return new Promise((fullfill) => {
     Job.count({
-      state: strings.jobStates.searchingForFreelancer,
+      state: strings().jobStates.searchingForFreelancer,
       description: {
         $exists: true,
       },
@@ -539,13 +539,13 @@ function jobCount() {
 
 /**
  * Finds all jobs without reminders fired, but completely filled
- *     and with strings.jobStates.searchingForFreelancer state
+ *     and with strings().jobStates.searchingForFreelancer state
  */
 function getJobsForReminder() {
   return Job.find({
     remindersFired: [],
     description: { $exists: true },
-    state: strings.jobStates.searchingForFreelancer,
+    state: strings().jobStates.searchingForFreelancer,
     language: { $exists: true },
     category: { $exists: true },
     hourly_rate: { $exists: true },

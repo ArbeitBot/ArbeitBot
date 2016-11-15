@@ -2,16 +2,16 @@ Job creation logic:
 
 1. startJobDraft - creates job draft and calls askForNewJobLanguage
 2. askForNewJobLanguage — sends user a message with inline keyboard to choose languages and cancel button, saves inline chat id and inline message id to the job draft
-3. eventEmitter.on(strings.inputLanguageInline) - assigns language to draft and calls askForNewJobCategory
+3. eventEmitter.on(strings().inputLanguageInline) - assigns language to draft and calls askForNewJobCategory
 4. askForNewJobCategory — edits inline keyboard and draft's message to show categories inline
-5. eventEmitter.on(strings.inputCategoryNameInline) - saves category to job and calls askForNewJobPriceRange
+5. eventEmitter.on(strings().inputCategoryNameInline) - saves category to job and calls askForNewJobPriceRange
 6. askForNewJobPriceRange — saves user's input state to inputHourlyRateState, sends a keyboard with available hourly rates
-7. eventEmitter.on(strings.inputHourlyRateInline) - adds horly rate to job draft and calls askForNewJobDescription
+7. eventEmitter.on(strings().inputHourlyRateInline) - adds horly rate to job draft and calls askForNewJobDescription
 8. askForNewJobDescription - saves user state to inputJobDescriptionState, saves job draft to current_job_draft of user and adds message with inline button to cancel job description
-9. eventEmitter.on(strings.inputJobDescriptionState) - gets description and calls addDescriptionToJobDraft
+9. eventEmitter.on(strings().inputJobDescriptionState) - gets description and calls addDescriptionToJobDraft
 10. addDescriptionToJobDraft - adds description to draft, removes draft from current_job_draft and job_drafts of user, adds job to user's jobs, cleans draft's message and calls sendJobCreatedMessage
 12. sendJobCreatedMessage — sends job created message and job's message with available freelancers
 
 
-0.1. eventEmitter.on(strings.cancelJobCreationInline) - cleans job message and calls cancelJobCreation
+0.1. eventEmitter.on(strings().cancelJobCreationInline) - cleans job message and calls cancelJobCreation
 0.2. cancelJobCreation - removes draft from user's object and database, sends client main menu

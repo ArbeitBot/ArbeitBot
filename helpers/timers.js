@@ -78,7 +78,7 @@ function sendJobCreationReminder(job, bot) {
         if (savedJob.description.length > 150) {
           addition = '...';
         }
-        const text = `${strings.jobCreationFindFreelancerReminderMessage1}\n\n\`${savedJob.description.substring(0, 150)}${addition}\`\n\n${strings.jobCreationFindFreelancerReminderMessage2}`;
+        const text = `${strings().jobCreationFindFreelancerReminderMessage1}\n\n\`${savedJob.description.substring(0, 150)}${addition}\`\n\n${strings().jobCreationFindFreelancerReminderMessage2}`;
         keyboards.sendInline(bot, savedJob.client.id, text, keyboards.arbeitbotSupportKeyboard, null, true);
         adminReports.sentJobReminder(bot , job);
       })

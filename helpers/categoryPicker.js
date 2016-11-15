@@ -19,13 +19,13 @@ const pageSize = 10;
  * @param  {Telegram:Bot} bot - Bot that should send a response to this action
  * @param  {Telegram:Message} - msg Message that was received upon clicking an inline button
  */
-global.eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
-  const command = msg.data.split(strings.inlineSeparator)[1];
-  const page = parseInt(msg.data.split(strings.inlineSeparator)[2], 10);
+global.eventEmitter.on(strings().categoryInline, ({ msg, bot, user }) => {
+  const command = msg.data.split(strings().inlineSeparator)[1];
+  const page = parseInt(msg.data.split(strings().inlineSeparator)[2], 10);
 
-  if (command === strings.categoryLeft) {
+  if (command === strings().categoryLeft) {
     editPage(bot, msg, page - 1);
-  } else if (command === strings.categoryRight) {
+  } else if (command === strings().categoryRight) {
     editPage(bot, msg, page + 1);
   } else {
     dbmanager.toggleCategoryForUser(msg.message.chat.id, command)
@@ -38,7 +38,7 @@ global.eventEmitter.on(strings.categoryInline, ({ msg, bot }) => {
             keyboards.sendKeyboard(
               bot,
               user.id,
-              strings.filledEverythingMessage,
+              strings(user).filledEverythingMessage,
               keyboards.freelancerKeyboard(user)
             );
           }
@@ -82,7 +82,7 @@ function getCategoriesCallback(categories, user, bot) {
   keyboards.sendInline(
     bot,
     user.id,
-    strings.pickCategoriesMessage,
+    strings(user).pickCategoriesMessage,
     keyboard
   );
 }
@@ -151,16 +151,16 @@ function categoriesKeyboard(categories, user, page) {
     const currentCategory = allCategories[i];
 
     const text = ((user.categories.indexOf(currentCategory) > -1) ?
-      strings.selectedCategory + currentCategory.title :
+      strings(user).selectedCategory + currentCategory.title :
       currentCategory.title
     );
 
     tempRow.push({
       text,
-      callback_data: strings.categoryInline +
-        strings.inlineSeparator +
+      callback_data: strings().categoryInline +
+        strings().inlineSeparator +
         currentCategory._id +
-        strings.inlineSeparator +
+        strings().inlineSeparator +
         page,
     });
 
@@ -173,11 +173,11 @@ function categoriesKeyboard(categories, user, page) {
   const navButtons = [];
   if (page > 0) {
     navButtons.push({
-      text: strings.categoryLeft,
-      callback_data: strings.categoryInline +
-        strings.inlineSeparator +
-        strings.categoryLeft +
-        strings.inlineSeparator +
+      text: strings(user).categoryLeft,
+      callback_data: strings().categoryInline +
+        strings().inlineSeparator +
+        strings().categoryLeft +
+        strings().inlineSeparator +
         page,
     });
   }
@@ -188,11 +188,11 @@ function categoriesKeyboard(categories, user, page) {
   if (remainder > 0) lastPage += 1;
   if (page + 1 < lastPage) {
     navButtons.push({
-      text: strings.categoryRight,
-      callback_data: strings.categoryInline +
-        strings.inlineSeparator +
-        strings.categoryRight +
-        strings.inlineSeparator +
+      text: strings(user).categoryRight,
+      callback_data: strings().categoryInline +
+        strings().inlineSeparator +
+        strings().categoryRight +
+        strings().inlineSeparator +
         page,
     });
   }
@@ -201,7 +201,7 @@ function categoriesKeyboard(categories, user, page) {
 
   if (page + 1 === lastPage) {
     keyboard.push([{
-      text: strings.suggestCategoryMessage,
+      text: strings(user).suggestCategoryMessage,
       url: 'http://telegram.me/borodutch',
     }]);
   }

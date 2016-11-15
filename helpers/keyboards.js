@@ -10,17 +10,25 @@ const strings = require('./strings');
 const dbmanager = require('./dbmanager');
 
 /** Keyboards */
-const mainMenuKeyboard = [
-  [{ text: strings.mainMenuOptions.findJobs },
-  { text: strings.mainMenuOptions.findContractors }],
-  [{ text: strings.mainMenuOptions.help },
-  { text: strings.mainMenuOptions.chooseLanguage }],
-];
+/**
+ * Returns localized main menu keyboard
+ * @param {Mongoose:User} user User that contains info about localization
+ * @return {Telegram:InlineKeyboard} Localized keyboard
+ */
+function mainMenuKeyboard(user) {
+  return [
+    [{ text: strings(user).mainMenuOptions.findJobs },
+    { text: strings(user).mainMenuOptions.findContractors }],
+    [{ text: strings(user).mainMenuOptions.help },
+    // { text: strings(user).mainMenuOptions.chooseLanguage }
+    ],
+  ];
+}
 
 const clientKeyboard = [
-  [{ text: strings.clientMenuOptions.postNewJob }],
-  [{ text: strings.clientMenuOptions.back },
-  { text: strings.clientMenuOptions.myJobs }],
+  [{ text: strings().clientMenuOptions.postNewJob }],
+  [{ text: strings().clientMenuOptions.back },
+  { text: strings().clientMenuOptions.myJobs }],
 ];
 
 const helpKeyboard = [
@@ -43,32 +51,32 @@ const arbeitbotSupportKeyboard = [
  */
 function freelancerKeyboard(user) {
   const bioText = ((user.bio) ?
-    strings.freelanceMenuOptions.editBio :
-    strings.freelanceMenuOptions.addBio
+    strings().freelanceMenuOptions.editBio :
+    strings().freelanceMenuOptions.addBio
   );
 
   const categoriesText = ((user.categories.length > 0) ?
-    strings.freelanceMenuOptions.editCategories :
-    strings.freelanceMenuOptions.addCategories
+    strings().freelanceMenuOptions.editCategories :
+    strings().freelanceMenuOptions.addCategories
   );
 
   const hourlyRateText = ((user.hourly_rate) ?
-    strings.freelanceMenuOptions.editHourlyRate :
-    strings.freelanceMenuOptions.addHourlyRate
+    strings().freelanceMenuOptions.editHourlyRate :
+    strings().freelanceMenuOptions.addHourlyRate
   );
 
   const availableText = ((user.busy) ?
-    strings.freelanceMenuOptions.available :
-    strings.freelanceMenuOptions.busy
+    strings().freelanceMenuOptions.available :
+    strings().freelanceMenuOptions.busy
   );
 
   const languages = (user.languages.length > 0) ?
     user.languages.map(v => v.flag).reduce((res, cur) => `${res} ${cur}`) :
-    strings.freelanceMenuOptions.addLanguage;
+    strings().freelanceMenuOptions.addLanguage;
   return [
     [{ text: bioText }, { text: categoriesText }],
     [{ text: hourlyRateText }, { text: languages }],
-    [{ text: strings.freelanceMenuOptions.back },
+    [{ text: strings().freelanceMenuOptions.back },
      { text: availableText }],
   ];
 }
@@ -83,24 +91,24 @@ function freelancerKeyboard(user) {
 function rateKeyboard(inline, jobId) {
   return [
     [{
-      text: strings.rateOptions.oneStar,
-      callback_data: `${inline}${strings.inlineSeparator}1${strings.inlineSeparator}${jobId}`,
+      text: strings().rateOptions.oneStar,
+      callback_data: `${inline}${strings().inlineSeparator}1${strings().inlineSeparator}${jobId}`,
     },
     {
-      text: strings.rateOptions.twoStars,
-      callback_data: `${inline}${strings.inlineSeparator}2${strings.inlineSeparator}${jobId}`,
+      text: strings().rateOptions.twoStars,
+      callback_data: `${inline}${strings().inlineSeparator}2${strings().inlineSeparator}${jobId}`,
     },
     {
-      text: strings.rateOptions.threeStars,
-      callback_data: `${inline}${strings.inlineSeparator}3${strings.inlineSeparator}${jobId}`,
+      text: strings().rateOptions.threeStars,
+      callback_data: `${inline}${strings().inlineSeparator}3${strings().inlineSeparator}${jobId}`,
     }],
     [{
-      text: strings.rateOptions.fourStars,
-      callback_data: `${inline}${strings.inlineSeparator}4${strings.inlineSeparator}${jobId}`,
+      text: strings().rateOptions.fourStars,
+      callback_data: `${inline}${strings().inlineSeparator}4${strings().inlineSeparator}${jobId}`,
     },
     {
-      text: strings.rateOptions.fiveStars,
-      callback_data: `${inline}${strings.inlineSeparator}5${strings.inlineSeparator}${jobId}`,
+      text: strings().rateOptions.fiveStars,
+      callback_data: `${inline}${strings().inlineSeparator}5${strings().inlineSeparator}${jobId}`,
     }],
   ];
 }
@@ -127,12 +135,16 @@ function hideKeyboard(bot, chatId, text) {
  * @param {Number} chatId - Chat id of user who should receive this keyboard
  */
 function sendMainMenu(bot, chatId, firstTime) {
-  sendKeyboard(
-    bot,
-    chatId,
-    ((firstTime) ? strings.initialMessage : strings.mainMenuMessage),
-    mainMenuKeyboard
-  );
+  dbmanager.findUser({ id: chatId })
+    .then((user) => {
+      sendKeyboard(
+        bot,
+        chatId,
+        ((firstTime) ? strings(user).initialMessage : strings(user).mainMenuMessage),
+        mainMenuKeyboard(user)
+      );
+    })
+    .catch(/** todo: handle error */);
 }
 
 /**
@@ -145,7 +157,7 @@ function sendClientMenu(bot, chatId) {
   sendKeyboard(
     bot,
     chatId,
-    strings.clientMenuMessage,
+    strings().clientMenuMessage,
     clientKeyboard
   );
 }
@@ -168,14 +180,14 @@ function sendFreelanceMenu(bot, chatId) {
   dbmanager.findUser({ id: chatId })
     .then((user) => {
       let text = ((user.busy) ?
-        strings.fullFreelancerMessageBusy :
-        strings.fullFreelancerMessageAvailable
+        strings().fullFreelancerMessageBusy :
+        strings().fullFreelancerMessageAvailable
       );
 
       if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
-        text = strings.emptyFreelancerMessage;
+        text = strings().emptyFreelancerMessage;
       } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
-        text = strings.missingFreelancerMessage;
+        text = strings().missingFreelancerMessage;
       }
 
       if (user.bio || user.categories.length > 0 || user.hourly_rate) {
@@ -232,7 +244,7 @@ function sendHelp(bot, chatId) {
   sendInline(
     bot,
     chatId,
-    strings.helpMessage,
+    strings().helpMessage,
     helpKeyboard
   );
 }

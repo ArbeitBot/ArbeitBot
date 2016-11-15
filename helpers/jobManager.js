@@ -37,7 +37,7 @@ function sendJobCreatedMessage(user, bot, job) {
         .then((users) => {
           keyboards.sendKeyboard(bot,
             user.id,
-            strings.pickFreelancersMessage,
+            strings(user).pickFreelancersMessage,
             keyboards.clientKeyboard,
             () => {
               keyboards.sendInline(
@@ -66,7 +66,7 @@ function sendAllJobs(bot, msg) {
   dbmanager.findUser({ id: msg.from.id })
     .then((user) => {
       if (user.jobs.length <= 0) {
-        keyboards.sendInline(bot, user.id, strings.noJobsExistMessage, [])
+        keyboards.sendInline(bot, user.id, strings(user).noJobsExistMessage, [])
           .catch(/** todo: handle error */);
       } else {
         sendJobMessages(user, bot);
@@ -86,19 +86,19 @@ function sendAllJobs(bot, msg) {
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Messager} msg Message received
  */
-eventEmitter.on(strings.freelancerInline, ({ bot, msg, user }) => {
+eventEmitter.on(strings().freelancerInline, ({ bot, msg, user }) => {
   /** Get essential info */
-  const options = msg.data.split(strings.inlineSeparator);
+  const options = msg.data.split(strings().inlineSeparator);
   const freelancerId = options[1];
   const jobId = options[2];
   /** Check if select all touched */
-  if (freelancerId === strings.jobSendAllFreelancers) {
+  if (freelancerId === strings().jobSendAllFreelancers) {
     dbmanager.freelancersForJobId(jobId)
       .then((users) => {
         addFreelancersToCandidates(bot, msg, jobId, users);
       })
       .catch(/** todo: handle error */);
-  } else if (freelancerId === strings.jobSelectFreelancer) {
+  } else if (freelancerId === strings().jobSelectFreelancer) {
     dbmanager.findJobById(jobId, 'interestedCandidates')
       .then((job) => {
         showSelectFreelancers(msg, job, bot);
@@ -113,25 +113,25 @@ eventEmitter.on(strings.freelancerInline, ({ bot, msg, user }) => {
   }
 });
 
-eventEmitter.on(strings.jobManageInline, ({ bot, msg, user }) => {
+eventEmitter.on(strings().jobManageInline, ({ bot, msg, user }) => {
   /** Get essential info */
-  const options = msg.data.split(strings.inlineSeparator);
+  const options = msg.data.split(strings().inlineSeparator);
   const answer = options[1];
   const jobId = options[2];
 
-  if (answer === strings.jobRefresh) {
+  if (answer === strings().jobRefresh) {
     dbmanager.findJobById(jobId)
       .then((job) => {
         updateJobMessage(job, bot);
       })
       .catch(/** todo: handle error */);
-  } else if (answer === strings.jobEdit) {
+  } else if (answer === strings().jobEdit) {
     /** todo: add edit job */
-  } else if (answer === strings.jobDelete) {
+  } else if (answer === strings().jobDelete) {
     dbmanager.findJobById(jobId, 'interestedCandidates')
       .then((job) => {
         const jobCopy = Object.create(job);
-        jobCopy.state = strings.jobStates.removed;
+        jobCopy.state = strings().jobStates.removed;
         adminReports.jobDeleted(bot, jobCopy);
         return jobCopy.save()
           .then((savedJob) => {
@@ -142,18 +142,18 @@ eventEmitter.on(strings.jobManageInline, ({ bot, msg, user }) => {
   }
 });
 
-eventEmitter.on(strings.freelancerPageInline, ({ bot, msg, user }) => {
+eventEmitter.on(strings().freelancerPageInline, ({ bot, msg, user }) => {
   /** Get essential info */
-  const options = msg.data.split(strings.inlineSeparator);
+  const options = msg.data.split(strings().inlineSeparator);
   const answer = options[1];
   const jobId = options[2];
 
   dbmanager.findJobById(jobId, 'interestedCandidates')
     .then((job) => {
       const jobCopy = Object.create(job);
-      if (answer === strings.jobBackPage) {
+      if (answer === strings().jobBackPage) {
         jobCopy.current_page -= 1;
-      } else if (answer === strings.jobNextPage) {
+      } else if (answer === strings().jobNextPage) {
         jobCopy.current_page += 1;
       }
       return jobCopy.save()
@@ -169,8 +169,8 @@ eventEmitter.on(strings.freelancerPageInline, ({ bot, msg, user }) => {
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Message} msg Message that was sent with this inline
  */
-eventEmitter.on(strings.freelancerJobInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().freelancerJobInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const jobId = options[1];
   const answer = options[2];
   const freelancerUsername = options[3];
@@ -181,9 +181,9 @@ eventEmitter.on(strings.freelancerJobInline, ({ bot, msg, user }) => {
         .then(user =>
           dbmanager.saveFreelancerMessageToJob(msg, job, user)
             .then((savedJob) => {
-              if (answer === strings.freelancerOptions.interested) {
+              if (answer === strings().freelancerOptions.interested) {
                 makeInterested(true, bot, msg, savedJob, user);
-              } else if (answer === strings.freelancerOptions.notInterested) {
+              } else if (answer === strings().freelancerOptions.notInterested) {
                 makeInterested(false, bot, msg, savedJob, user);
               }
             })
@@ -192,8 +192,8 @@ eventEmitter.on(strings.freelancerJobInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
-eventEmitter.on(strings.freelancerJobEditInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().freelancerJobEditInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const jobId = options[1];
   const answer = options[2];
   const freelancerUsername = options[3];
@@ -203,9 +203,9 @@ eventEmitter.on(strings.freelancerJobEditInline, ({ bot, msg, user }) => {
         .then(user =>
           dbmanager.saveFreelancerMessageToJob(msg, job, user)
             .then((savedJob) => {
-              if (answer === strings.freelancerOptions.interested) {
+              if (answer === strings().freelancerOptions.interested) {
                 makeInterested(true, bot, msg, savedJob, user, true);
-              } else if (answer === strings.freelancerOptions.notInterested) {
+              } else if (answer === strings().freelancerOptions.notInterested) {
                 makeInterested(false, bot, msg, savedJob, user, true);
               }
             })
@@ -219,12 +219,12 @@ eventEmitter.on(strings.freelancerJobEditInline, ({ bot, msg, user }) => {
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Messager} msg Message received
  */
-eventEmitter.on(strings.selectFreelancerInline, ({ bot, msg, user }) => {
+eventEmitter.on(strings().selectFreelancerInline, ({ bot, msg, user }) => {
   // Get essential info
-  const freelancerId = msg.data.split(strings.inlineSeparator)[1];
-  const jobId = msg.data.split(strings.inlineSeparator)[2];
+  const freelancerId = msg.data.split(strings().inlineSeparator)[1];
+  const jobId = msg.data.split(strings().inlineSeparator)[2];
 
-  if (freelancerId === strings.selectFreelancerCancel) {
+  if (freelancerId === strings().selectFreelancerCancel) {
     dbmanager.findJobById(jobId)
       .then((job) => {
         updateJobMessage(job, bot);
@@ -241,8 +241,8 @@ eventEmitter.on(strings.selectFreelancerInline, ({ bot, msg, user }) => {
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Messager} msg Message received
  */
-eventEmitter.on(strings.selectAnotherFreelancerInline, ({ bot, msg, user }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
+eventEmitter.on(strings().selectAnotherFreelancerInline, ({ bot, msg, user }) => {
+  const jobId = msg.data.split(strings().inlineSeparator)[1];
   selectAnotherFreelancerForJob(bot, jobId);
 });
 
@@ -251,22 +251,22 @@ eventEmitter.on(strings.selectAnotherFreelancerInline, ({ bot, msg, user }) => {
  * @param  {Telegram:Messager} msg Message received
  * @param  {Telegram:Bot} bot Bot that should respond
  */
-eventEmitter.on(strings.freelancerAcceptInline, ({ bot, msg, user }) => {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
-  const option = msg.data.split(strings.inlineSeparator)[2];
-  const freelancerUsername = msg.data.split(strings.inlineSeparator)[3];
+eventEmitter.on(strings().freelancerAcceptInline, ({ bot, msg, user }) => {
+  const jobId = msg.data.split(strings().inlineSeparator)[1];
+  const option = msg.data.split(strings().inlineSeparator)[2];
+  const freelancerUsername = msg.data.split(strings().inlineSeparator)[3];
 
   dbmanager.findJobById(jobId)
     .then((job) => {
-      if (job.state === strings.jobStates.freelancerChosen) {
+      if (job.state === strings().jobStates.freelancerChosen) {
         dbmanager.findUser({ username: freelancerUsername })
           .then((user) => {
             const jobCopy = Object.create(job);
 
-            adminReports.acceptOrRejectJobOffer(bot, job, user, option === strings.freelancerAcceptOptions.accept);
+            adminReports.acceptOrRejectJobOffer(bot, job, user, option === strings().freelancerAcceptOptions.accept);
 
-            if (option === strings.freelancerAcceptOptions.accept) {
-              jobCopy.state = strings.jobStates.finished;
+            if (option === strings().freelancerAcceptOptions.accept) {
+              jobCopy.state = strings().jobStates.finished;
               jobCopy.save()
                 .then((savedJob) => {
                   updateJobMessage(savedJob, bot);
@@ -274,7 +274,7 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ bot, msg, user }) => {
                 })
                 .catch(/** todo: handle error */);
             } else {
-              jobCopy.state = strings.jobStates.searchingForFreelancer;
+              jobCopy.state = strings().jobStates.searchingForFreelancer;
               jobCopy.candidate = null;
               jobCopy.save()
                 .then((savedJob) => {
@@ -291,8 +291,8 @@ eventEmitter.on(strings.freelancerAcceptInline, ({ bot, msg, user }) => {
 
 /** Job creation inlines */
 
-eventEmitter.on(strings.inputLanguageInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().inputLanguageInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const language = options[1];
   const draftId = options[2];
 
@@ -308,8 +308,8 @@ eventEmitter.on(strings.inputLanguageInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
-eventEmitter.on(strings.inputSupercategoryNameInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().inputSupercategoryNameInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const supercategoryId = options[1];
   const jobId = options[2];
 
@@ -323,8 +323,8 @@ eventEmitter.on(strings.inputSupercategoryNameInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
-eventEmitter.on(strings.supercategoryBackInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().supercategoryBackInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const draftId = options[1];
 
   dbmanager.findJobById(draftId, 'language')
@@ -334,8 +334,8 @@ eventEmitter.on(strings.supercategoryBackInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
-eventEmitter.on(strings.inputCategoryNameInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().inputCategoryNameInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const categoryId = options[1];
   const draftId = options[2];
 
@@ -367,8 +367,8 @@ eventEmitter.on(strings.inputCategoryNameInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
-eventEmitter.on(strings.categoryBackInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().categoryBackInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const draftId = options[1];
 
   dbmanager.findJobById(draftId, 'language')
@@ -381,12 +381,12 @@ eventEmitter.on(strings.categoryBackInline, ({ bot, msg, user }) => {
 /**
  * Adds hourly rate to job draft and sends next step
  */
-eventEmitter.on(strings.inputHourlyRateInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().inputHourlyRateInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const hourlyRate = options[1];
   const draftId = options[2];
 
-  if (strings.hourlyRateOptions.includes(hourlyRate) || hourlyRate === strings.hourlyRateAllRatesOption) {
+  if (strings().hourlyRateOptions.includes(hourlyRate) || hourlyRate === strings().hourlyRateAllRatesOption) {
     dbmanager.findJobById(draftId)
       .then((draft) => {
         const draftCopy = Object.create(draft);
@@ -400,8 +400,8 @@ eventEmitter.on(strings.inputHourlyRateInline, ({ bot, msg, user }) => {
   }
 });
 
-eventEmitter.on(strings.hourlyRateBackInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().hourlyRateBackInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const draftId = options[1];
 
   dbmanager.findJobById(draftId, 'language')
@@ -423,9 +423,9 @@ eventEmitter.on(strings.hourlyRateBackInline, ({ bot, msg, user }) => {
     .catch(/** todo: handle error */);
 });
 
-eventEmitter.on(strings.inputJobDescriptionState, ({ bot, msg, user }) => {
+eventEmitter.on(strings().inputJobDescriptionState, ({ bot, msg, user }) => {
   if (msg.text.length < 100 || msg.text.length > 500) {
-    bot.sendMessage(msg.chat.id, strings.jobDescriptionErrorMessage);
+    bot.sendMessage(msg.chat.id, strings(user).jobDescriptionErrorMessage);
     return;
   }
   const description = msg.text.substring(0, 500);
@@ -441,8 +441,8 @@ eventEmitter.on(strings.inputJobDescriptionState, ({ bot, msg, user }) => {
  * @param  {Telegram:Bot} bot Bot that should respond
  * @param  {Telegram:Messager} msg Message received
  */
-eventEmitter.on(strings.cancelJobCreationInline, ({ bot, msg, user }) => {
-  const options = msg.data.split(strings.inlineSeparator);
+eventEmitter.on(strings().cancelJobCreationInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
   const draftId = options[1];
 
   dbmanager.findJobById(draftId)
@@ -450,7 +450,7 @@ eventEmitter.on(strings.cancelJobCreationInline, ({ bot, msg, user }) => {
         keyboards.editMessage(bot,
           msg.message.chat.id,
           msg.message.message_id,
-          strings.thisDraftIsRemoved,
+          strings(user).thisDraftIsRemoved,
           [])
           .then(() => {
             cancelJobCreation(bot, msg.message, user, draft);
@@ -459,16 +459,16 @@ eventEmitter.on(strings.cancelJobCreationInline, ({ bot, msg, user }) => {
       .catch(/** todo: handle error */);
 });
 
-eventEmitter.on(`cancel${strings.inputLanguageState}`, ({ bot, msg, user }) => {
+eventEmitter.on(`cancel${strings().inputLanguageState}`, ({ bot, msg, user }) => {
   cancelJobCreation(bot, msg, user);
 });
-eventEmitter.on(`cancel${strings.inputCategoryNameState}`, ({ bot, msg, user }) => {
+eventEmitter.on(`cancel${strings().inputCategoryNameState}`, ({ bot, msg, user }) => {
   cancelJobCreation(bot, msg, user);
 });
-eventEmitter.on(`cancel${strings.inputHourlyRateState}`, ({ bot, msg, user }) => {
+eventEmitter.on(`cancel${strings().inputHourlyRateState}`, ({ bot, msg, user }) => {
   cancelJobCreation(bot, msg, user);
 });
-eventEmitter.on(`cancel${strings.inputJobDescriptionState}`, ({ bot, msg, user }) => {
+eventEmitter.on(`cancel${strings().inputJobDescriptionState}`, ({ bot, msg, user }) => {
   cancelJobCreation(bot, msg, user);
 });
 
@@ -479,7 +479,7 @@ eventEmitter.on(`cancel${strings.inputJobDescriptionState}`, ({ bot, msg, user }
  * @param  {Mongoose:Job} job Job that should be updated
  * @param  {Telegram:Bot} bot Bot that should update message
  */
-eventEmitter.on(strings.shouldUpdateJobMessage, ({ job, bot }) => {
+eventEmitter.on(strings().shouldUpdateJobMessage, ({ job, bot }) => {
   updateJobMessage(job, bot);
 });
 
@@ -490,7 +490,7 @@ eventEmitter.on(strings.shouldUpdateJobMessage, ({ job, bot }) => {
  * @param  {Mongoose:User} user Freelancer whos message should be editted
  * @param  {Mongoose:Job} job  Relevant job
  */
-eventEmitter.on(strings.shouldUpdateFreelancerMessage, ({ bot, msg, user, job }) => {
+eventEmitter.on(strings().shouldUpdateFreelancerMessage, ({ bot, msg, user, job }) => {
   updateFreelancerMessage(bot, msg, user, job);
 });
 
@@ -504,7 +504,7 @@ eventEmitter.on(strings.shouldUpdateFreelancerMessage, ({ bot, msg, user, job })
  * @param  {Mongoose:Job} job        Job where to add freelancer
  * @param  {Mongoose:User} user       Freelancer object to add to job list
  */
-eventEmitter.on(strings.shouldMakeInterested, ({ interested, bot, msg, job, user }) => {
+eventEmitter.on(strings().shouldMakeInterested, ({ interested, bot, msg, job, user }) => {
   makeInterested(interested, bot, msg, job, user);
 });
 
@@ -569,14 +569,14 @@ function cancelJobCreation(bot, msg, user, draft) {
           keyboards.sendKeyboard(
               bot,
               msg.chat.id,
-              strings.clientMenuMessage,
+              strings(user).clientMenuMessage,
               keyboards.clientKeyboard);
         });
       } else {
         keyboards.sendKeyboard(
             bot,
             msg.chat.id,
-            strings.clientMenuMessage,
+            strings(user).clientMenuMessage,
             keyboards.clientKeyboard);
       }
     })
@@ -611,7 +611,7 @@ function addDescriptionToJobDraft(bot, msg, user, description) {
           keyboards.editMessage(bot,
             draft.current_inline_chat_id,
             draft.current_inline_message_id,
-            strings.jobCreationSuccessMessage)
+            strings(savedUser).jobCreationSuccessMessage)
             .then(() => {
               draft.populate('category', (err, job) => {
                 /** todo: handle error */
@@ -632,22 +632,22 @@ function addDescriptionToJobDraft(bot, msg, user, description) {
  * @param  {Mongoose:Job} job Job that freelancers are offered
  */
 function sendUsersJobOffer(bot, users, job) {
-  if (job.state === strings.jobStates.searchingForFreelancer) {
+  if (job.state === strings().jobStates.searchingForFreelancer) {
     users.forEach((user) => {
       const keyboard = [];
-      Object.keys(strings.freelancerOptions).forEach((key) => {
-        const option = strings.freelancerOptions[key];
-        const inline = option === strings.freelancerOptions.report ?
-          strings.reportJobInline : strings.freelancerJobInline;
+      Object.keys(strings().freelancerOptions).forEach((key) => {
+        const option = strings().freelancerOptions[key];
+        const inline = option === strings().freelancerOptions.report ?
+          strings().reportJobInline : strings().freelancerJobInline;
         keyboard.push([{
           text: option,
           callback_data:
             inline +
-            strings.inlineSeparator +
+            strings().inlineSeparator +
             job._id +
-            strings.inlineSeparator +
+            strings().inlineSeparator +
             option +
-            strings.inlineSeparator +
+            strings().inlineSeparator +
             user.username,
         }]);
       });
@@ -669,7 +669,7 @@ function showSelectFreelancers(msg, job, bot) {
     bot,
     msg.message.chat.id,
     msg.message.message_id,
-    `[${job.category.title}]\n${job.description}\n\n${strings.selectCandidateMessage}\n\n
+    `[${job.category.title}]\n${job.description}\n\n${strings().selectCandidateMessage}\n\n
     ${messageFromFreelancers(job.interestedCandidates)}`,
     jobSelectCandidateKeyboard(job));
 }
@@ -682,13 +682,13 @@ function showSelectFreelancers(msg, job, bot) {
 function sendJobMessages(user, bot) {
   let tCount = 0;
   user.jobs.forEach((job) => {
-    if (!job.reviewByClient && job.state !== strings.jobStates.removed) {
+    if (!job.reviewByClient && job.state !== strings().jobStates.removed) {
       tCount += 1;
       sendNewJobMessage(job, user, bot);
     }
   });
   if (tCount === 0) {
-    keyboards.sendInline(bot, user.id, strings.noJobsExistMessage, [])
+    keyboards.sendInline(bot, user.id, strings(user).noJobsExistMessage, [])
       .catch(/** todo: handle error */);
   }
 }
@@ -703,7 +703,7 @@ function sendNewJobMessage(job, user, bot) {
   deprecateJobMessage(job, bot);
   keyboards.sendInline(bot,
     user.id,
-    strings.loadingMessage,
+    strings(user).loadingMessage,
     [],
     (data) => {
       const jobCopy = Object.create(job);
@@ -728,16 +728,16 @@ function askForNewJobLanguage(bot, msg, draft) {
   dbmanager.getLanguages()
     .then((languages) => {
       let languagesButtons = languages
-        .map(language => ({ text: `${language.flag}`, callback_data: `${strings.inputLanguageInline}${strings.inlineSeparator}${language._id}${strings.inlineSeparator}${draft._id}` }));
+        .map(language => ({ text: `${language.flag}`, callback_data: `${strings().inputLanguageInline}${strings().inlineSeparator}${language._id}${strings().inlineSeparator}${draft._id}` }));
       const flagButtons = [];
       languagesButtons.forEach((button) => {
         flagButtons.push(button);
       });
       languagesButtons = [flagButtons];
-      languagesButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}` }]);
+      languagesButtons.unshift([{ text: strings().jobCreateCancel, callback_data: `${strings().cancelJobCreationInline}${strings().inlineSeparator}${draft._id}` }]);
       keyboards.sendInline(bot,
         msg.chat.id,
-        strings.selectLanguageMessage,
+        strings().selectLanguageMessage,
         languagesButtons,
         (data) => {
           const draftCopy = Object.create(draft);
@@ -760,18 +760,18 @@ function askForEditJobLanguage(bot, msg, draft) {
   dbmanager.getLanguages()
     .then((languages) => {
       let languagesButtons = languages
-        .map(language => ({ text: `${language.flag}`, callback_data: `${strings.inputLanguageInline}${strings.inlineSeparator}${language._id}${strings.inlineSeparator}${draft._id}` }));
+        .map(language => ({ text: `${language.flag}`, callback_data: `${strings().inputLanguageInline}${strings().inlineSeparator}${language._id}${strings().inlineSeparator}${draft._id}` }));
       const flagButtons = [];
       languagesButtons.forEach((button) => {
         flagButtons.push(button);
       });
       languagesButtons = [flagButtons];
-      languagesButtons.unshift([{ text: strings.jobCreateCancel, callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}` }]);
+      languagesButtons.unshift([{ text: strings().jobCreateCancel, callback_data: `${strings().cancelJobCreationInline}${strings().inlineSeparator}${draft._id}` }]);
 
       return keyboards.editMessage(bot,
         msg.message.chat.id,
         msg.message.message_id,
-        strings.selectLanguageMessage,
+        strings().selectLanguageMessage,
         languagesButtons);
     })
     .catch(err => console.error(err));
@@ -804,21 +804,21 @@ function askForNewJobSupercategory(bot, msg, user, job) {
           });
           return [{
             text: `${supercategory.title} [${count}]`,
-            callback_data: `${strings.inputSupercategoryNameInline}${strings.inlineSeparator}${supercategory._id}${strings.inlineSeparator}${job._id}`,
+            callback_data: `${strings().inputSupercategoryNameInline}${strings().inlineSeparator}${supercategory._id}${strings().inlineSeparator}${job._id}`,
           }];
         });
       categoryButtons.unshift([{
-        text: strings.back,
-        callback_data: `${strings.supercategoryBackInline}${strings.inlineSeparator}${job._id}`,
+        text: strings().back,
+        callback_data: `${strings().supercategoryBackInline}${strings().inlineSeparator}${job._id}`,
       },
       { 
-        text: strings.jobCreateCancel,
-        callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${job._id}`,
+        text: strings().jobCreateCancel,
+        callback_data: `${strings().cancelJobCreationInline}${strings().inlineSeparator}${job._id}`,
       }]);
       keyboards.editMessage(bot,
         job.current_inline_chat_id,
         job.current_inline_message_id,
-        strings.selectSupercategoryMessage,
+        strings(user).selectSupercategoryMessage,
         categoryButtons);
     })
     .catch(/** todo: handle error */);
@@ -843,22 +843,22 @@ function askForNewJobCategory(bot, msg, user, job, supercategory) {
     .map(category =>
       [{
         text: `${category.title} [${(category.freelancers.length - (category.freelancers.find(f => f.id === user.id) ? 1 : 0))}]`,
-        callback_data: `${strings.inputCategoryNameInline}${strings.inlineSeparator}${category._id}${strings.inlineSeparator}${job._id}`,
+        callback_data: `${strings().inputCategoryNameInline}${strings().inlineSeparator}${category._id}${strings().inlineSeparator}${job._id}`,
       }]
     );
   categoryButtons.unshift([
     {
-      text: strings.back,
-      callback_data: `${strings.categoryBackInline}${strings.inlineSeparator}${job._id}` 
+      text: strings().back,
+      callback_data: `${strings().categoryBackInline}${strings().inlineSeparator}${job._id}` 
     },
     {
-      text: strings.jobCreateCancel,
-      callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${job._id}` 
+      text: strings().jobCreateCancel,
+      callback_data: `${strings().cancelJobCreationInline}${strings().inlineSeparator}${job._id}` 
     }]);
   keyboards.editMessage(bot,
     job.current_inline_chat_id,
     job.current_inline_message_id,
-    strings.selectCategoryMessage,
+    strings(user).selectCategoryMessage,
     categoryButtons);
 }
 
@@ -875,7 +875,7 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
   const category = draft.category;
   const language = draft.language;
   const keyboard = [];
-  const options = strings.hourlyRateOptions;
+  const options = strings().hourlyRateOptions;
   const buttons = [];
   for (let i = 0; i < options.length; i += 1) {
     const option = options[i];
@@ -892,7 +892,7 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
     if (count > 0) {
       buttons.push({
         text: `${option} [${count}]`,
-        callback_data: `${strings.inputHourlyRateInline}${strings.inlineSeparator}${option}${strings.inlineSeparator}${draft._id}`,
+        callback_data: `${strings().inputHourlyRateInline}${strings().inlineSeparator}${option}${strings().inlineSeparator}${draft._id}`,
       });
     }
   }
@@ -904,19 +904,19 @@ function askForNewJobPriceRange(bot, msg, user, draft) {
       tempRow = [];
     }
   }
-  keyboard.unshift([{ text: strings.hourlyRateAllRatesOption, callback_data: `${strings.inputHourlyRateInline}${strings.inlineSeparator}${strings.hourlyRateAllRatesOption}${strings.inlineSeparator}${draft._id}` }]);
+  keyboard.unshift([{ text: strings().hourlyRateAllRatesOption, callback_data: `${strings().inputHourlyRateInline}${strings().inlineSeparator}${strings().hourlyRateAllRatesOption}${strings().inlineSeparator}${draft._id}` }]);
   keyboard.unshift([{
-    text: strings.back,
-    callback_data: `${strings.hourlyRateBackInline}${strings.inlineSeparator}${draft._id}`,
+    text: strings().back,
+    callback_data: `${strings().hourlyRateBackInline}${strings().inlineSeparator}${draft._id}`,
   },
   {
-    text: strings.jobCreateCancel,
-    callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}`,
+    text: strings().jobCreateCancel,
+    callback_data: `${strings().cancelJobCreationInline}${strings().inlineSeparator}${draft._id}`,
   }]);
   keyboards.editMessage(bot,
     draft.current_inline_chat_id,
     draft.current_inline_message_id,
-    strings.selectJobHourlyRateMessage,
+    strings().selectJobHourlyRateMessage,
     keyboard);
 }
 
@@ -932,26 +932,26 @@ function askForNewJobDescription(bot, msg, user, draft) {
   const userCopy = Object.create(user);
 
   if (user.current_job_draft) {
-    bot.sendMessage(msg.message.chat.id, strings.anotherJobDraftErrorMessage);
+    bot.sendMessage(msg.message.chat.id, strings().anotherJobDraftErrorMessage);
     return;
   }
 
-  userCopy.input_state = strings.inputJobDescriptionState;
+  userCopy.input_state = strings().inputJobDescriptionState;
   userCopy.current_job_draft = draft;
   userCopy.save()
     .then(() =>
       keyboards.editMessage(bot,
         draft.current_inline_chat_id,
         draft.current_inline_message_id,
-        strings.addJobDescriptionMessage,
+        strings(user).addJobDescriptionMessage,
         [[{
-          text: strings.cancel,
-          callback_data: `${strings.cancelJobCreationInline}${strings.inlineSeparator}${draft._id}`,
+          text: strings().cancel,
+          callback_data: `${strings().cancelJobCreationInline}${strings().inlineSeparator}${draft._id}`,
         }]])
         .then(() => {
           keyboards.hideKeyboard(bot,
             draft.current_inline_chat_id,
-            strings.addJobDescriptionHideKeyboardMessage);
+            strings(user).addJobDescriptionHideKeyboardMessage);
         })
     )
     .catch(/** todo: handle error */);
@@ -999,7 +999,7 @@ function selectFreelancerForJob(bot, msg, userId, jobId) {
         .then((user) => {
           const jobCopy = Object.create(job);
           jobCopy.selectedCandidate = user._id;
-          jobCopy.state = strings.jobStates.freelancerChosen;
+          jobCopy.state = strings().jobStates.freelancerChosen;
           return jobCopy.save()
             .then((newJob) => {
               adminReports.selectedFreelancerForJob(bot, newJob, user);
@@ -1025,7 +1025,7 @@ function selectAnotherFreelancerForJob(bot, jobId) {
           const chatInline = dbmanager.chatInline(job, user);
           const jobCopy = Object.create(job);
           jobCopy.selectedCandidate = null;
-          jobCopy.state = strings.jobStates.searchingForFreelancer;
+          jobCopy.state = strings().jobStates.searchingForFreelancer;
           // jobCopy.interestedCandidates.push(user);
           return jobCopy.save()
             .then((newJob) => {
@@ -1046,15 +1046,15 @@ function selectAnotherFreelancerForJob(bot, jobId) {
  * @param  {Telegram:Bot} bot Bot that should update message
  */
 function updateJobMessage(job, bot) {
-  if (job.state === strings.jobStates.searchingForFreelancer) {
+  if (job.state === strings().jobStates.searchingForFreelancer) {
     updateJobMessageForSearch(job, bot);
-  } else if (job.state === strings.jobStates.freelancerChosen) {
+  } else if (job.state === strings().jobStates.freelancerChosen) {
     updateJobMessageForSelected(job, bot);
-  } else if (job.state === strings.jobStates.finished) {
+  } else if (job.state === strings().jobStates.finished) {
     updateJobMessageForFinished(job, bot);
-  } else if (job.state === strings.jobStates.rated) {
+  } else if (job.state === strings().jobStates.rated) {
     updateJobMessageForRated(job, bot);
-  } else if (job.state === strings.jobStates.removed) {
+  } else if (job.state === strings().jobStates.removed) {
     updateJobMessageForRemoved(job, bot);
   }
 }
@@ -1069,7 +1069,7 @@ function deprecateJobMessage(job, bot) {
     bot,
     job.current_inline_chat_id,
     job.current_inline_message_id,
-    strings.deprecatedMessage,
+    strings().deprecatedMessage,
     []);
 }
 
@@ -1108,10 +1108,10 @@ function updateJobMessageForSelected(job, bot) {
     const userMessage = `${specialSymbol}@${user.username}${ratingMessage}\n${user.bio}`;
 
     const keyboard = [[{
-      text: strings.jobSelectAnotherFreelancer,
+      text: strings().jobSelectAnotherFreelancer,
       callback_data:
-        strings.selectAnotherFreelancerInline +
-        strings.inlineSeparator +
+        strings().selectAnotherFreelancerInline +
+        strings().inlineSeparator +
         populatedJob._id,
     }]];
 
@@ -1119,7 +1119,7 @@ function updateJobMessageForSelected(job, bot) {
       bot,
       populatedJob.current_inline_chat_id,
       populatedJob.current_inline_message_id,
-      `[${populatedJob.category.title}]\n${populatedJob.description}\n\n${strings.waitContractorResponseMessage}\n\n${userMessage}`,
+      `[${populatedJob.category.title}]\n${populatedJob.description}\n\n${strings().waitContractorResponseMessage}\n\n${userMessage}`,
       keyboard);
   });
 }
@@ -1133,12 +1133,12 @@ function updateJobMessageForFinished(job, bot) {
   dbmanager.findUserById(job.selectedCandidate)
     .then((user) => {
       const keyboard = [[{
-        text: strings.jobFinishedOptions.rate,
+        text: strings().jobFinishedOptions.rate,
         callback_data:
-          strings.askRateFreelancerInline +
-          strings.inlineSeparator +
+          strings().askRateFreelancerInline +
+          strings().inlineSeparator +
           job._id +
-          strings.inlineSeparator +
+          strings().inlineSeparator +
           user._id,
       }]];
 
@@ -1150,12 +1150,12 @@ function updateJobMessageForFinished(job, bot) {
       // !String(user.reportedBy).includes(String(job.client))
       if (!isAlreadyReportedInThisJob) {
         keyboard[0].push({
-          text: strings.jobFinishedOptions.report,
+          text: strings().jobFinishedOptions.report,
           callback_data:
-            strings.reportFreelancerInline +
-            strings.inlineSeparator +
+            strings().reportFreelancerInline +
+            strings().inlineSeparator +
             job._id +
-            strings.inlineSeparator +
+            strings().inlineSeparator +
             user._id,
         });
       }
@@ -1167,7 +1167,7 @@ function updateJobMessageForFinished(job, bot) {
         bot,
         job.current_inline_chat_id,
         job.current_inline_message_id,
-        `[${job.category.title}]\n${job.description}\n\n${strings.contactWithFreelancerMessage}\n\n${specialSymbol}@${user.username}${ratingMessage}\n${user.bio}`,
+        `[${job.category.title}]\n${job.description}\n\n${strings().contactWithFreelancerMessage}\n\n${specialSymbol}@${user.username}${ratingMessage}\n${user.bio}`,
         keyboard);
     })
     .catch(/** todo: handle error */);
@@ -1183,7 +1183,7 @@ function updateJobMessageForRated(job, bot) {
     bot,
     job.current_inline_chat_id,
     job.current_inline_message_id,
-    `${job.description}\n\n${strings.thanksReviewMessage}`,
+    `${job.description}\n\n${strings().thanksReviewMessage}`,
     []);
 }
 
@@ -1197,7 +1197,7 @@ function updateJobMessageForRemoved(job, bot) {
     bot,
     job.current_inline_chat_id,
     job.current_inline_message_id,
-    `${job.description}\n\n${strings.thisWorkIsRemoved}`,
+    `${job.description}\n\n${strings().thisWorkIsRemoved}`,
     []);
 }
 
@@ -1214,59 +1214,59 @@ function jobInlineKeyboard(job, freelancers, count) {
 
   if (job.interestedCandidates.length > 0) {
     keyboard.push([{
-      text: strings.jobSelectFreelancer,
+      text: strings().jobSelectFreelancer,
       callback_data:
-        strings.freelancerInline +
-        strings.inlineSeparator +
-        strings.jobSelectFreelancer +
-        strings.inlineSeparator +
+        strings().freelancerInline +
+        strings().inlineSeparator +
+        strings().jobSelectFreelancer +
+        strings().inlineSeparator +
         job._id,
     }]);
   }
   keyboard.push([{
-    text: strings.jobSendAllFreelancers,
+    text: strings().jobSendAllFreelancers,
     callback_data:
-      strings.freelancerInline +
-      strings.inlineSeparator +
-      strings.jobSendAllFreelancers +
-      strings.inlineSeparator +
+      strings().freelancerInline +
+      strings().inlineSeparator +
+      strings().jobSendAllFreelancers +
+      strings().inlineSeparator +
       job._id,
   }],
   // for some reason eslint was failing here
   [{ // eslint-disable-line indent
-    text: strings.jobRefresh,
+    text: strings().jobRefresh,
     callback_data:
-      strings.jobManageInline +
-      strings.inlineSeparator +
-      strings.jobRefresh +
-      strings.inlineSeparator +
+      strings().jobManageInline +
+      strings().inlineSeparator +
+      strings().jobRefresh +
+      strings().inlineSeparator +
       job._id,
   },
   {
-    text: strings.jobDelete,
+    text: strings().jobDelete,
     callback_data:
-      strings.jobManageInline +
-      strings.inlineSeparator +
-      strings.jobDelete +
-      strings.inlineSeparator +
+      strings().jobManageInline +
+      strings().inlineSeparator +
+      strings().jobDelete +
+      strings().inlineSeparator +
       job._id,
   }]);
   freelancers.forEach((freelancer) => {
     /** Get postfix */
     let postfix = '';
     if (job.candidates.indexOf(freelancer._id) > -1) {
-      postfix = strings.pendingOption;
+      postfix = strings().pendingOption;
     } else if (job.interestedCandidates.indexOf(freelancer._id) > -1) {
-      postfix = strings.interestedOption;
+      postfix = strings().interestedOption;
     }
     /** Add freelancer button */
     keyboard.push([{
       text: `${postfix} ${freelancer.username}`,
       callback_data:
-        strings.freelancerInline +
-        strings.inlineSeparator +
+        strings().freelancerInline +
+        strings().inlineSeparator +
         freelancer._id +
-        strings.inlineSeparator +
+        strings().inlineSeparator +
         job._id,
     }]);
   });
@@ -1278,22 +1278,22 @@ function jobInlineKeyboard(job, freelancers, count) {
 
   if (job.current_page > 0) {
     navKeyboard.push({
-      text: strings.jobBackPage,
-      callback_data: strings.freelancerPageInline +
-      strings.inlineSeparator +
-      strings.jobBackPage +
-      strings.inlineSeparator +
+      text: strings().jobBackPage,
+      callback_data: strings().freelancerPageInline +
+      strings().inlineSeparator +
+      strings().jobBackPage +
+      strings().inlineSeparator +
       job._id,
     });
   }
 
   if (job.current_page < pages) {
     navKeyboard.push({
-      text: strings.jobNextPage,
-      callback_data: strings.freelancerPageInline +
-      strings.inlineSeparator +
-      strings.jobNextPage +
-      strings.inlineSeparator +
+      text: strings().jobNextPage,
+      callback_data: strings().freelancerPageInline +
+      strings().inlineSeparator +
+      strings().jobNextPage +
+      strings().inlineSeparator +
       job._id,
     });
   }
@@ -1311,22 +1311,22 @@ function jobInlineKeyboard(job, freelancers, count) {
 function jobSelectCandidateKeyboard(job) {
   const keyboard = [];
   keyboard.push([{
-    text: strings.selectFreelancerCancel,
+    text: strings().selectFreelancerCancel,
     callback_data:
-    strings.selectFreelancerInline +
-    strings.inlineSeparator +
-    strings.selectFreelancerCancel +
-    strings.inlineSeparator +
+    strings().selectFreelancerInline +
+    strings().inlineSeparator +
+    strings().selectFreelancerCancel +
+    strings().inlineSeparator +
     job._id,
   }]);
   job.interestedCandidates.forEach((freelancer) => {
     keyboard.push([{
       text: freelancer.username,
       callback_data:
-      strings.selectFreelancerInline +
-      strings.inlineSeparator +
+      strings().selectFreelancerInline +
+      strings().inlineSeparator +
       freelancer._id +
-      strings.inlineSeparator +
+      strings().inlineSeparator +
       job._id,
     }]);
   });
@@ -1352,7 +1352,7 @@ function messageFromFreelancers(users) {
     }
   }
   if (message.length <= 0) {
-    message = strings.noCandidatesMessage;
+    message = strings().noCandidatesMessage;
   }
   return message;
 }
@@ -1378,14 +1378,14 @@ function messageFromFreelancers(users) {
  * @param  {Boolean} silent - If true will not send interested notification to client
  */
 function makeInterested(interested, bot, msg, job, user, silent) {
-  if (job.state === strings.jobStates.removed) {
+  if (job.state === strings().jobStates.removed) {
     updateFreelancerMessage(bot, msg, user, job);
-  } else if (job.state !== strings.jobStates.searchingForFreelancer && interested) {
+  } else if (job.state !== strings().jobStates.searchingForFreelancer && interested) {
     keyboards.editMessage(
       bot,
       msg.from.id,
       msg.message.message_id,
-      strings.clientHasChosenAnotherFreelancer,
+      strings().clientHasChosenAnotherFreelancer,
       []);
   } else {
     // Remove user from candidates
@@ -1412,7 +1412,7 @@ function makeInterested(interested, bot, msg, job, user, silent) {
           if (job.description.length > 150) {
             addition = '...';
           }
-          bot.sendMessage(populatedJob.client.id, `${strings.interestedOption} @${user.username}${strings.freelancerInterestedNotification}\`${job.description.substring(0, 150)}${addition}\``, { parse_mode: 'Markdown' });
+          bot.sendMessage(populatedJob.client.id, `${strings().interestedOption} @${user.username}${strings().freelancerInterestedNotification}\`${job.description.substring(0, 150)}${addition}\``, { parse_mode: 'Markdown' });
         });
       }
     } else {
@@ -1440,15 +1440,15 @@ function makeInterested(interested, bot, msg, job, user, silent) {
  * @param {Mongoose:UserChatInline} chatInline (Optional) Chat inline to use instead of msg
  */
 function updateFreelancerMessage(bot, msg, user, job, chatInline) {
-  if (job.state === strings.jobStates.searchingForFreelancer) {
+  if (job.state === strings().jobStates.searchingForFreelancer) {
     updateFreelancerMessageForSearch(bot, msg, user, job, chatInline);
-  } else if (job.state === strings.jobStates.freelancerChosen) {
+  } else if (job.state === strings().jobStates.freelancerChosen) {
     updateFreelancerMessageForSelected(bot, msg, user, job);
-  } else if (job.state === strings.jobStates.finished) {
+  } else if (job.state === strings().jobStates.finished) {
     updateFreelancerMessageForFinished(bot, msg, user, job);
-  } else if (job.state === strings.jobStates.rated) {
+  } else if (job.state === strings().jobStates.rated) {
     updateFreelancerMessageForRated(bot, msg, user, job);
-  } else if (job.state === strings.jobStates.removed) {
+  } else if (job.state === strings().jobStates.removed) {
     updateFreelancerMessageRemoved(bot, msg, user, job);
   }
 }
@@ -1468,9 +1468,9 @@ function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
   const isNotInterested = job.notInterestedCandidates.map(o => String(o)).includes(String(user._id));
 
   if (isInterested) {
-    prefix = `${strings.interestedOption} ${strings.freelancerOptions.interested}\n\n`;
+    prefix = `${strings().interestedOption} ${strings().freelancerOptions.interested}\n\n`;
   } else if (isNotInterested) {
-    prefix = `${strings.notInterestedOption} ${strings.freelancerOptions.notInterested}\n\n`;
+    prefix = `${strings().notInterestedOption} ${strings().freelancerOptions.notInterested}\n\n`;
   }
 
   const chatId = (msg) ? msg.message.chat.id : chatInline.chat_id;
@@ -1478,31 +1478,31 @@ function updateFreelancerMessageForSearch(bot, msg, user, job, chatInline) {
 
   const keyboard = [];
   if (isInterested) {
-    const option = strings.freelancerOptions.notInterested;
-    const inline = strings.freelancerJobEditInline;
+    const option = strings().freelancerOptions.notInterested;
+    const inline = strings().freelancerJobEditInline;
     keyboard.push([{
-      text: strings.changeTo + option,
+      text: strings().changeTo + option,
       callback_data:
         inline +
-        strings.inlineSeparator +
+        strings().inlineSeparator +
         job._id +
-        strings.inlineSeparator +
+        strings().inlineSeparator +
         option +
-        strings.inlineSeparator +
+        strings().inlineSeparator +
         user.username,
     }]);
   } else if (isNotInterested) {
-    const option = strings.freelancerOptions.interested;
-    const inline = strings.freelancerJobEditInline;
+    const option = strings().freelancerOptions.interested;
+    const inline = strings().freelancerJobEditInline;
     keyboard.push([{
-      text: strings.changeTo + option,
+      text: strings().changeTo + option,
       callback_data:
         inline +
-        strings.inlineSeparator +
+        strings().inlineSeparator +
         job._id +
-        strings.inlineSeparator +
+        strings().inlineSeparator +
         option +
-        strings.inlineSeparator +
+        strings().inlineSeparator +
         user.username,
     }]);
   }
@@ -1529,17 +1529,17 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
       const chatInline = dbmanager.chatInline(populatedJob, user);
 
       const keyboard = [];
-      Object.keys(strings.freelancerAcceptOptions).forEach((key) => {
-        const option = strings.freelancerAcceptOptions[key];
+      Object.keys(strings().freelancerAcceptOptions).forEach((key) => {
+        const option = strings().freelancerAcceptOptions[key];
         keyboard.push([{
           text: option,
           callback_data:
-          strings.freelancerAcceptInline +
-          strings.inlineSeparator +
+          strings().freelancerAcceptInline +
+          strings().inlineSeparator +
           populatedJob._id +
-          strings.inlineSeparator +
+          strings().inlineSeparator +
           option +
-          strings.inlineSeparator +
+          strings().inlineSeparator +
           user.username,
         }]);
       });
@@ -1548,7 +1548,7 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
         bot,
         chatInline.chat_id,
         chatInline.message_id,
-        `${strings.interestedOption} ${strings.freelancerOptions.interested}\n\n@${populatedJob.client.username}\n[${populatedJob.category.title}]\n${populatedJob.description}\n\n${strings.acceptOrRejectMessage}`,
+        `${strings().interestedOption} ${strings().freelancerOptions.interested}\n\n@${populatedJob.client.username}\n[${populatedJob.category.title}]\n${populatedJob.description}\n\n${strings().acceptOrRejectMessage}`,
         keyboard);
     });
   });
@@ -1563,23 +1563,23 @@ function updateFreelancerMessageForSelected(bot, msg, user, job) {
  */
 function updateFreelancerMessageForFinished(bot, msg, user, job) {
   const keyboard = [[{
-    text: strings.jobFinishedOptions.rate,
+    text: strings().jobFinishedOptions.rate,
     callback_data:
-      strings.askRateClientInline +
-      strings.inlineSeparator +
+      strings().askRateClientInline +
+      strings().inlineSeparator +
       job._id +
-      strings.inlineSeparator +
+      strings().inlineSeparator +
       user._id,
   }]];
 
   if (!String(job.reportedBy).includes(String(user._id))) {
     keyboard[0].push({
-      text: strings.jobFinishedOptions.report,
+      text: strings().jobFinishedOptions.report,
       callback_data:
-        strings.reportClientInline +
-        strings.inlineSeparator +
+        strings().reportClientInline +
+        strings().inlineSeparator +
         job._id +
-        strings.inlineSeparator +
+        strings().inlineSeparator +
         user._id,
     });
   }
@@ -1589,7 +1589,7 @@ function updateFreelancerMessageForFinished(bot, msg, user, job) {
       bot,
       msg.message.chat.id,
       msg.message.message_id,
-      `${strings.contactWithClientMessage}\n\n@${populatedJob.client.username}\n[${populatedJob.category.title}]\n${populatedJob.description}`,
+      `${strings().contactWithClientMessage}\n\n@${populatedJob.client.username}\n[${populatedJob.category.title}]\n${populatedJob.description}`,
       keyboard);
   });
 }
@@ -1606,7 +1606,7 @@ function updateFreelancerMessageForRated(bot, msg, user, job) {
     bot,
     msg.message.chat.id,
     msg.message.message_id,
-    `${job.description}\n\n${strings.thanksReviewMessage}`,
+    `${job.description}\n\n${strings().thanksReviewMessage}`,
     []);
 }
 /**
@@ -1621,7 +1621,7 @@ function updateFreelancerMessageRemoved(bot, msg, user, job) {
     bot,
     msg.message.chat.id,
     msg.message.message_id,
-    `${job.description}\n\n${strings.thisWorkIsRemoved}`,
+    `${job.description}\n\n${strings().thisWorkIsRemoved}`,
     []);
 }
 

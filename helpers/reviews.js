@@ -16,8 +16,8 @@ const strings = require('./strings');
  * @param {Telegram:Bot} bot - Bot that should respond
  * @param {Telegram:Messager} msg - Message received
  */
-global.eventEmitter.on(strings.askRateFreelancerInline, ({ msg, bot }) => {
-  sendRateKeyboard(msg, bot, strings.rateClientInline);
+global.eventEmitter.on(strings().askRateFreelancerInline, ({ msg, bot }) => {
+  sendRateKeyboard(msg, bot, strings().rateClientInline);
 });
 
 /**
@@ -26,8 +26,8 @@ global.eventEmitter.on(strings.askRateFreelancerInline, ({ msg, bot }) => {
  * @param {Telegram:Bot} bot - Bot that should respond
  * @param {Telegram:Messager} msg - Message received
  */
-global.eventEmitter.on(strings.askRateClientInline, ({ msg, bot }) => {
-  sendRateKeyboard(msg, bot, strings.rateFreelancerInline);
+global.eventEmitter.on(strings().askRateClientInline, ({ msg, bot }) => {
+  sendRateKeyboard(msg, bot, strings().rateFreelancerInline);
 });
 
 /**
@@ -36,11 +36,11 @@ global.eventEmitter.on(strings.askRateClientInline, ({ msg, bot }) => {
  * @param {Telegram:Bot} bot - Bot that should respond
  * @param {Telegram:Messager} msg - Message received
  */
-global.eventEmitter.on(strings.rateFreelancerInline, ({ msg, bot }) => {
-  const rating = msg.data.split(strings.inlineSeparator)[1];
-  const jobId = msg.data.split(strings.inlineSeparator)[2];
+global.eventEmitter.on(strings().rateFreelancerInline, ({ msg, bot }) => {
+  const rating = msg.data.split(strings().inlineSeparator)[1];
+  const jobId = msg.data.split(strings().inlineSeparator)[2];
 
-  writeReview(bot, jobId, rating, strings.reviewTypes.byFreelancer);
+  writeReview(bot, jobId, rating, strings().reviewTypes.byFreelancer);
 });
 
 /**
@@ -49,21 +49,21 @@ global.eventEmitter.on(strings.rateFreelancerInline, ({ msg, bot }) => {
  * @param {Telegram:Bot} bot - Bot that should respond
  * @param {Telegram:Messager} msg - Message received
  */
-global.eventEmitter.on(strings.rateClientInline, ({ msg, bot }) => {
-  const rating = msg.data.split(strings.inlineSeparator)[1];
-  const jobId = msg.data.split(strings.inlineSeparator)[2];
+global.eventEmitter.on(strings().rateClientInline, ({ msg, bot }) => {
+  const rating = msg.data.split(strings().inlineSeparator)[1];
+  const jobId = msg.data.split(strings().inlineSeparator)[2];
 
-  writeReview(bot, jobId, rating, strings.reviewTypes.byClient);
+  writeReview(bot, jobId, rating, strings().reviewTypes.byClient);
 });
 
 /**
  * Function to send rate keyboard to sender of the message
  * @param {Telegram:Message} msg - Message that triggered this function
  * @param {Telegram:Bot} bot - Bot that should respond
- * @param {String} type - See strings.js, either freelancer rate inline or client's one
+ * @param {String} type - See strings().js, either freelancer rate inline or client's one
  */
 function sendRateKeyboard(msg, bot, type) {
-  const jobId = msg.data.split(strings.inlineSeparator)[1];
+  const jobId = msg.data.split(strings().inlineSeparator)[1];
 
   dbmanager.findJobById(jobId, 'selectedCandidate')
     .then((job) => {
@@ -78,10 +78,10 @@ function sendRateKeyboard(msg, bot, type) {
         ''
       );
 
-      const rateClient = type !== strings.rateFreelancerInline;
+      const rateClient = type !== strings().rateFreelancerInline;
       let message = ((rateClient) ?
-        strings.rateFreelancerMessage :
-        strings.rateClientMessage
+        strings().rateFreelancerMessage :
+        strings().rateClientMessage
       );
 
       if (rateClient) {
@@ -116,7 +116,7 @@ function writeReview(bot, jobId, rating, reviewType) {
     .then(job =>
       dbmanager.findUserById(job.selectedCandidate)
         .then((freelancer) => {
-          const byClient = (reviewType === strings.reviewTypes.byClient);
+          const byClient = (reviewType === strings().reviewTypes.byClient);
           const byUser = (byClient) ? job.client : freelancer;
           const toUser = (byClient) ? freelancer : job.client;
           const chatInline = dbmanager.chatInline(job, freelancer);
@@ -125,7 +125,7 @@ function writeReview(bot, jobId, rating, reviewType) {
 
           if ((job.reviewByClient && byClient) || (job.reviewByFreelancer && !byClient)) return;
 
-          const ratingEmoji = strings.rateOptionsArray[rating - 1];
+          const ratingEmoji = strings().rateOptionsArray[rating - 1];
 
           dbmanager.addReview({
             review: '',
@@ -136,7 +136,7 @@ function writeReview(bot, jobId, rating, reviewType) {
             toUser,
           })
             .then((dbReviewObject) => {
-              global.eventEmitter.emit(strings.newReview, { bot, dbReviewObject });
+              global.eventEmitter.emit(strings().newReview, { bot, dbReviewObject });
               dbmanager.findUserById(toUser)
                 .then((dbToUser) => {
                   const dbToUserCopy = Object.create(dbToUser);
@@ -151,7 +151,7 @@ function writeReview(bot, jobId, rating, reviewType) {
                       const options = { disable_web_page_preview: 'true' };
 
                       bot.sendMessage(savedUser.id,
-                        `${strings.youWereRated}@${byUser.username}\n${ratingEmoji}`,
+                        `${strings().youWereRated}@${byUser.username}\n${ratingEmoji}`,
                         options
                       ).catch(/** todo: handle error */);
                     })
@@ -167,7 +167,7 @@ function writeReview(bot, jobId, rating, reviewType) {
               }
 
               if (jobCopy.reviewByClient && jobCopy.reviewByFreelancer) {
-                jobCopy.state = strings.jobStates.rated;
+                jobCopy.state = strings().jobStates.rated;
               }
 
               jobCopy.save();
@@ -188,9 +188,9 @@ function writeReview(bot, jobId, rating, reviewType) {
                       ''
                     );
 
-                    message = `[${jobCopy.category.title}]\n${jobCopy.description}\n\n${specialSymbol}@${selectedFreelancer.username}${ratingMessage}\n${selectedFreelancer.bio}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`;
+                    message = `[${jobCopy.category.title}]\n${jobCopy.description}\n\n${specialSymbol}@${selectedFreelancer.username}${ratingMessage}\n${selectedFreelancer.bio}\n\n${strings().thanksReviewMessage}\n${ratingEmoji}`;
                   } else {
-                    message = `@${toUser.username}\n[${jobCopy.category.title}]\n${jobCopy.description}\n\n${strings.thanksReviewMessage}\n${ratingEmoji}`;
+                    message = `@${toUser.username}\n[${jobCopy.category.title}]\n${jobCopy.description}\n\n${strings().thanksReviewMessage}\n${ratingEmoji}`;
                   }
 
                   keyboards.editMessage(

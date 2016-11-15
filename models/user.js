@@ -111,7 +111,7 @@ userSchema.methods = {
     let ret = '';
 
     for (let i = 0; i < Math.round(this.rate / this.reviews.length); i += 1) {
-      ret += strings.star;
+      ret += strings().star;
     }
 
     return ret;

@@ -44,16 +44,16 @@ function adminCommand(message) {
  * @return {Boolean} True if this message is answer to keyboard button, false otherwise
  */
 function replyMarkup(message) {
-  const mainMenuOptions = Object.keys(strings.mainMenuOptions).map(
-    key => strings.mainMenuOptions[key]
+  const mainMenuOptions = Object.keys(strings().mainMenuOptions).map(
+    key => strings().mainMenuOptions[key]
   );
 
-  const freelanceMenuOptions = Object.keys(strings.freelanceMenuOptions).map(
-    key => strings.freelanceMenuOptions[key]
+  const freelanceMenuOptions = Object.keys(strings().freelanceMenuOptions).map(
+    key => strings().freelanceMenuOptions[key]
   );
 
-  const clientMenuOptions = Object.keys(strings.clientMenuOptions).map(
-    key => strings.clientMenuOptions[key]
+  const clientMenuOptions = Object.keys(strings().clientMenuOptions).map(
+    key => strings().clientMenuOptions[key]
   );
 
   const allOptions = mainMenuOptions.concat(freelanceMenuOptions, clientMenuOptions);

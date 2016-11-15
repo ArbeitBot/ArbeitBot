@@ -13,7 +13,7 @@ const jobSchema = new Schema({
   state: {
     type: String,
     required: true,
-    default: strings.jobStates.searchingForFreelancer,
+    default: strings().jobStates.searchingForFreelancer,
   },
   current_inline_message_id: String,
   current_inline_chat_id: String,
