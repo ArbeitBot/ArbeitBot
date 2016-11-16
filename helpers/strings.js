@@ -9,6 +9,7 @@ const englishObjectId = '581d0b8db33e47e7008726bd';
 const russianObjectId = '581d0b8db33e47e7008726be';
 
 const english = {
+  showBio: 'Show bio',
   resubscribe: 'Resubscribe',
   unsubscribe: 'Unsubscribe',
   hideButtons: 'Keep',
@@ -144,6 +145,7 @@ const english = {
   unsubscripeFromGodvoiceInline: 'uFGI',
   hideButtonsGodvoiceInline: 'hBGI',
   resubscribeGodvoiceInline: 'rGVI',
+  showBioInline: 'sBI',
   jobCreationState: 'jobCreationState',
   inputBioState: 'inputBioState',
   inputLanguageState: 'inputLanguageState',
@@ -225,6 +227,7 @@ const english = {
 };
 
 const russian = {
+  showBio: 'Show bio',
   resubscribe: 'Переподписаться',
   unsubscribe: 'Отписаться',
   hideButtons: 'Оставить',
@@ -360,6 +363,7 @@ const russian = {
   unsubscripeFromGodvoiceInline: 'uFGI',
   hideButtonsGodvoiceInline: 'hBGI',
   resubscribeGodvoiceInline: 'rGVI',
+  showBioInline: 'sBI',
   jobCreationState: 'jobCreationState',
   inputBioState: 'inputBioState',
   inputLanguageState: 'inputLanguageState',

@@ -459,6 +459,17 @@ eventEmitter.on(strings().cancelJobCreationInline, ({ bot, msg, user }) => {
       .catch(/** todo: handle error */);
 });
 
+eventEmitter.on(strings().showBioInline, ({ bot, msg, user }) => {
+  const options = msg.data.split(strings().inlineSeparator);
+  const userId = options[1];
+
+  dbmanager.findUserById(userId)
+    .then(freelancer =>
+      keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, `${msg.message.text}\n\n${freelancer.bio}`, [])
+    )
+    .catch(/** todo: handle error */);
+});
+
 eventEmitter.on(`cancel${strings().inputLanguageState}`, ({ bot, msg, user }) => {
   cancelJobCreation(bot, msg, user);
 });
@@ -1412,7 +1423,11 @@ function makeInterested(interested, bot, msg, job, user, silent) {
           if (job.description.length > 150) {
             addition = '...';
           }
-          bot.sendMessage(populatedJob.client.id, `${strings().interestedOption} @${user.username}${strings().freelancerInterestedNotification}\`${job.description.substring(0, 150)}${addition}\``, { parse_mode: 'Markdown' });
+          const keyboard = [[{
+            text: strings().showBio,
+            callback_data: `${strings().showBioInline}${strings().inlineSeparator}${user._id}`
+          }]];
+          keyboards.sendInline(bot, populatedJob.client.id, `${strings().interestedOption} @${user.username}${strings().freelancerInterestedNotification}\`${job.description.substring(0, 150)}${addition}\``, keyboard, null, true);
         });
       }
     } else {
