@@ -20,7 +20,8 @@ First free open-source Telegram freelance market. Built by people for people.
 - [License](#license)
 
 # About Arbeit Bot
-We've been talking about how bad are classic freelance markets for too long: they are old, slow, expensive [(on average they take ~22% of your money)](https://support.upwork.com/hc/en-us/articles/211062538-Freelancer-Service-Fees), profit-oriented, not customer-oriented. Heck, [read this post about why upwork sucks](https://collegetimes.co/upwork-sucks/)! I mean, when I first started on Elance back in 2012 fees were around 10%, then they launched paid accounts, then raised fees to 15% and then finally raised them to the current figures when merging into Upwork.
+
+Classic freelance markets have long been terrible: not only are they old, slow, expensive [(on average they take ~22% of your money)](https://support.upwork.com/hc/en-us/articles/211062538-Freelancer-Service-Fees), but also profit-oriented and not customer-oriented. Heck, [read this post about why upwork sucks](https://collegetimes.co/upwork-sucks/)! I mean, when I first started on Elance back in 2012 fees were around 10%, then they launched paid accounts, then raised fees to 15% and then finally raised them to the current figures when merging into Upwork.
 
 [@arbeit_bot](https://telegram.me/arbeit_bot) — is freelance market, redesigned. Imagine if you didn't have to pay a dime to get job offers or the list of the best freelancers on the market. Imagine if you didn't get spammed with amateur job bids from sketchy companies or freelancers. Imagine if you could always contribute to your favourite freelance market and if all freelancer ranking algorithms were transparent. Imagine if you didn't have to copy-paste the same job bid from client to client. Imagined? Good, because that's what ArbeitBot is offering to you.
 
