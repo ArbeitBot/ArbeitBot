@@ -33,6 +33,7 @@ const clientKeyboard = [
 
 const helpKeyboard = [
   [{ text: '@arbeit_bot on GitHub', url: 'https://github.com/arbeitbot/arbeitbot' }],
+  [{ text: strings().tutorialButton, callback_data: strings().tutorialInline }],
 ];
 
 const arbeitbotSupportKeyboard = [
@@ -135,9 +136,9 @@ function hideKeyboard(bot, chatId, text) {
  * @param {Number} chatId - Chat id of user who should receive this keyboard
  */
 function sendMainMenu(bot, chatId, firstTime) {
-  dbmanager.findUser({ id: chatId })
+  return dbmanager.findUser({ id: chatId })
     .then((user) => {
-      sendKeyboard(
+      return sendKeyboard(
         bot,
         chatId,
         ((firstTime) ? strings(user).initialMessage : strings(user).mainMenuMessage),
@@ -268,7 +269,7 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
   };
 
   options.reply_markup = JSON.stringify(options.reply_markup);
-  bot.sendMessage(chatId, text, options)
+  return bot.sendMessage(chatId, text, options)
     .then(then)
     .catch(/** todo: handle error */);
 }

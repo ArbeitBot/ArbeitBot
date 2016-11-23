@@ -8,6 +8,7 @@ const adminReports = require('./adminReports');
 const dbmanager = require('./dbmanager');
 const keyboards = require('./keyboards');
 const strings = require('./strings');
+const tutorial = require('./tutorial');
 
 global.eventEmitter.on(strings().inputBioState, ({ msg, user, bot }) => {
   if (msg.text.length > 150) {
@@ -77,7 +78,10 @@ function createProfile(bot, msg) {
       const isNew = obj.new;
 
       if (isNew) adminReports.userRegistered(bot, user);
-      keyboards.sendMainMenu(bot, msg.chat.id, true);
+      keyboards.sendMainMenu(bot, msg.chat.id, true)
+        .then(() => {
+          tutorial.sendTutorial(bot, user);
+        });
     })
     .catch(/** todo: handle error */);
 }
