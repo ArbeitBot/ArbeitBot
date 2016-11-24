@@ -8,6 +8,7 @@
 /** Dependencies */
 const keyboards = require('./keyboards');
 const strings = require('./strings');
+const adminReports = require('./adminReports');
 
 /**
  * Called when user touches 'Tutorial' on help inline keyboard
@@ -53,6 +54,8 @@ global.eventEmitter.on(strings().freelancerTutorialRatedInline, ({ bot, user, ms
  * Called when user selects rating in freelancer tutorial
  */
 global.eventEmitter.on(strings().freelancerTutorialEndInline, ({ bot, user, msg }) => {
+  adminReports.freelancerTutorialEnded(bot, user);
+
   keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.freelancerTutorialEnd, []);
 });
 
@@ -85,7 +88,8 @@ function sendTutorial(bot, user) {
  * @param {Telegram:Message} msg Message to be editted
  */
 function startFreelancerTutorial(bot, user, msg) {
-  /** todo: bot report start of tutorial */
+  adminReports.freelancerTutorialStarted(bot, user);
+
   const keyboard = [
     [{ text: strings().freelancerOptions.interested, callback_data: `${strings().freelancerTutorialInterestedInline}${strings().inlineSeparator}${strings().freelancerOptions.interested}`}],
     [{ text: strings().freelancerOptions.notInterested, callback_data: `${strings().freelancerTutorialInterestedInline}${strings().inlineSeparator}${strings().freelancerOptions.notInterested}`}],

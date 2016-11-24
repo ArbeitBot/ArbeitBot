@@ -87,6 +87,24 @@ function userRegistered(bot, user) {
   bot.sendMessage(adminChatId, `🦄 @${user.username} just registered!`);
 }
 
+/**
+ * Notifies admins that a user has started freelancer tutorial
+ * @param {Telegram:Bot} bot Bot that should notify admins
+ * @param {Mongoose:User} user User that started tutorial
+ */
+function freelancerTutorialStarted(bot, user) {
+  bot.sendMessage(adminChatId, `🙆‍ @${user.username} started freelancer tutorial`);
+}
+
+/**
+ * Notifies admins that a user has ended freelancer tutorial
+ * @param {Telegram:Bot} bot Bot that should notify admins
+ * @param {Mongoose:User} user User that ended tutorial
+ */
+function freelancerTutorialEnded(bot, user) {
+  bot.sendMessage(adminChatId, `🙅‍ @${user.username} ended freelancer tutorial`);
+}
+
 module.exports = {
   jobCreated,
   jobDeleted,
@@ -94,5 +112,7 @@ module.exports = {
   acceptOrRejectJobOffer,
   userRegistered,
   sentJobReminder,
+  freelancerTutorialStarted,
+  freelancerTutorialEnded,
 };
 
