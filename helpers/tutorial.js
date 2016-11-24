@@ -67,6 +67,34 @@ global.eventEmitter.on(strings().clientTutorialInline, ({ bot, user, msg }) => {
 });
 
 /**
+ * Called when user selects language at client tutorial
+ */
+global.eventEmitter.on(strings().clientTutorialLanguageInline, ({ bot, user, msg }) => {
+  showSupercategoriesClientTutorial(bot, user, msg);
+});
+
+/**
+ * Called when user selects supercategory at client tutorial
+ */
+global.eventEmitter.on(strings().clientTutorialSupercategoryInline, ({ bot, user, msg }) => {
+  showCategoriesClientTutorial(bot, user, msg);
+});
+
+/**
+ * Called when user selects category at client tutorial
+ */
+global.eventEmitter.on(strings().clientTutorialCategoryInline, ({ bot, user, msg }) => {
+  showFreelancersClientTutorial(bot, user, msg);
+});
+
+/**
+ * Called when user selects freelancer as a candidate at client tutorial
+ */
+global.eventEmitter.on(strings().clientTutorialFreelancersInline, ({ bot, user, msg }) => {
+  selectFreelancerClientTutorial(bot, user, msg);
+});
+
+/**
  * Used to send initial tutorial message to user
  * @param {Telegram:Bot} bot Bot that should send tutorial
  * @param {Mongoose:User} user User that should receive tutorial
@@ -152,8 +180,225 @@ function sendEndFreelancerTutorial(bot, user, msg, isRate) {
  * @param {Telegram:Message} msg Message to be editted
  */
 function startClientTutorial(bot, user, msg) {
-  /** todo: bot report start of tutorial */
-  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, 'Under development', []);
+  adminReports.clientTutorialStarted(bot, user);
+  const keyboard = [
+    [{ text: '🇺🇸', callback_data: `${strings().clientTutorialLanguageInline}${strings().inlineSeparator}🇺🇸`},
+    { text: '🇷🇺', callback_data: `${strings().clientTutorialLanguageInline}${strings().inlineSeparator}🇷🇺`}],
+  ];
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialLanguage, keyboard);
+}
+
+/**
+ * Used to send supercategory picker tutorial step
+ * @param {Telegram:Bot} bot Bot that should respond
+ * @param {Mongoose:User} user User that should have tutorial continued
+ * @param {Telegram:Message} msg Message to be editted
+ */
+function showSupercategoriesClientTutorial(bot, user, msg) {
+  const keyboard = [
+    [{ text: 'Design [10]', callback_data: strings().clientTutorialSupercategoryInline }],
+    [{ text: 'Development [3]', callback_data: strings().clientTutorialSupercategoryInline}],
+    [{ text: 'Copywriting [57]', callback_data: strings().clientTutorialSupercategoryInline }],
+  ];
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialSupercategory, keyboard);
+}
+
+/**
+ * Used to send category picker tutorial step
+ * @param {Telegram:Bot} bot Bot that should respond
+ * @param {Mongoose:User} user User that should have tutorial continued
+ * @param {Telegram:Message} msg Message to be editted
+ */
+function showCategoriesClientTutorial(bot, user, msg) {
+  const keyboard = [
+    [{ text: 'iOS [10]', callback_data: strings().clientTutorialCategoryInline }],
+    [{ text: 'Backend development [3]', callback_data: strings().clientTutorialCategoryInline}],
+    [{ text: 'Unity [57]', callback_data: strings().clientTutorialCategoryInline }],
+  ];
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialCategory, keyboard)
+    .catch(/** todo: handle error */);
+}
+
+/**
+ * Used to send freelancer picker tutorial step
+ * @param {Telegram:Bot} bot Bot that should respond
+ * @param {Mongoose:User} user User that should have tutorial continued
+ * @param {Telegram:Message} msg Message to be editted
+ */
+function showFreelancersClientTutorial(bot, user, msg) {
+  const keyboard = [
+    [{ text: `@borodutch`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}borodutch` }],
+    [{ text: `@alexzzz9`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}alexzzz9` }],
+    [{ text: `@nof1000`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}nof1000` }],
+  ];
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialInterestedFreelancers, keyboard)
+    .catch(/** todo: handle error */);
+}
+
+/**
+ * Used to send select freelancer at select candidate tutorial step
+ * @param {Telegram:Bot} bot Bot that should respond
+ * @param {Mongoose:User} user User that should have tutorial continued
+ * @param {Telegram:Message} msg Message to be editted
+ */
+function selectFreelancerClientTutorial(bot, user, msg) {
+  const candidate = msg.data.split(strings().inlineSeparator)[1];
+  /** 0 = empty, 1 = pending, 2 = interested */
+  const states = {
+    'borodutch': 0,
+    'alexzzz9': 0,
+    'nof1000': 0,
+  }
+  if (msg.data.split(strings().inlineSeparator).length > 2) {
+    const data = msg.data.split(strings().inlineSeparator)[2];
+    if (data.indexOf('1') > -1) {
+      states['borodutch'] = 1;
+    } else if (data.indexOf('2') > -1) {
+      states['borodutch'] = 2;
+    }
+    if (data.indexOf('3') > -1) {
+      states['alexzzz9'] = 1;
+    } else if (data.indexOf('4') > -1) {
+      states['alexzzz9'] = 2;
+    }
+    if (data.indexOf('5') > -1) {
+      states['nof1000'] = 1;
+    } else if (data.indexOf('6') > -1) {
+      states['nof1000'] = 2;
+    }
+  }
+  let needsChekmarkTimer = false;
+  if (states[candidate] === 0) {
+    needsChekmarkTimer = true;
+    states[candidate] = 1;
+  }
+
+  let borodutchState = '';
+  let alexzzz9State = '';
+  let nof1000State = '';
+
+  let extraData = '';
+  Object.keys(states).forEach((key) => {
+    if (key === 'borodutch') {
+      if (states[key] === 1) {
+        borodutchState = strings().pendingOption+' ';
+        extraData = `${extraData}1`;
+      } else if (states[key] === 2) {
+        borodutchState = strings().acceptOption+' ';
+        extraData = `${extraData}2`;
+      }
+    }
+    if (key === 'alexzzz9') {
+      if (states[key] === 1) {
+        extraData = `${extraData}3`;
+        alexzzz9State = strings().pendingOption+' ';
+      } else if (states[key] === 2) {
+        extraData = `${extraData}4`;
+        alexzzz9State = strings().acceptOption+' ';
+      }
+    }
+    if (key === 'nof1000') {
+      if (states[key] === 1) {
+        extraData = `${extraData}5`;
+        nof1000State = strings().pendingOption+' ';
+      } else if (states[key] === 2) {
+        extraData = `${extraData}6`;
+        nof1000State = strings().acceptOption+' ';
+      }
+    }
+  });
+
+  const keyboard = [
+    [{ text: `${borodutchState}@borodutch`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}borodutch${strings().inlineSeparator}${extraData}` }],
+    [{ text: `${alexzzz9State}@alexzzz9`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}alexzzz9${strings().inlineSeparator}${extraData}` }],
+    [{ text: `${nof1000State}@nof1000`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}nof1000${strings().inlineSeparator}${extraData}` }],
+  ];
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialInterestedFreelancers, keyboard)
+    .then(() => {
+      const randomDelay = Math.floor(Math.random() * 60) + 10;
+      setTimeout(() => {
+        selectFreelancerInterestedClientTutorial(bot, user, msg);
+      }, randomDelay * 1000);
+    })
+    .catch(/** todo: handle error */);
+}
+
+/**
+ * Used to send make freelancer interested at select candidate tutorial step
+ * @param {Telegram:Bot} bot Bot that should respond
+ * @param {Mongoose:User} user User that should have tutorial continued
+ * @param {Telegram:Message} msg Message to be editted
+ */
+function selectFreelancerInterestedClientTutorial(bot, user, msg) {
+  const candidate = msg.data.split(strings().inlineSeparator)[1];
+  /** 0 = empty, 1 = pending, 2 = interested */
+  const states = {
+    'borodutch': 0,
+    'alexzzz9': 0,
+    'nof1000': 0,
+  }
+  if (msg.data.split(strings().inlineSeparator).length > 2) {
+    const data = msg.data.split(strings().inlineSeparator)[2];
+    if (data.indexOf('1') > -1) {
+      states['borodutch'] = 1;
+    } else if (data.indexOf('2') > -1) {
+      states['borodutch'] = 2;
+    }
+    if (data.indexOf('3') > -1) {
+      states['alexzzz9'] = 1;
+    } else if (data.indexOf('4') > -1) {
+      states['alexzzz9'] = 2;
+    }
+    if (data.indexOf('5') > -1) {
+      states['nof1000'] = 1;
+    } else if (data.indexOf('6') > -1) {
+      states['nof1000'] = 2;
+    }
+  }
+  states[candidate] = 2;
+
+  let borodutchState = '';
+  let alexzzz9State = '';
+  let nof1000State = '';
+
+  let extraData = '';
+  Object.keys(states).forEach((key) => {
+    if (key === 'borodutch') {
+      if (states[key] === 1) {
+        borodutchState = strings().pendingOption+' ';
+        extraData = `${extraData}1`;
+      } else if (states[key] === 2) {
+        borodutchState = strings().acceptOption+' ';
+        extraData = `${extraData}2`;
+      }
+    }
+    if (key === 'alexzzz9') {
+      if (states[key] === 1) {
+        extraData = `${extraData}3`;
+        alexzzz9State = strings().pendingOption+' ';
+      } else if (states[key] === 2) {
+        extraData = `${extraData}4`;
+        alexzzz9State = strings().acceptOption+' ';
+      }
+    }
+    if (key === 'nof1000') {
+      if (states[key] === 1) {
+        extraData = `${extraData}5`;
+        nof1000State = strings().pendingOption+' ';
+      } else if (states[key] === 2) {
+        extraData = `${extraData}6`;
+        nof1000State = strings().acceptOption+' ';
+      }
+    }
+  });
+
+  const keyboard = [
+    [{ text: `${borodutchState}@borodutch`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}borodutch${strings().inlineSeparator}${extraData}` }],
+    [{ text: `${alexzzz9State}@alexzzz9`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}alexzzz9${strings().inlineSeparator}${extraData}` }],
+    [{ text: `${nof1000State}@nof1000`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}nof1000${strings().inlineSeparator}${extraData}` }],
+  ];
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialInterestedFreelancers, keyboard)
+    .catch(/** todo: handle error */);
 }
 
 /** Exports */

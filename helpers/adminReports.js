@@ -105,6 +105,24 @@ function freelancerTutorialEnded(bot, user) {
   bot.sendMessage(adminChatId, `🙅‍ @${user.username} ended freelancer tutorial`);
 }
 
+/**
+ * Notifies admins that a user has started client tutorial
+ * @param {Telegram:Bot} bot Bot that should notify admins
+ * @param {Mongoose:User} user User that started tutorial
+ */
+function clientTutorialStarted(bot, user) {
+  bot.sendMessage(adminChatId, `🙆‍ @${user.username} started client tutorial`);
+}
+
+/**
+ * Notifies admins that a user has ended client tutorial
+ * @param {Telegram:Bot} bot Bot that should notify admins
+ * @param {Mongoose:User} user User that ended tutorial
+ */
+function clientTutorialEnded(bot, user) {
+  bot.sendMessage(adminChatId, `🙅‍ @${user.username} ended client tutorial`);
+}
+
 module.exports = {
   jobCreated,
   jobDeleted,
@@ -114,5 +132,7 @@ module.exports = {
   sentJobReminder,
   freelancerTutorialStarted,
   freelancerTutorialEnded,
+  clientTutorialStarted,
+  clientTutorialEnded,
 };
 
