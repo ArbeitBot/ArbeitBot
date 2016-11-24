@@ -94,6 +94,26 @@ global.eventEmitter.on(strings().clientTutorialFreelancersInline, ({ bot, user, 
   selectFreelancerClientTutorial(bot, user, msg);
 });
 
+global.eventEmitter.on(strings().clientTutorialSelectFreelancer, ({ bot, user, msg }) => {
+  showPickFreelancerClientTutorial(bot, user, msg);
+});
+
+global.eventEmitter.on(strings().clientTutorialAcceptFreelancerInline, ({ bot, user, msg }) => {
+  showRateOrReportClientTutorial(bot, user, msg);
+});
+
+global.eventEmitter.on(strings().clientTutorialRatedInline, ({ bot, user, msg }) => {
+  const command = msg.data.split(strings().inlineSeparator)[1];
+
+  sendEndClientTutorial(bot, user, msg, command === strings().jobFinishedOptions.rate);  
+});
+
+global.eventEmitter.on(strings().clientTutorialEndInline, ({ bot, user, msg }) => {
+  adminReports.clientTutorialEnded(bot, user);
+
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialEnd, []);
+});
+
 /**
  * Used to send initial tutorial message to user
  * @param {Telegram:Bot} bot Bot that should send tutorial
@@ -165,6 +185,13 @@ function sendRateFreelancerTutorial(bot, user, msg, isAccept) {
   keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, message, keyboard);
 }
 
+/**
+ * Used to send rate step freelancer tutorial about rating
+ * @param {Telegram:Bot} bot Bot that should edit message
+ * @param {Mongoose:User} user Owner of this message
+ * @param {Telegram:Message} msg Message that should be modified
+ * @param {Boolean} isRate Boolean identifying if user selected rate or not
+ */
 function sendEndFreelancerTutorial(bot, user, msg, isRate) {
   const keyboard = keyboards.rateKeyboard(strings().freelancerTutorialEndInline);
   const message = (isRate) ? strings().tutorialMessages.endFreelancerMessage : strings().tutorialMessages.endFreelancerMessageReport;
@@ -197,7 +224,7 @@ function startClientTutorial(bot, user, msg) {
 function showSupercategoriesClientTutorial(bot, user, msg) {
   const keyboard = [
     [{ text: 'Design [10]', callback_data: strings().clientTutorialSupercategoryInline }],
-    [{ text: 'Development [3]', callback_data: strings().clientTutorialSupercategoryInline}],
+    [{ text: 'Development [68]', callback_data: strings().clientTutorialSupercategoryInline}],
     [{ text: 'Copywriting [57]', callback_data: strings().clientTutorialSupercategoryInline }],
   ];
   keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialSupercategory, keyboard);
@@ -212,7 +239,7 @@ function showSupercategoriesClientTutorial(bot, user, msg) {
 function showCategoriesClientTutorial(bot, user, msg) {
   const keyboard = [
     [{ text: 'iOS [10]', callback_data: strings().clientTutorialCategoryInline }],
-    [{ text: 'Backend development [3]', callback_data: strings().clientTutorialCategoryInline}],
+    [{ text: 'Backend development [1]', callback_data: strings().clientTutorialCategoryInline}],
     [{ text: 'Unity [57]', callback_data: strings().clientTutorialCategoryInline }],
   ];
   keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialCategory, keyboard)
@@ -227,9 +254,7 @@ function showCategoriesClientTutorial(bot, user, msg) {
  */
 function showFreelancersClientTutorial(bot, user, msg) {
   const keyboard = [
-    [{ text: `@borodutch`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}borodutch` }],
-    [{ text: `@alexzzz9`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}alexzzz9` }],
-    [{ text: `@nof1000`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}nof1000` }],
+    [{ text: `@borodutch`, callback_data: strings().clientTutorialFreelancersInline }],
   ];
   keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialInterestedFreelancers, keyboard)
     .catch(/** todo: handle error */);
@@ -242,83 +267,14 @@ function showFreelancersClientTutorial(bot, user, msg) {
  * @param {Telegram:Message} msg Message to be editted
  */
 function selectFreelancerClientTutorial(bot, user, msg) {
-  const candidate = msg.data.split(strings().inlineSeparator)[1];
-  /** 0 = empty, 1 = pending, 2 = interested */
-  const states = {
-    'borodutch': 0,
-    'alexzzz9': 0,
-    'nof1000': 0,
-  }
-  if (msg.data.split(strings().inlineSeparator).length > 2) {
-    const data = msg.data.split(strings().inlineSeparator)[2];
-    if (data.indexOf('1') > -1) {
-      states['borodutch'] = 1;
-    } else if (data.indexOf('2') > -1) {
-      states['borodutch'] = 2;
-    }
-    if (data.indexOf('3') > -1) {
-      states['alexzzz9'] = 1;
-    } else if (data.indexOf('4') > -1) {
-      states['alexzzz9'] = 2;
-    }
-    if (data.indexOf('5') > -1) {
-      states['nof1000'] = 1;
-    } else if (data.indexOf('6') > -1) {
-      states['nof1000'] = 2;
-    }
-  }
-  let needsChekmarkTimer = false;
-  if (states[candidate] === 0) {
-    needsChekmarkTimer = true;
-    states[candidate] = 1;
-  }
-
-  let borodutchState = '';
-  let alexzzz9State = '';
-  let nof1000State = '';
-
-  let extraData = '';
-  Object.keys(states).forEach((key) => {
-    if (key === 'borodutch') {
-      if (states[key] === 1) {
-        borodutchState = strings().pendingOption+' ';
-        extraData = `${extraData}1`;
-      } else if (states[key] === 2) {
-        borodutchState = strings().acceptOption+' ';
-        extraData = `${extraData}2`;
-      }
-    }
-    if (key === 'alexzzz9') {
-      if (states[key] === 1) {
-        extraData = `${extraData}3`;
-        alexzzz9State = strings().pendingOption+' ';
-      } else if (states[key] === 2) {
-        extraData = `${extraData}4`;
-        alexzzz9State = strings().acceptOption+' ';
-      }
-    }
-    if (key === 'nof1000') {
-      if (states[key] === 1) {
-        extraData = `${extraData}5`;
-        nof1000State = strings().pendingOption+' ';
-      } else if (states[key] === 2) {
-        extraData = `${extraData}6`;
-        nof1000State = strings().acceptOption+' ';
-      }
-    }
-  });
-
   const keyboard = [
-    [{ text: `${borodutchState}@borodutch`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}borodutch${strings().inlineSeparator}${extraData}` }],
-    [{ text: `${alexzzz9State}@alexzzz9`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}alexzzz9${strings().inlineSeparator}${extraData}` }],
-    [{ text: `${nof1000State}@nof1000`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}nof1000${strings().inlineSeparator}${extraData}` }],
+    [{ text: `🕒 @borodutch`, callback_data: 'nothing' }],
   ];
   keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialInterestedFreelancers, keyboard)
     .then(() => {
-      const randomDelay = Math.floor(Math.random() * 60) + 10;
       setTimeout(() => {
         selectFreelancerInterestedClientTutorial(bot, user, msg);
-      }, randomDelay * 1000);
+      }, 10000);
     })
     .catch(/** todo: handle error */);
 }
@@ -330,75 +286,53 @@ function selectFreelancerClientTutorial(bot, user, msg) {
  * @param {Telegram:Message} msg Message to be editted
  */
 function selectFreelancerInterestedClientTutorial(bot, user, msg) {
-  const candidate = msg.data.split(strings().inlineSeparator)[1];
-  /** 0 = empty, 1 = pending, 2 = interested */
-  const states = {
-    'borodutch': 0,
-    'alexzzz9': 0,
-    'nof1000': 0,
-  }
-  if (msg.data.split(strings().inlineSeparator).length > 2) {
-    const data = msg.data.split(strings().inlineSeparator)[2];
-    if (data.indexOf('1') > -1) {
-      states['borodutch'] = 1;
-    } else if (data.indexOf('2') > -1) {
-      states['borodutch'] = 2;
-    }
-    if (data.indexOf('3') > -1) {
-      states['alexzzz9'] = 1;
-    } else if (data.indexOf('4') > -1) {
-      states['alexzzz9'] = 2;
-    }
-    if (data.indexOf('5') > -1) {
-      states['nof1000'] = 1;
-    } else if (data.indexOf('6') > -1) {
-      states['nof1000'] = 2;
-    }
-  }
-  states[candidate] = 2;
-
-  let borodutchState = '';
-  let alexzzz9State = '';
-  let nof1000State = '';
-
-  let extraData = '';
-  Object.keys(states).forEach((key) => {
-    if (key === 'borodutch') {
-      if (states[key] === 1) {
-        borodutchState = strings().pendingOption+' ';
-        extraData = `${extraData}1`;
-      } else if (states[key] === 2) {
-        borodutchState = strings().acceptOption+' ';
-        extraData = `${extraData}2`;
-      }
-    }
-    if (key === 'alexzzz9') {
-      if (states[key] === 1) {
-        extraData = `${extraData}3`;
-        alexzzz9State = strings().pendingOption+' ';
-      } else if (states[key] === 2) {
-        extraData = `${extraData}4`;
-        alexzzz9State = strings().acceptOption+' ';
-      }
-    }
-    if (key === 'nof1000') {
-      if (states[key] === 1) {
-        extraData = `${extraData}5`;
-        nof1000State = strings().pendingOption+' ';
-      } else if (states[key] === 2) {
-        extraData = `${extraData}6`;
-        nof1000State = strings().acceptOption+' ';
-      }
-    }
-  });
-
   const keyboard = [
-    [{ text: `${borodutchState}@borodutch`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}borodutch${strings().inlineSeparator}${extraData}` }],
-    [{ text: `${alexzzz9State}@alexzzz9`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}alexzzz9${strings().inlineSeparator}${extraData}` }],
-    [{ text: `${nof1000State}@nof1000`, callback_data: `${strings().clientTutorialFreelancersInline}${strings().inlineSeparator}nof1000${strings().inlineSeparator}${extraData}` }],
+    [{ text: `${strings().jobSelectFreelancer}`, callback_data: strings().clientTutorialSelectFreelancer }],
+    [{ text: `✅ @borodutch`, callback_data: 'nothing' }],
   ];
   keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialInterestedFreelancers, keyboard)
     .catch(/** todo: handle error */);
+}
+
+/**
+ * Used to send freelancer picker tutorial step
+ * @param {Telegram:Bot} bot Bot that should respond
+ * @param {Mongoose:User} user User that should have tutorial continued
+ * @param {Telegram:Message} msg Message to be editted
+ */
+function showPickFreelancerClientTutorial(bot, user, msg) {
+  const keyboard = [
+    [{ text: `@borodutch`, callback_data: strings().clientTutorialAcceptFreelancerInline }],
+  ];
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialPickFreelancer, keyboard)
+    .catch(/** todo: handle error */);
+}
+
+/**
+ * Used to send report/rate tutorial step
+ * @param {Telegram:Bot} bot Bot that should respond
+ * @param {Mongoose:User} user User that should have tutorial continued
+ * @param {Telegram:Message} msg Message to be editted
+ */
+function showRateOrReportClientTutorial(bot, user, msg) {
+  const keyboard = [
+    [{ text: strings().jobFinishedOptions.rate, callback_data: `${strings().clientTutorialRatedInline}${strings().inlineSeparator}${strings().jobFinishedOptions.rate}`},
+    { text: strings().jobFinishedOptions.report, callback_data: `${strings().clientTutorialRatedInline}${strings().inlineSeparator}${strings().jobFinishedOptions.report}`}],
+  ];
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.clientTutorialRate, keyboard);
+}
+
+/**
+ * Used to send rate step freelancer tutorial about rating
+ * @param {Telegram:Bot} bot Bot that should edit message
+ * @param {Mongoose:User} user Owner of this message
+ * @param {Telegram:Message} msg Message that should be modified
+ * @param {Boolean} isRate Boolean identifying if user selected rate or not
+ */
+function sendEndClientTutorial(bot, user, msg, isRate) {
+  const keyboard = keyboards.rateKeyboard(strings().clientTutorialEndInline);
+  const message = (isRate) ? strings().tutorialMessages.clientTutorialFinishRate : strings().tutorialMessages.clientTutorialFinishRateReport;
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, message, keyboard);
 }
 
 /** Exports */

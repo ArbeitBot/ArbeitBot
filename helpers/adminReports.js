@@ -111,7 +111,7 @@ function freelancerTutorialEnded(bot, user) {
  * @param {Mongoose:User} user User that started tutorial
  */
 function clientTutorialStarted(bot, user) {
-  bot.sendMessage(adminChatId, `🙆‍ @${user.username} started client tutorial`);
+  bot.sendMessage(adminChatId, `🐷 @${user.username} started client tutorial`);
 }
 
 /**
@@ -120,7 +120,7 @@ function clientTutorialStarted(bot, user) {
  * @param {Mongoose:User} user User that ended tutorial
  */
 function clientTutorialEnded(bot, user) {
-  bot.sendMessage(adminChatId, `🙅‍ @${user.username} ended client tutorial`);
+  bot.sendMessage(adminChatId, `🐱 @${user.username} ended client tutorial`);
 }
 
 module.exports = {
