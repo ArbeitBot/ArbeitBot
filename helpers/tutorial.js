@@ -53,7 +53,7 @@ global.eventEmitter.on(strings().freelancerTutorialRatedInline, ({ bot, user, ms
  * Called when user selects rating in freelancer tutorial
  */
 global.eventEmitter.on(strings().freelancerTutorialEndInline, ({ bot, user, msg }) => {
-  console.log(12234);
+  keyboards.editMessage(bot, msg.message.chat.id, msg.message.message_id, strings().tutorialMessages.freelancerTutorialEnd, []);
 });
 
 /**
