@@ -53,7 +53,6 @@ So, you decided to help us out — good, good. First, ArbeitBot can be launched 
 * *(Optional)* `WEBHOOK_CALLBACK_URL` — url that should be used by Telegram servers for webhooks, should be `https`
 * *(Optional)* `SSL_CERTIFICATE_PATH` — path to ssl certificate for webhooks
 * *(Optional)* `SSH_RSA_PATH` — path to ssh private certificate for webhooks (should not be password encrypted)
-* *(Optional)* `ARBEIT_BOT_STAGING_URL` — url of your staging server for flightplan (if you use flightplan)
 * *(Optional)* `ARBEIT_BOT_PRODUCTION_URL` — url of your production server for flightplan (if you use flightplan)
 
 ### How to get ssl certificate and key
