@@ -146,15 +146,15 @@ function deleteAllAdminMessages(report, bot) {
     const chatId = msgData[1];
     const messageId = msgData[0];
     const emptyKeyboard = [];
-    
+
     formReportMessage(report)
       .then((message) => {
 
         /** Mark report message as viewed and resolved */
-        bot.editMessageText( message + '\nResolved report.', {
+        bot.editMessageText(message + '\nResolved report.', {
           chat_id: chatId,
           message_id: messageId,
-        }).catch(/** todo: handle error */);  
+        }).catch(/** todo: handle error */);
 
       })
       .catch(/** todo: handle error */);
