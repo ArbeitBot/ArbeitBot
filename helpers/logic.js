@@ -17,6 +17,7 @@ const profile = require('./profile');
 const strings = require('./strings');
 const check = require('./messageParser');
 const bot = require('./telegramBot');
+const botan = require('botanio')('e6ec3f07-db08-4a5a-9ef1-433dc34ed9ae');
 
 /** Handle messages */
 
@@ -57,6 +58,8 @@ bot.on('message', (msg) => {
       adminPanel.handleAdminCommand(msg, bot);
     }
   });
+
+  botan.track(msg, 'message');
 });
 
 /**
