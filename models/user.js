@@ -102,7 +102,7 @@ const userSchema = new Schema({
     required: true,
     default: false,
   }
-});
+}, { timestamps: true });
 
 /** Functionality */
 userSchema.methods = {

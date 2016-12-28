@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node ./app.js",
     "test": "mocha --reporter spec",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "timestamps": "node ./scripts/createdAtFix.js"
   },
   "repository": {
     "type": "git",
