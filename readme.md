@@ -55,6 +55,8 @@ So, you decided to help us out — good, good. First, ArbeitBot can be launched 
 * *(Optional)* `SSH_RSA_PATH` — path to ssh private certificate for webhooks (should not be password encrypted)
 * *(Optional)* `ARBEIT_BOT_PRODUCTION_URL` — url of your production server for flightplan (if you use flightplan)
 
+Easiest approach to obtain `ADMIN_CHAT_ID` is to access url `https://api.telegram.org/botYOUR-BOT-TOKEN/getUpdates` with no code running, after you send bot some commands.
+
 ### How to get ssl certificate and key
 Fortunately, Telegram webhooks support self-signed SSL certificates. You can use this command on server to create self-signed ssl key that can be accepted by Telegram servers:
 

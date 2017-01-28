@@ -26,6 +26,7 @@
     "body": "^5.1.0",
     "botanio": "0.0.6",
     "mongoose": "4.6.6",
+    "dotenv": "^4.0.0",
     "node-telegram-bot-api": "^0.23.3"
   },
   "devDependencies": {
