@@ -189,10 +189,12 @@ function interfaceLanguageKeyboard(user, languages) {
   const row = [];
 
   languages.forEach((language) => {
-    const text =
-      (String(user.interfaceLanguage._id)  === String(language._id) || String(user.interfaceLanguage)  === String(language._id)) ?
-      strings().selectedLanguage + language.flag :
-      language.flag;
+    let text = language.flag;
+    if (user.hasOwnProperty('interfaceLanguage')) {
+      if ((String(user.interfaceLanguage._id)  === String(language._id))   ||  
+        String(user.interfaceLanguage)  === String(language._id))
+      text = strings().selectedLanguage + language.flag;
+    }
     row.push({
       text,
       callback_data: strings().interfaceLanguageInline + strings().inlineSeparator + language.flag,
