@@ -11,7 +11,7 @@ const strings = require('./strings');
 
 const Report = mongoose.model('report');
 
-const admins = ['74169393', '-1001052392095'];
+const admins = ['-1001052392095'];
 
 /** Inlines */
 
