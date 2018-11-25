@@ -6,8 +6,8 @@
  */
 
 /** Dependencies */
-const strings = require('./strings');
-const dbmanager = require('./dbmanager');
+const strings = require('./strings')
+const dbmanager = require('./dbmanager')
 
 /** Keyboards */
 /**
@@ -17,28 +17,38 @@ const dbmanager = require('./dbmanager');
  */
 function mainMenuKeyboard(user) {
   return [
-    [{ text: strings(user).mainMenuOptions.findJobs },
-    { text: strings(user).mainMenuOptions.findContractors }],
-    [{ text: strings(user).mainMenuOptions.help },
-    // { text: strings(user).mainMenuOptions.chooseLanguage }
+    [
+      { text: strings(user).mainMenuOptions.findJobs },
+      { text: strings(user).mainMenuOptions.findContractors },
     ],
-  ];
+    [
+      { text: strings(user).mainMenuOptions.help },
+      // { text: strings(user).mainMenuOptions.chooseLanguage }
+    ],
+  ]
 }
 
 const clientKeyboard = [
   [{ text: strings().clientMenuOptions.postNewJob }],
-  [{ text: strings().clientMenuOptions.back },
-  { text: strings().clientMenuOptions.myJobs }],
-];
+  [
+    { text: strings().clientMenuOptions.back },
+    { text: strings().clientMenuOptions.myJobs },
+  ],
+]
 
 const helpKeyboard = [
-  [{ text: '@arbeit_bot on GitHub', url: 'https://github.com/arbeitbot/arbeitbot' }],
+  [
+    {
+      text: '@arbeit_bot on GitHub',
+      url: 'https://github.com/arbeitbot/arbeitbot',
+    },
+  ],
   [{ text: strings().tutorialButton, callback_data: strings().tutorialInline }],
-];
+]
 
 const arbeitbotSupportKeyboard = [
-  [{ text: 'Contact support', url: 'https://telegram.me/arbeit_bot_support' }],
-];
+  [{ text: 'Contact support', url: 'https://telegram.me/borodutch_support' }],
+]
 
 /** Functions */
 
@@ -51,35 +61,32 @@ const arbeitbotSupportKeyboard = [
  * @return {Telegram:Keyboard} Keyboard - ready to be shown to user
  */
 function freelancerKeyboard(user) {
-  const bioText = ((user.bio) ?
-    strings().freelanceMenuOptions.editBio :
-    strings().freelanceMenuOptions.addBio
-  );
+  const bioText = user.bio
+    ? strings().freelanceMenuOptions.editBio
+    : strings().freelanceMenuOptions.addBio
 
-  const categoriesText = ((user.categories.length > 0) ?
-    strings().freelanceMenuOptions.editCategories :
-    strings().freelanceMenuOptions.addCategories
-  );
+  const categoriesText =
+    user.categories.length > 0
+      ? strings().freelanceMenuOptions.editCategories
+      : strings().freelanceMenuOptions.addCategories
 
-  const hourlyRateText = ((user.hourly_rate) ?
-    strings().freelanceMenuOptions.editHourlyRate :
-    strings().freelanceMenuOptions.addHourlyRate
-  );
+  const hourlyRateText = user.hourly_rate
+    ? strings().freelanceMenuOptions.editHourlyRate
+    : strings().freelanceMenuOptions.addHourlyRate
 
-  const availableText = ((user.busy) ?
-    strings().freelanceMenuOptions.available :
-    strings().freelanceMenuOptions.busy
-  );
+  const availableText = user.busy
+    ? strings().freelanceMenuOptions.available
+    : strings().freelanceMenuOptions.busy
 
-  const languages = (user.languages.length > 0) ?
-    user.languages.map(v => v.flag).reduce((res, cur) => `${res} ${cur}`) :
-    strings().freelanceMenuOptions.addLanguage;
+  const languages =
+    user.languages.length > 0
+      ? user.languages.map(v => v.flag).reduce((res, cur) => `${res} ${cur}`)
+      : strings().freelanceMenuOptions.addLanguage
   return [
     [{ text: bioText }, { text: categoriesText }],
     [{ text: hourlyRateText }, { text: languages }],
-    [{ text: strings().freelanceMenuOptions.back },
-     { text: availableText }],
-  ];
+    [{ text: strings().freelanceMenuOptions.back }, { text: availableText }],
+  ]
 }
 
 /**
@@ -91,27 +98,41 @@ function freelancerKeyboard(user) {
  */
 function rateKeyboard(inline, jobId) {
   return [
-    [{
-      text: strings().rateOptions.oneStar,
-      callback_data: `${inline}${strings().inlineSeparator}1${strings().inlineSeparator}${jobId}`,
-    },
-    {
-      text: strings().rateOptions.twoStars,
-      callback_data: `${inline}${strings().inlineSeparator}2${strings().inlineSeparator}${jobId}`,
-    },
-    {
-      text: strings().rateOptions.threeStars,
-      callback_data: `${inline}${strings().inlineSeparator}3${strings().inlineSeparator}${jobId}`,
-    }],
-    [{
-      text: strings().rateOptions.fourStars,
-      callback_data: `${inline}${strings().inlineSeparator}4${strings().inlineSeparator}${jobId}`,
-    },
-    {
-      text: strings().rateOptions.fiveStars,
-      callback_data: `${inline}${strings().inlineSeparator}5${strings().inlineSeparator}${jobId}`,
-    }],
-  ];
+    [
+      {
+        text: strings().rateOptions.oneStar,
+        callback_data: `${inline}${strings().inlineSeparator}1${
+          strings().inlineSeparator
+        }${jobId}`,
+      },
+      {
+        text: strings().rateOptions.twoStars,
+        callback_data: `${inline}${strings().inlineSeparator}2${
+          strings().inlineSeparator
+        }${jobId}`,
+      },
+      {
+        text: strings().rateOptions.threeStars,
+        callback_data: `${inline}${strings().inlineSeparator}3${
+          strings().inlineSeparator
+        }${jobId}`,
+      },
+    ],
+    [
+      {
+        text: strings().rateOptions.fourStars,
+        callback_data: `${inline}${strings().inlineSeparator}4${
+          strings().inlineSeparator
+        }${jobId}`,
+      },
+      {
+        text: strings().rateOptions.fiveStars,
+        callback_data: `${inline}${strings().inlineSeparator}5${
+          strings().inlineSeparator
+        }${jobId}`,
+      },
+    ],
+  ]
 }
 
 /**
@@ -126,7 +147,7 @@ function hideKeyboard(bot, chatId, text) {
       hide_keyboard: true,
     }),
     disable_web_page_preview: 'true',
-  });
+  })
 }
 
 /**
@@ -136,16 +157,19 @@ function hideKeyboard(bot, chatId, text) {
  * @param {Number} chatId - Chat id of user who should receive this keyboard
  */
 function sendMainMenu(bot, chatId, firstTime) {
-  return dbmanager.findUser({ id: chatId })
-    .then((user) => {
+  return dbmanager
+    .findUser({ id: chatId })
+    .then(user => {
       return sendKeyboard(
         bot,
         chatId,
-        ((firstTime) ? strings(user).initialMessage : strings(user).mainMenuMessage),
+        firstTime
+          ? strings(user).initialMessage
+          : strings(user).mainMenuMessage,
         mainMenuKeyboard(user)
-      );
+      )
     })
-    .catch(/** todo: handle error */);
+    .catch(/** todo: handle error */)
 }
 
 /**
@@ -155,12 +179,7 @@ function sendMainMenu(bot, chatId, firstTime) {
  * @param {Number} chatId - Chat id of user who should receive keyboard
  */
 function sendClientMenu(bot, chatId) {
-  sendKeyboard(
-    bot,
-    chatId,
-    strings().clientMenuMessage,
-    clientKeyboard
-  );
+  sendKeyboard(bot, chatId, strings().clientMenuMessage, clientKeyboard)
 }
 
 /**
@@ -178,61 +197,60 @@ function sendFreelanceMenu(bot, chatId) {
    * Set categories, edit hourly rate,
    * and set Busy status.
    */
-  dbmanager.findUser({ id: chatId })
-    .then((user) => {
-      let text = ((user.busy) ?
-        strings().fullFreelancerMessageBusy :
-        strings().fullFreelancerMessageAvailable
-      );
+  dbmanager
+    .findUser({ id: chatId })
+    .then(user => {
+      let text = user.busy
+        ? strings().fullFreelancerMessageBusy
+        : strings().fullFreelancerMessageAvailable
 
       if (!user.bio && user.categories.length <= 0 && !user.hourly_rate) {
-        text = strings().emptyFreelancerMessage;
-      } else if (!user.bio || user.categories.length <= 0 || !user.hourly_rate) {
-        text = strings().missingFreelancerMessage;
+        text = strings().emptyFreelancerMessage
+      } else if (
+        !user.bio ||
+        user.categories.length <= 0 ||
+        !user.hourly_rate
+      ) {
+        text = strings().missingFreelancerMessage
       }
 
       if (user.bio || user.categories.length > 0 || user.hourly_rate) {
-        text = `${text}\n`;
+        text = `${text}\n`
 
         if (user.hourly_rate) {
           if (user.languages.length > 0) {
-            text = `${text}\n`;
-            user.languages.forEach((language) => {
-              text = `${text}${language.flag}`;
-            });
-            text = `${text} ${user.hourly_rate}`;
+            text = `${text}\n`
+            user.languages.forEach(language => {
+              text = `${text}${language.flag}`
+            })
+            text = `${text} ${user.hourly_rate}`
           } else {
-            text = `${text}\n${user.hourly_rate}`;
+            text = `${text}\n${user.hourly_rate}`
           }
         }
 
         if (user.reviews.length > 0) {
-          text = `${text}\n${user.getRateStars()} (${user.reviews.length})`;
+          text = `${text}\n${user.getRateStars()} (${user.reviews.length})`
         }
 
         if (user.bio) {
-          text = `${text}\n${user.bio}`;
+          text = `${text}\n${user.bio}`
         }
 
         if (user.categories.length > 0) {
           if (user.bio || user.hourly_rate) {
-            text = `${text}\n`;
+            text = `${text}\n`
           }
 
-          user.categories.forEach((cat) => {
-            text = `${text}[${cat.title}]`;
-          });
+          user.categories.forEach(cat => {
+            text = `${text}[${cat.title}]`
+          })
         }
       }
 
-      sendKeyboard(
-        bot,
-        chatId,
-        text,
-        freelancerKeyboard(user)
-      );
+      sendKeyboard(bot, chatId, text, freelancerKeyboard(user))
     })
-    .catch(/** todo: handle error */);
+    .catch(/** todo: handle error */)
 }
 
 /**
@@ -242,12 +260,7 @@ function sendFreelanceMenu(bot, chatId) {
  * @param {Number} chatId - Chat id of user who should receive keyboard
  */
 function sendHelp(bot, chatId) {
-  sendInline(
-    bot,
-    chatId,
-    strings().helpMessage,
-    helpKeyboard
-  );
+  sendInline(bot, chatId, strings().helpMessage, helpKeyboard)
 }
 
 /**
@@ -266,12 +279,13 @@ function sendKeyboard(bot, chatId, text, keyboard, then) {
       resize_keyboard: true,
     },
     disable_web_page_preview: 'true',
-  };
+  }
 
-  options.reply_markup = JSON.stringify(options.reply_markup);
-  return bot.sendMessage(chatId, text, options)
+  options.reply_markup = JSON.stringify(options.reply_markup)
+  return bot
+    .sendMessage(chatId, text, options)
     .then(then)
-    .catch(/** todo: handle error */);
+    .catch(/** todo: handle error */)
 }
 
 /**
@@ -286,16 +300,17 @@ function sendInline(bot, chatId, text, keyboard, then, markdown) {
   const options = {
     reply_markup: { inline_keyboard: keyboard },
     disable_web_page_preview: 'true',
-  };
+  }
 
   if (markdown) {
-    options.parse_mode = 'Markdown';
+    options.parse_mode = 'Markdown'
   }
-  options.reply_markup = JSON.stringify(options.reply_markup);
+  options.reply_markup = JSON.stringify(options.reply_markup)
 
-  bot.sendMessage(chatId, text, options)
+  bot
+    .sendMessage(chatId, text, options)
     .then(then)
-    .catch(err => console.log(err));
+    .catch(err => console.log(err))
 }
 
 /**
@@ -309,16 +324,17 @@ function sendInline(bot, chatId, text, keyboard, then, markdown) {
 function editInline(bot, chatId, messageId, keyboard) {
   const inlineMarkup = JSON.stringify({
     inline_keyboard: keyboard,
-  });
+  })
 
   const options = {
     chat_id: chatId,
     message_id: messageId,
     disable_web_page_preview: 'true',
-  };
+  }
 
-  bot.editMessageReplyMarkup(inlineMarkup, options)
-    .catch(/** todo: handle error */);
+  bot
+    .editMessageReplyMarkup(inlineMarkup, options)
+    .catch(/** todo: handle error */)
 }
 
 /**
@@ -331,14 +347,16 @@ function editInline(bot, chatId, messageId, keyboard) {
  * @param {Telegram:InlineKeyboard} keyboard - Inline keyboard to appear in message
  */
 function editMessage(bot, chatId, messageId, text, keyboard) {
-  return bot.editMessageText(text, {
-    chat_id: chatId,
-    message_id: messageId,
-    reply_markup: JSON.stringify({
-      inline_keyboard: keyboard,
-    }),
-    disable_web_page_preview: 'true',
-  }).catch(/** todo: handle error */);
+  return bot
+    .editMessageText(text, {
+      chat_id: chatId,
+      message_id: messageId,
+      reply_markup: JSON.stringify({
+        inline_keyboard: keyboard,
+      }),
+      disable_web_page_preview: 'true',
+    })
+    .catch(/** todo: handle error */)
 }
 
 /** Exports */
@@ -358,4 +376,4 @@ module.exports = {
   editInline,
   editMessage,
   hideKeyboard,
-};
+}
