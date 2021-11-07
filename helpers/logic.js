@@ -90,6 +90,9 @@ bot.on('callback_query', (msg) => {
 bot.on('inline_query', (msg) => {
   dbmanager.findUser({ id: msg.from.id })
     .then((user) => {
+      if (!user) {
+        return
+      }
       const results = [{
         type: 'article',
         id: `${getRandomInt(1000000000000000, 999999999999999999)}`,
