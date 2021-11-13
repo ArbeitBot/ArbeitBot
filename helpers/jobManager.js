@@ -30,30 +30,35 @@ const eventEmitter = global.eventEmitter;
  * @param  {Mongoose:Job} job  Relevant job
  */
 function sendJobCreatedMessage(user, bot, job) {
-  dbmanager.checkAndFixJobPage(job)
-    .then((ret) => {
-      const innerJob = ret.job;
-      return dbmanager.freelancersForJob(innerJob)
-        .then((users) => {
-          keyboards.sendKeyboard(bot,
-            user.id,
-            strings(user).pickFreelancersMessage,
-            keyboards.clientKeyboard,
-            () => {
-              keyboards.sendInline(
-                bot,
-                user.id,
-                `[${innerJob.category.title}]\n${innerJob.description}\n\n${messageFromFreelancers(users)}`,
-                  jobInlineKeyboard(innerJob, users, ret.count),
-                (data2) => {
-                  innerJob.current_inline_chat_id = data2.chat.id;
-                  innerJob.current_inline_message_id = data2.message_id;
-                  innerJob.save();
-                });
-            });
-        });
-    })
-    .catch(/** todo: handle error */);
+  try {
+
+    dbmanager.checkAndFixJobPage(job)
+      .then((ret) => {
+        const innerJob = ret.job;
+        return dbmanager.freelancersForJob(innerJob)
+          .then((users) => {
+            keyboards.sendKeyboard(bot,
+              user.id,
+              strings(user).pickFreelancersMessage,
+              keyboards.clientKeyboard,
+              () => {
+                keyboards.sendInline(
+                  bot,
+                  user.id,
+                  `[${innerJob.category.title}]\n${innerJob.description}\n\n${messageFromFreelancers(users)}`,
+                    jobInlineKeyboard(innerJob, users, ret.count),
+                  (data2) => {
+                    innerJob.current_inline_chat_id = data2.chat.id;
+                    innerJob.current_inline_message_id = data2.message_id;
+                    innerJob.save();
+                  });
+              });
+          });
+      })
+      .catch(/** todo: handle error */);
+  } catch {
+    // Do nothing
+  }
 }
 
 /**
